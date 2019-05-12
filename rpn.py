@@ -10,7 +10,6 @@ import inspect
 import re
 from ast import literal_eval
 from pprint import pprint
-import atexit
 import readline
 
 # Readline code from https://docs.python.org/3.7/library/readline.html
@@ -23,14 +22,20 @@ except FileNotFoundError:
     open(histfile, 'wb').close()
     historyLen = 0
 
+try:
+    readline.append_history_file
+except AttributeError:
+    # Can't save readline history. Oh well.
+    pass
+else:
+    import atexit
 
-def saveHistory(prevHistoryLen, histfile):
-    newHistoryLen = readline.get_current_history_length()
-    readline.set_history_length(1000)
-    readline.append_history_file(newHistoryLen - prevHistoryLen, histfile)
+    def saveHistory(prevHistoryLen, histfile):
+        newHistoryLen = readline.get_current_history_length()
+        readline.set_history_length(1000)
+        readline.append_history_file(newHistoryLen - prevHistoryLen, histfile)
 
-
-atexit.register(saveHistory, historyLen, histfile)
+    atexit.register(saveHistory, historyLen, histfile)
 
 
 functions = {}
