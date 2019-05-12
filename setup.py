@@ -3,7 +3,7 @@
 from setuptools import setup
 
 # This needs to have the following format - see Makefile 'upload' target.
-VERSION = '1.0.0'
+VERSION = '1.0.1'
 
 setup(name='rpnpy',
       version=VERSION,
@@ -23,7 +23,7 @@ setup(name='rpnpy',
       ],
       license='MIT',
       scripts=['rpn.py'],
-      description=('Control an RPN calculator.'),
+      description=('Control an RPN calculator from Python.'),
       extras_require={
         'dev': [
             'flake8',

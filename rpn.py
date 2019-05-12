@@ -205,7 +205,7 @@ def splitInput(inputLine):
     return command.strip().lower(), set(modifiers.strip().lower()), count
 
 
-class Calculation():
+class Calculation:
     def __init__(self):
         self.stack = []
         self.previousStack = self.previousVariables = None
@@ -258,7 +258,7 @@ class Calculation():
                 elif command == 'quit' or command == 'q':
                     raise EOFError()
                 elif command == 'pop':
-                    if len(self.stack):
+                    if self.stack:
                         self.saveState()
                         self.stack.pop()
                     else:
@@ -272,11 +272,12 @@ class Calculation():
                     self.saveState()
                     self.stack = []
                 elif command == 'dup' or command == 'd':
-                    if len(self.stack) == 0:
-                        print('Cannot duplicate empty stack', file=sys.stderr)
-                    else:
+                    if self.stack:
                         self.saveState()
                         self.stack.append(self.stack[-1])
+                    else:
+                        print('Cannot duplicate (stack is empty)',
+                              file=sys.stderr)
                 elif command == 'undo' or command == 'u':
                     if self.previousStack is None:
                         print('Nothing to undo.', file=sys.stderr)
