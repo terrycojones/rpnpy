@@ -379,6 +379,18 @@ class Calculation:
                             self.stack.append(result)
 
 
+def stdin():
+    calc = Calculation()
+
+    for command in sys.stdin.read().split():
+        try:
+            calc.do(command)
+        except EOFError:
+            break
+    if len(calc.stack):
+        calc.printStack(-1)
+
+
 def repl():
     calc = Calculation()
 
@@ -402,11 +414,4 @@ if __name__ == '__main__':
     if os.isatty(0):
         repl()
     else:
-        calc = Calculation()
-        for command in sys.stdin.read().split():
-            try:
-                calc.do(command)
-            except EOFError:
-                break
-        if len(calc.stack):
-            calc.printStack(-1)
+        stdin()

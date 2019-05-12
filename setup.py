@@ -3,7 +3,7 @@
 from setuptools import setup
 
 # This needs to have the following format - see Makefile 'upload' target.
-VERSION = '1.0.1'
+VERSION = '1.0.2'
 
 setup(name='rpnpy',
       version=VERSION,
