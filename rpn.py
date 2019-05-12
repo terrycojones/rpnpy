@@ -145,7 +145,7 @@ def addVariables():
             ('inf', math.inf),
             ('nan', math.nan),
             ('pi', math.pi),
-            ('tau', math.tau),
+            # ('tau', math.tau),  tau was only introduced in Python 3.6
             ):
         if name in variables:
             print('%r is already a variable!' % name, file=sys.stderr)
