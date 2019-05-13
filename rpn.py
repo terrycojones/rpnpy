@@ -3,12 +3,12 @@
 import sys
 import os
 import math
+import decimal
 import builtins
 import operator
 import functools
 import inspect
 import re
-from ast import literal_eval
 from pprint import pprint
 import readline
 
@@ -25,7 +25,7 @@ except FileNotFoundError:
 try:
     readline.append_history_file
 except AttributeError:
-    # Can't save readline history. Oh well.
+    # Can't save readline history.
     pass
 else:
     import atexit
@@ -74,6 +74,8 @@ class Variable:
 
 def addAbbrevs():
     for longName, shortNames in (
+            ('decimal.Decimal', ('Decimal',)),
+            ('decimal.Context', ('Context',)),
             ('math.gcd', ('gcd',)),
             ('math.log', ('log',)),
             ('math.log10', ('log10',)),
@@ -132,6 +134,7 @@ def addSpecialCases():
             (builtins, builtins.str, 1),
             (builtins, builtins.range, 1),
             (functools, functools.reduce, 2),
+            (decimal, decimal.Decimal, 1),
     ):
         longName = '%s.%s' % (module.__name__, func.__name__)
         try:
@@ -144,7 +147,8 @@ def addSpecialCases():
                   file=sys.stderr)
 
 
-def addVariables():
+def addConstants():
+    """Add some constants (well, constant in theory) from math"""
     for name, value in (
             ('e', math.e),
             ('inf', math.inf),
@@ -160,11 +164,12 @@ def addVariables():
 
 def importCallables(module):
     moduleName = module.__name__
-    exec('import ' + moduleName)
+    exec('import ' + moduleName, globals(), variables)
+    # exec('import ' + moduleName)
     callables = inspect.getmembers(module, callable)
 
     for name, func in callables:
-        if name.startswith('__'):
+        if name.startswith('_'):
             continue
 
         try:
@@ -174,12 +179,18 @@ def importCallables(module):
             pass
 
         path = '%s.%s' % (moduleName, name)
+
         try:
             sig = inspect.signature(func)
         except ValueError:
             # print('Could not get signature for', path, file=sys.stderr)
             pass
         else:
+
+            if path in functions:
+                # print('Function %r already exists' % path, file=sys.stderr)
+                continue
+
             nArgs = len([p for p in sig.parameters.values() if
                          p.kind == inspect.Parameter.POSITIONAL_ONLY])
             # or p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD])
@@ -207,13 +218,14 @@ def splitInput(inputLine):
     else:
         count = None
 
-    return command.strip().lower(), set(modifiers.strip().lower()), count
+    return command.strip(), set(modifiers.strip().lower()), count
 
 
 class Calculation:
     def __init__(self):
         self.stack = []
         self.previousStack = self.previousVariables = None
+        self.debug = False
 
     def printStack(self, n=None):
         if n is None:
@@ -238,7 +250,8 @@ class Calculation:
         command, modifiers, count = splitInput(command)
 
         if not command:
-            # print('Empty command')
+            if self.debug:
+                print('Empty command')
             return
 
         push_ = '!' in modifiers
@@ -250,59 +263,66 @@ class Calculation:
         try:
             function = functions[command]
         except KeyError:
-            try:
-                value = literal_eval(command)
-            except (ValueError, SyntaxError):
+            if self.debug:
+                print('%s is not a known function' % (command,))
 
-                if command in variables and not forceCommand:
-                    self.saveState()
-                    if push_:
-                        self.stack.append(Variable(command))
-                    else:
-                        self.stack.append(variables[command])
-                elif command == 'quit' or command == 'q':
-                    raise EOFError()
-                elif command == 'pop':
-                    if self.stack:
-                        self.saveState()
-                        self.stack.pop()
-                    else:
-                        print('Cannot pop (stack is empty)', file=sys.stderr)
-                elif command == 'functions':
-                    for name, func in sorted(functions.items()):
-                        print(func)
-                elif command == 'stack' or command == 's' or command == 'f':
-                    self.printStack()
-                elif command == 'clear' or command == 'c':
-                    self.saveState()
-                    self.stack = []
-                elif command == 'dup' or command == 'd':
-                    if self.stack:
-                        self.saveState()
-                        self.stack.append(self.stack[-1])
-                    else:
-                        print('Cannot duplicate (stack is empty)',
-                              file=sys.stderr)
-                elif command == 'undo' or command == 'u':
-                    if self.previousStack is None:
-                        print('Nothing to undo.', file=sys.stderr)
-                    else:
-                        self.stack = self.previousStack.copy()
-                        variables = self.previousVariables.copy()
-                elif command == 'print' or command == 'p':
-                    self.printStack(-1)
-                elif command == 'none':
-                    self.saveState()
-                    self.stack.append(None)
-                elif command == 'true':
-                    self.saveState()
-                    self.stack.append(True)
-                elif command == 'false':
-                    self.saveState()
-                    self.stack.append(False)
+            lcommand = command.lower()
+            if command in variables and not forceCommand:
+                self.saveState()
+                if push_:
+                    self.stack.append(Variable(command))
                 else:
-                    # print('exec', command)
-                    currentVars = set(variables)
+                    self.stack.append(variables[command])
+            elif lcommand == 'quit' or lcommand == 'q':
+                raise EOFError()
+            elif lcommand == 'pop':
+                if self.stack:
+                    self.saveState()
+                    self.stack.pop()
+                else:
+                    print('Cannot pop (stack is empty)', file=sys.stderr)
+            elif lcommand == 'functions':
+                for name, func in sorted(functions.items()):
+                    print(func)
+            elif lcommand == 'stack' or lcommand == 's' or lcommand == 'f':
+                self.printStack()
+            elif lcommand == 'variables' or lcommand == 'v':
+                pprint(variables)
+            elif lcommand == 'clear' or lcommand == 'c':
+                self.saveState()
+                self.stack = []
+            elif lcommand == 'dup' or lcommand == 'd':
+                if self.stack:
+                    self.saveState()
+                    self.stack.append(self.stack[-1])
+                else:
+                    print('Cannot duplicate (stack is empty)',
+                          file=sys.stderr)
+            elif lcommand == 'undo' or lcommand == 'u':
+                if self.previousStack is None:
+                    print('Nothing to undo.', file=sys.stderr)
+                else:
+                    self.stack = self.previousStack.copy()
+                    variables = self.previousVariables.copy()
+            elif lcommand == 'print' or lcommand == 'p':
+                self.printStack(-1)
+            elif lcommand == 'none':
+                self.saveState()
+                self.stack.append(None)
+            elif lcommand == 'true':
+                self.saveState()
+                self.stack.append(True)
+            elif lcommand == 'false':
+                self.saveState()
+                self.stack.append(False)
+            else:
+                try:
+                    value = eval(command, globals(), variables)
+                except Exception as e:
+                    if self.debug:
+                        print('Could not eval %s: %s' % (command, e))
+                        print('Trying exec.')
+                    # currentVars = variables.copy()
                     self.saveState()
                     try:
                         exec(command, globals(), variables)
@@ -311,26 +331,34 @@ class Calculation:
                         variables = self.previousVariables
                         self.stack = self.previousStack
                     else:
-                        self.saveState()
-                        for variable in set(variables) - currentVars:
-                            if push_:
-                                self.stack.append(Variable(variable))
-                            else:
-                                if iterate:
-                                    for i in variables[variable]:
-                                        self.stack.append(i)
-                                else:
-                                    self.stack.append(variables[variable])
-            else:
-                if list_:
-                    value = list(value)
-                self.saveState()
-                if iterate:
-                    for i in value:
-                        self.stack.append(i)
+                        pass
+                        # self.saveState()
+                        # for var in variables:
+                        #     # Add all new or changed variables.
+                        #     if (var not in currentVars or
+                        #             variables[var] != currentVars[var]):
+                        #         if push_:
+                        #             self.stack.append(Variable(var))
+                        #         else:
+                        #             if iterate:
+                        #                 for i in variables[var]:
+                        #                     self.stack.append(i)
+                        #             else:
+                        #                 self.stack.append(variables[var])
                 else:
-                    self.stack.append(value)
+                    if self.debug:
+                        print('eval %s worked: %r' % (command, value))
+                    if list_:
+                        value = list(value)
+                    self.saveState()
+                    if iterate:
+                        for i in value:
+                            self.stack.append(i)
+                    else:
+                        self.stack.append(value)
         else:
+            if self.debug:
+                print('Found variable', command)
             if count is None:
                 if '*' in modifiers:
                     nArgs = len(self.stack)
@@ -367,7 +395,8 @@ class Calculation:
                 if not preserveStack:
                     self.stack = self.stack[:-nArgs]
                 try:
-                    # print('Calling', function.name, 'with', tuple(args))
+                    if self.debug:
+                        print('Calling', function.name, 'with', tuple(args))
                     result = function.func(*args)
                 except Exception as e:
                     print('Exception:', e, file=sys.stderr)
@@ -409,13 +438,14 @@ def repl():
 
 
 if __name__ == '__main__':
+    addSpecialCases()
     importCallables(math)
     importCallables(operator)
     importCallables(builtins)
     importCallables(functools)
-    addSpecialCases()
+    importCallables(decimal)
     addAbbrevs()
-    addVariables()
+    addConstants()
     if os.isatty(0):
         repl()
     else:
