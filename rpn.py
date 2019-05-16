@@ -75,38 +75,21 @@ class Variable:
 def addAbbrevs():
     for longName, shortNames in (
             ('decimal.Decimal', ('Decimal',)),
-            ('decimal.Context', ('Context',)),
-            ('math.gcd', ('gcd',)),
             ('math.log', ('log',)),
-            ('math.log10', ('log10',)),
-            ('math.sqrt', ('sqrt',)),
-            ('operator.abs', ('abs',)),
-            ('operator.add', ('+', 'add')),
-            ('operator.eq', ('=', 'eq')),
-            ('operator.mul', ('*', 'mul')),
-            ('operator.ne', ('ne',)),
-            ('operator.neg', ('neg',)),
-            ('operator.pow', ('pow',)),
-            ('operator.sub', ('-', 'sub')),
+            ('operator.add', ('+',)),
+            ('operator.eq', ('=', '==')),
+            ('operator.mul', ('*',)),
+            ('operator.ne', ('!=',)),
+            ('operator.sub', ('-',)),
             ('operator.truediv', ('/', 'div')),
-            ('builtins.any', ('any',)),
-            ('builtins.all', ('all',)),
             ('builtins.bool', ('bool',)),
-            ('builtins.hex', ('hex',)),
             ('builtins.int', ('int',)),
-            ('builtins.len', ('len',)),
-            ('builtins.list', ('list',)),
             ('builtins.map', ('map',)),
             ('builtins.max', ('max',)),
             ('builtins.min', ('min',)),
-            ('builtins.oct', ('oct',)),
             ('builtins.print', ('print',)),
             ('builtins.range', ('range',)),
             ('builtins.str', ('str',)),
-            ('builtins.ord', ('ord',)),
-            ('builtins.reversed', ('reversed',)),
-            ('builtins.sorted', ('sorted',)),
-            ('builtins.sum', ('sum',)),
             ('functools.reduce', ('reduce',)),
     ):
         try:
@@ -120,6 +103,8 @@ def addAbbrevs():
                     # print('Long name %r alias %r' % (longName, shortName),
                     # file=sys.stderr)
                     functions[shortName] = function
+                else:
+                    print(shortName, 'already known')
 
 
 def addSpecialCases():
@@ -149,13 +134,17 @@ def addSpecialCases():
 
 def addConstants():
     """Add some constants (well, constant in theory) from math"""
-    for name, value in (
+    constants = [
             ('e', math.e),
             ('inf', math.inf),
             ('nan', math.nan),
             ('pi', math.pi),
-            # ('tau', math.tau),  tau was only introduced in Python 3.6
-            ):
+    ]
+
+    if sys.version_info > (3, 5):
+        constants.append(('tau', math.tau))
+
+    for name, value in constants:
         if name in variables:
             print('%r is already a variable!' % name, file=sys.stderr)
         else:
@@ -165,7 +154,6 @@ def addConstants():
 def importCallables(module):
     moduleName = module.__name__
     exec('import ' + moduleName, globals(), variables)
-    # exec('import ' + moduleName)
     callables = inspect.getmembers(module, callable)
 
     for name, func in callables:
@@ -188,14 +176,34 @@ def importCallables(module):
         else:
 
             if path in functions:
-                # print('Function %r already exists' % path, file=sys.stderr)
+                if path != 'decimal.Decimal':
+                    print('Function %r already exists' % path, file=sys.stderr)
                 continue
 
+            # Add the function to our functions dict along with a default
+            # number of positional parameters it expects. This allows the
+            # user to call it and have the arguments taken from the stack
+            # (the number of arguments used can always be modified via
+            # e.g., /3 on the command line).
             nArgs = len([p for p in sig.parameters.values() if
                          p.kind == inspect.Parameter.POSITIONAL_ONLY])
             # or p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD])
-            exec('functions["%s"] = Function("%s", "%s", %s, %d)' % (
-                path, moduleName, name, path, nArgs))
+            exec('functions["%s"] = Function("%s", "%s", %s, %d)' %
+                 (path, moduleName, name, path, nArgs))
+
+            # Import the function by name to allow the user to use it in a
+            # command with an explicit argument, instead of applying it to
+            # whatever is on the stack.
+            if name in variables:
+                # print('name %s already defined! Ignoring %s' % (name, path))
+                pass
+            else:
+                exec('from %s import %s' % (moduleName, name), globals(),
+                     variables)
+                if name not in variables:
+                    print('name %s not now defined!!!' % name)
+                assert name not in functions
+                functions[name] = functions[path]
 
 
 def splitInput(inputLine):
@@ -259,6 +267,19 @@ class Calculation:
         forceCommand = 'c' in modifiers
         preserveStack = '=' in modifiers
         iterate = 'i' in modifiers
+        # Just print the result, do not put it onto the stack.
+        print_ = 'p' in modifiers
+
+        # Test for incompatible modifiers.
+        if push_:
+            if print_:
+                print('/p (print) makes no sense with /! (push)',
+                      file=sys.stderr)
+                return
+            if preserveStack:
+                print('/= (preserve stack) makes no sense with /! (push)',
+                      file=sys.stderr)
+                return
 
         try:
             function = functions[command]
@@ -268,11 +289,15 @@ class Calculation:
 
             lcommand = command.lower()
             if command in variables and not forceCommand:
-                self.saveState()
                 if push_:
+                    self.saveState()
                     self.stack.append(Variable(command))
                 else:
-                    self.stack.append(variables[command])
+                    if print_:
+                        pprint(variables[command])
+                    else:
+                        self.saveState()
+                        self.stack.append(variables[command])
             elif lcommand == 'quit' or lcommand == 'q':
                 raise EOFError()
             elif lcommand == 'pop':
@@ -287,34 +312,58 @@ class Calculation:
             elif lcommand == 'stack' or lcommand == 's' or lcommand == 'f':
                 self.printStack()
             elif lcommand == 'variables' or lcommand == 'v':
-                pprint(variables)
+                for name, value in sorted(variables.items()):
+                    print(name, end=': ')
+                    pprint(value)
             elif lcommand == 'clear' or lcommand == 'c':
                 self.saveState()
                 self.stack = []
             elif lcommand == 'dup' or lcommand == 'd':
                 if self.stack:
-                    self.saveState()
-                    self.stack.append(self.stack[-1])
+                    if preserveStack:
+                        print('The /= modifier makes no sense with %s' %
+                              command, file=sys.stderr)
+                    elif print_:
+                        print('The /p modifier makes no sense with %s' %
+                              command, file=sys.stderr)
+                    else:
+                        self.saveState()
+                        self.stack.append(self.stack[-1])
                 else:
                     print('Cannot duplicate (stack is empty)',
                           file=sys.stderr)
             elif lcommand == 'undo' or lcommand == 'u':
                 if self.previousStack is None:
                     print('Nothing to undo.', file=sys.stderr)
+                elif preserveStack:
+                    print('The /= modifier makes no sense with %s' %
+                          command, file=sys.stderr)
+                elif print_:
+                    print('The /p modifier makes no sense with %s' %
+                          command, file=sys.stderr)
                 else:
                     self.stack = self.previousStack.copy()
                     variables = self.previousVariables.copy()
             elif lcommand == 'print' or lcommand == 'p':
                 self.printStack(-1)
             elif lcommand == 'none':
-                self.saveState()
-                self.stack.append(None)
+                if print_:
+                    print(None)
+                else:
+                    self.saveState()
+                    self.stack.append(None)
             elif lcommand == 'true':
-                self.saveState()
-                self.stack.append(True)
+                if print_:
+                    print(True)
+                else:
+                    self.saveState()
+                    self.stack.append(True)
             elif lcommand == 'false':
-                self.saveState()
-                self.stack.append(False)
+                if print_:
+                    print(False)
+                else:
+                    self.saveState()
+                    self.stack.append(False)
             else:
                 try:
                     value = eval(command, globals(), variables)
@@ -353,9 +402,15 @@ class Calculation:
                     self.saveState()
                     if iterate:
                         for i in value:
-                            self.stack.append(i)
+                            if print_:
+                                pprint(i)
+                            else:
+                                self.stack.append(i)
                     else:
-                        self.stack.append(value)
+                        if print_:
+                            pprint(value)
+                        else:
+                            self.stack.append(value)
         else:
             if self.debug:
                 print('Found variable', command)
@@ -403,13 +458,18 @@ class Calculation:
                     variables = self.previousVariables
                     self.stack = self.previousStack
                 else:
-                    if not preserveStack:
-                        if list_:
-                            result = list(result)
-                        if iterate:
-                            for i in result:
+                    if list_:
+                        result = list(result)
+                    if iterate:
+                        for i in result:
+                            if print_:
+                                pprint(i)
+                            elif not preserveStack:
                                 self.stack.append(i)
-                        else:
+                    else:
+                        if print_:
+                            pprint(result)
+                        elif not preserveStack:
                             self.stack.append(result)
 
 
