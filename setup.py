@@ -2,11 +2,26 @@
 
 from setuptools import setup
 
-# This needs to have the following format - see Makefile 'upload' target.
-VERSION = '1.0.5'
+
+# Modified from http://stackoverflow.com/questions/2058802/
+# how-can-i-get-the-version-defined-in-setup-py-setuptools-in-my-package
+def version():
+    import os
+    import re
+
+    init = os.path.join('rpnpy', '__init__.py')
+    with open(init) as fp:
+        initData = fp.read()
+    match = re.search(r"^__version__ = ['\"]([^'\"]+)['\"]",
+                      initData, re.M)
+    if match:
+        return match.group(1)
+    else:
+        raise RuntimeError('Unable to find version string in %r.' % init)
+
 
 setup(name='rpnpy',
-      version=VERSION,
+      version=version(),
       include_package_data=False,
       url='https://github.com/terrycojones/rpnpy',
       download_url='https://github.com/terrycojones/rpnpy',

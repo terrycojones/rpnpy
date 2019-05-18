@@ -1,9 +1,12 @@
-.PHONY: clean, flake8, upload
+.PHONY: flake8, check, clean, upload
 
 XARGS := xargs $(shell test $$(uname) = Linux && echo -r)
 
 flake8:
-	flake8 pystdin.py
+	find . -name '*.py' -print0 | $(XARGS) -0 flake8
+
+check:
+	env PYTHONPATH=. pytest
 
 clean:
 	find . -name '*.pyc' -print0 | $(XARGS) -0 rm
