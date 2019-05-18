@@ -17,4 +17,4 @@ clean:
 # twine-pypi').
 upload:
 	python setup.py sdist
-	twine upload dist/rpnpy-$$(egrep '^VERSION' setup.py | cut -f2 -d"'").tar.gz
+	twine upload dist/rpnpy-$$(grep __version__ rpnpy/__init__.py | cut -f2 -d\').tar.gz
