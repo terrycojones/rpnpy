@@ -48,13 +48,14 @@ I wrote this for 3 reasons:
         is prime.
     
     But `dc` has only a tiny set of operations. So while it's great to be
-    able to quickly use it from the command line (e.g., `echo 4 5 + p |
-    dc`) you have to reach for a real calculator or use a full programming
-    language, e.g., Perl or Python.
+    able to easily use it from the command line (e.g., `echo 4 5 + p | dc`)
+    I often find myself reaching for a real calculator or go into an
+    interactive session with a full programming language (Perl, Python,
+    etc).
 1. I was curious what it would be like to have a Python RPN calculator that
    offered both the minimalist syntax of `dc` but that also offered a much
    wider range of operations and made it possible to put Python objects
-   (lists, dicts, functions) onto the stack and operate on them. I'm
+   (lists, dicts, functions, etc.) onto the stack and operate on them. I'm
    curious what use I'll make of it, and what others might do with it too.
 
 *Note* that this is a work in progress! Everything may change. Suggestions

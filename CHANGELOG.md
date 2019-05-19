@@ -1,3 +1,7 @@
+## 1.0.11 May 20, 2019
+
+Updated README.md
+
 ## 1.0.10 May 19, 2019
 
 Ongoing development. Many things added, rearranged, etc.
