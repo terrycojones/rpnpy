@@ -9,48 +9,48 @@ put Python objects and functions onto the stack and operate on them.
 
 I wrote this for 3 reasons:
 
-1. I absolutely loved the [HP41C](https://en.wikipedia.org/wiki/HP-41C)
-   programmable calculator series, which used RPN. Although I had taught
-   myself to program on a
-   [Casio FX-502P](https://en.wikipedia.org/wiki/Casio_FX-502P_series) in
-   1978, the Casio was like a toy compared to the HP-41C. I owned a 41-C, a
-   41-CV, and then a 41-CX, had a bunch of memory expansion packs, several
-   other add-on packs (e.g., stats), a card reader/writer, and got it
-   overclocked by some hardware hacker friends. It was an amazing
-   machine. I still have one but don't use it.
-1. I have been using the [UNIX](https://en.wikipedia.org/wiki/Unix)
-   [dc](https://en.wikipedia.org/wiki/Dc_(computer_program)) (desk
-   calculator) command on almost a daily basis since 1983 or so. `dc` is
-   ancient (in UNIX terms), predating even
-   [the C programming language](https://en.wikipedia.org/wiki/C_(programming_language)). `dc`
-   provides a minimalist and rather cryptic RPN calculator. You can program
-   it, if you have a taste for mystery.  Here's a program I wrote in about
-   1984 to factor numbers:
+1.  I absolutely loved the [HP-41C](https://en.wikipedia.org/wiki/HP-41C)
+    programmable calculator series, which used RPN. Although I had taught
+    myself to program on a
+    [Casio FX-502P](https://en.wikipedia.org/wiki/Casio_FX-502P_series) in
+    1978, the Casio was like a toy compared to the HP-41C. I owned a 41C, a
+    41CV, and then a 41CX, had a bunch of memory expansion packs, several
+    other add-on packs (e.g., stats), a card reader/writer, and got it
+    overclocked by some hardware hacker friends. It was an amazing
+    machine. I still have one but don't use it.
+1.  I have been using the [UNIX](https://en.wikipedia.org/wiki/Unix)
+    [dc](https://en.wikipedia.org/wiki/Dc_(computer_program)) (desk
+    calculator) command on almost a daily basis since 1983 or so. `dc` is
+    ancient (in UNIX terms), predating even
+    [the C programming language](https://en.wikipedia.org/wiki/C_(programming_language)). `dc`
+    provides a minimalist and rather cryptic RPN calculator. You can program
+    it, if you have a taste for mystery.  Here's a program I wrote in about
+    1984 to factor numbers:
+
+        [[neither]plsx]sn[c2pla2/sallx]se[ladv1+sm0=nla1=ncla2=pla2%0=elfx]sl
+        [ldlm<pclald%0=cld2+sdlfx]sf[lap[is prime.]plsx]sp[ldplald/salfx]sc
+        [[enter X : ]P?dsa0>n3sdllx]ss[[negative]plsx]snlsx
+
+    [The code](https://gist.github.com/terrycojones/bdc16bf8910ba16dd2dd6ccab8cd7e53)
+    still runs today, 35 years later, totally unchanged:
     
-    [[neither]plsx]sn[c2pla2/sallx]se[ladv1+sm0=nla1=ncla2=pla2%0=elfx]sl
-    [ldlm<pclald%0=cld2+sdlfx]sf[lap[is prime.]plsx]sp[ldplald/salfx]sc
-    [[enter X : ]P?dsa0>n3sdllx]ss[[negative]plsx]snlsx
+        $ dc factor
+        enter X : 34
+        2
+        17
+        is prime.
+        enter X : 77
+        7
+        11
+        is prime.
+        enter X : 887
+        887
+        is prime.
     
-   [The code](https://gist.github.com/terrycojones/bdc16bf8910ba16dd2dd6ccab8cd7e53)
-   still runs today, 35 years later, totally unchanged:
-    
-    $ dc factor
-    enter X : 34
-    2
-    17
-    is prime.
-    enter X : 77
-    7
-    11
-    is prime.
-    enter X : 887
-    887
-    is prime.
-    
-   `dc` has only a tiny set of operations, though. So while it's great to
-   be able to quickly use it from the command line (e.g., `echo 4 5 + p |
-   dc`) you have to reach for a real calculator or use a full programming
-   language, e.g., Perl or Python.
+    `dc` has only a tiny set of operations, though. So while it's great to
+    be able to quickly use it from the command line (e.g., `echo 4 5 + p |
+    dc`) you have to reach for a real calculator or use a full programming
+    language, e.g., Perl or Python.
 1. I was curious what it would be like to have a Python RPN calculator that
    offered both the minimalist syntax of `dc` but that also offered a much
    wider range of operations and made it possible to put Python objects
