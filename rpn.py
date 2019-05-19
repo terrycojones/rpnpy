@@ -65,7 +65,7 @@ def parseArgs():
         help='Print the version number and exit.')
 
     parser.add_argument(
-        '--noSplit', action='store_false', default=True, dest='split',
+        '--noSplit', action='store_false', default=True, dest='splitLines',
         help=('If given, do not split lines read from standard input into '
               'separate commands, treat each line as an entire command.'))
 
@@ -117,7 +117,8 @@ if __name__ == '__main__':
         print(__version__)
     else:
         setupReadline()
-        calc = Calculator(separator=args.separator, debug=args.debug)
+        calc = Calculator(splitLines=args.splitLines, separator=args.separator,
+                          debug=args.debug)
 
         if os.isatty(0):
             repl(calc, args.prompt)

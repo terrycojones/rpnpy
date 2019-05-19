@@ -7,7 +7,7 @@ _NUMBER_RE = re.compile(r'(\d+)')
 _SEPARATOR = ':'
 
 
-def splitInput(line, separator=None):
+def splitInput(line, splitLines=True, separator=None):
     """Split an input line into a command and modifiers
 
     @param line: A C{str} input line.
@@ -43,8 +43,16 @@ def splitInput(line, separator=None):
             count = None
 
         modifiers = strToModifiers(modifiers)
-        if modifiers.noSplit:
-            yield (commands, modifiers, count)
+
+        if splitLines:
+            if modifiers.noSplit:
+                yield (commands, modifiers, count)
+            else:
+                for command in commands.split(separator):
+                    yield command.strip(), modifiers, count
         else:
-            for command in commands.split(separator):
-                yield command.strip(), modifiers, count
+            if modifiers.split:
+                for command in commands.split(separator):
+                    yield command.strip(), modifiers, count
+            else:
+                yield (commands, modifiers, count)

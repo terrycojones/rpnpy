@@ -36,9 +36,7 @@ class TestCalculator(TestCase):
     def testAdd(self):
         """Adding must work"""
         c = Calculator()
-        c.execute('3')
-        c.execute('4')
-        c.execute('+')
+        c.execute('3 4 +')
         (result,) = c.stack
         self.assertEqual(7, result)
 
@@ -46,8 +44,7 @@ class TestCalculator(TestCase):
         """Adding must give an error if there is only one thing on the stack"""
         err = StringIO()
         c = Calculator(errfp=err)
-        c.execute('3')
-        c.execute('+')
+        c.execute('3 +')
         self.assertEqual(
             'Not enough args on stack! (+ needs 2 args, stack has 1 item)\n',
             err.getvalue())
@@ -60,8 +57,7 @@ class TestCalculator(TestCase):
 
         c = Calculator()
         c.register(double, name='double', nArgs=1)
-        c.execute('3')
-        c.execute('double')
+        c.execute('3 double')
         (result,) = c.stack
         self.assertEqual(6, result)
 
@@ -73,11 +69,7 @@ class TestCalculator(TestCase):
 
         c = Calculator()
         c.register(doubleMax, name='doubleMax', nArgs=3)
-        c.execute('3')
-        c.execute('5')
-        c.execute('6')
-        c.execute('7')
-        c.execute('doubleMax')
+        c.execute('3 5 6 7 doubleMax')
         (onStack, result) = c.stack
         self.assertEqual(14, result)
         self.assertEqual(3, onStack)
@@ -90,9 +82,7 @@ class TestCalculator(TestCase):
 
         c = Calculator()
         c.register(addAndDouble, name='addAndDouble')
-        c.execute('3')
-        c.execute('5')
-        c.execute('addAndDouble')
+        c.execute('3 5 addAndDouble')
         (result,) = c.stack
         self.assertEqual(16, result)
 
@@ -106,8 +96,7 @@ class TestCalculator(TestCase):
 
         c = Calculator()
         c.register(celcius)
-        c.execute('212')
-        c.execute('celcius')
+        c.execute('212 celcius')
         (result,) = c.stack
         self.assertEqual(100, result)
 
@@ -142,8 +131,29 @@ class TestCalculator(TestCase):
     def testSwap(self):
         """swap must work as expected"""
         c = Calculator()
-        c.execute('4')
-        c.execute('5')
+        c.execute('4 5')
         self.assertEqual([4, 5], c.stack)
         c.execute('swap')
         self.assertEqual([5, 4], c.stack)
+
+    def testDup(self):
+        """dup must work as expected"""
+        c = Calculator()
+        c.execute('4 d')
+        self.assertEqual([4, 4], c.stack)
+        c.execute('dup')
+        self.assertEqual([4, 4, 4], c.stack)
+
+    def testIterateString(self):
+        """The :i (iterate) modifier must work as expected on a string"""
+        c = Calculator()
+        c.execute('"hello" :i')
+        self.assertEqual(['h', 'e', 'l', 'l', 'o'], c.stack)
+
+    def testIterateGenerator(self):
+        """The :i (iterate) modifier must work as expected on a generator"""
+        c = Calculator()
+        c.execute('str :!')
+        c.execute('[1,2,3]')
+        c.execute('map :i')
+        self.assertEqual(['1', '2', '3'], c.stack)

@@ -7,10 +7,10 @@ MODIFIERS = {
     '*': 'all',
     'c': 'forceCommand',
     'i': 'iterate',
-    'l': 'list',
     'n': 'noSplit',
     '=': 'preserveStack',
     'p': 'print',
+    's': 'split',
     '!': 'push',
 }
 

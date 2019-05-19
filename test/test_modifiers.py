@@ -21,7 +21,7 @@ class TestModifiers(TestCase):
 
     def testKnownModifiers(self):
         "Make sure only known modifiers are present."
-        self.assertEqual(sorted('*cil=np!'), sorted(MODIFIERS))
+        self.assertEqual(sorted('*=!cinps'), sorted(MODIFIERS))
 
     def testNamesDiffer(self):
         "Make sure all known modifiers have different names."
@@ -48,11 +48,6 @@ class TestModifiers(TestCase):
         modifiers = strToModifiers('i')
         self.assertTrue(modifiers.iterate)
 
-    def testList(self):
-        "Test the strToModifiers function sets list."
-        modifiers = strToModifiers('l')
-        self.assertTrue(modifiers.list)
-
     def testPresevereStack(self):
         "Test the strToModifiers function sets preserveStack."
         modifiers = strToModifiers('=')
@@ -72,3 +67,8 @@ class TestModifiers(TestCase):
         "Test the strToModifiers function sets push."
         modifiers = strToModifiers('!')
         self.assertTrue(modifiers.push)
+
+    def testSplit(self):
+        "Test the strToModifiers function sets split."
+        modifiers = strToModifiers('s')
+        self.assertTrue(modifiers.split)

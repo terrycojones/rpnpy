@@ -52,8 +52,12 @@ class Variable:
 
 
 class Calculator:
-    def __init__(self, separator=None, outfp=sys.stdout, errfp=sys.stderr,
-                 debug=False):
+
+    OVERRIDES = set('builtins.list'.split())
+
+    def __init__(self, splitLines=True, separator=None, outfp=sys.stdout,
+                 errfp=sys.stderr, debug=False):
+        self._splitLines = splitLines
         self._separator = separator
         self._outfp = outfp
         self._errfp = errfp
@@ -195,6 +199,10 @@ class Calculator:
 
             path = '%s.%s' % (moduleName, name)
 
+            if path in self.OVERRIDES:
+                self.debug('Not importing %r' % path)
+                continue
+
             if path in self._functions:
                 if path != 'decimal.Decimal':
                     self.err('Function %r already exists' % path)
@@ -203,8 +211,8 @@ class Calculator:
             # Add the function to our functions dict along with a default
             # number of positional parameters it expects. This allows the
             # user to call it and have the arguments taken from the stack
-            # (the number of arguments used can always be modified via
-            # e.g., /3 on the command line).
+            # (the number of arguments used can always be specified on the
+            # command line (e.g., :3)
             exec('self._functions["%s"] = Function("%s", "%s", %s, %d)' %
                  (path, moduleName, name, path, nArgs))
 
@@ -244,31 +252,38 @@ class Calculator:
         self._previousStack = self.stack.copy()
         self._previousVariables = self._variables.copy()
 
-    def _finalize(self, result, modifiers, stateAlreadySaved=False):
+    def _finalize(self, result, modifiers, nPop=0, extend=False,
+                  noValue=False):
         """Process the final result of executing a command.
 
-        @param result: The result.
+        @param result: A C{list} or C{tuple} of results to add to the stack.
         @param modifiers: A C{Modifiers} instance.
-        @param stateAlreadySaved: If C{True} the stack and variable state
-            have already been saved in earlier processing of the command.
+        @param nPop: An C{int} number of stack items to pop.
+        @param extend: If C{True}, use extend to add items to the end of the
+            stack, else use append.
+        @param noValue: If C{True}, do not push any value (i.e., ignore
+            C{result}).
         """
-        if modifiers.list:
-            result = list(result)
+        if (nPop or not noValue) and not modifiers.preserveStack:
+            # We're going to pop and/or push.
+            self.saveState()
+            if nPop:
+                self.stack[-nPop:] = []
+
         if modifiers.iterate:
             if modifiers.print:
                 for i in result:
-                    self.report(i)
-            elif not modifiers.preserveStack:
-                if not stateAlreadySaved:
-                    self.saveState()
-                self.stack.extend(result)
+                    self.pprint(i)
+            elif not (modifiers.preserveStack or noValue):
+                self.stack.extend(list(result))
         else:
             if modifiers.print:
-                self.report(result)
-            elif not modifiers.preserveStack:
-                if not stateAlreadySaved:
-                    self.saveState()
-                self.stack.append(result)
+                self.pprint(result)
+            elif not (modifiers.preserveStack or noValue):
+                if extend:
+                    self.stack.extend(result)
+                else:
+                    self.stack.append(result)
 
     def execute(self, line):
         """
@@ -276,7 +291,7 @@ class Calculator:
 
         @param line: A C{str} command line to run.
         """
-        inputGen = splitInput(line, self._separator)
+        inputGen = splitInput(line, self._splitLines, self._separator)
 
         try:
             while True:
@@ -305,16 +320,16 @@ class Calculator:
             self.debug('Empty command')
             return
 
-        done = self._tryFunction(command, count, modifiers)
-
-        if done is False and count is not None:
-            self.err('Modifier count %d will not be used' % count)
+        done = self._tryFunction(command, modifiers, count)
 
         if done is False:
             done = self._tryVariable(command, modifiers)
 
         if done is False:
-            done = self._trySpecial(command, modifiers)
+            done = self._trySpecial(command, modifiers, count)
+
+        if done is False and count is not None:
+            self.err('Modifier count %d will not be used' % count)
 
         if done is False:
             done = self._tryEval(command, modifiers)
@@ -323,9 +338,9 @@ class Calculator:
             done = self._tryExec(command)
 
         if done is False:
-            self.err('Could not execute %r!' % command)
+            self.err('No action taken on input %r' % command)
 
-    def _tryFunction(self, command, count, modifiers):
+    def _tryFunction(self, command, modifiers, count):
         if modifiers.forceCommand:
             return False
 
@@ -336,6 +351,11 @@ class Calculator:
             return False
 
         self.debug('Found function %r' % command)
+
+        if modifiers.push:
+            self._finalize(function.func, modifiers)
+            return
+
         if count is None:
             nArgs = len(self) if modifiers.all else function.nArgs
         else:
@@ -345,9 +365,7 @@ class Calculator:
                     self.err('/modifiers cannot have both a count and a *')
                     return
 
-        if modifiers.push:
-            self._finalize(function.func, modifiers)
-        elif len(self) < function.nArgs:
+        if len(self) < nArgs:
             self.err(
                 'Not enough args on stack! (%s needs %d arg%s, stack has '
                 '%d item%s)' %
@@ -363,22 +381,14 @@ class Calculator:
                 else:
                     args.append(arg)
 
-            if not modifiers.preserveStack:
-                self.saveState()
-                self.stack = self.stack[:-nArgs]
-
             self.debug('Calling %s with %r' % (function.name, tuple(args)))
             try:
                 result = function.func(*args)
             except Exception as e:
                 self.err('Exception running %s(%s): %s' %
                          (function.name, ', '.join(map(str, args)), e))
-                self._variables = self._previousVariables
-                self.stack = self._previousStack
             else:
-                self._finalize(
-                    result, modifiers,
-                    stateAlreadySaved=(not modifiers.preserveStack))
+                self._finalize(result, modifiers, nPop=nArgs)
 
     def _tryVariable(self, command, modifiers):
         if modifiers.forceCommand:
@@ -391,25 +401,39 @@ class Calculator:
         else:
             return False
 
-    def _trySpecial(self, command, modifiers):
+    def _trySpecial(self, command, modifiers, count):
         lcommand = command.lower()
 
         if lcommand == 'quit' or lcommand == 'q':
             raise EOFError()
         elif lcommand == 'pop':
-            if self.stack:
-                self.saveState()
-                result = self.stack.pop()
-                if modifiers.print:
-                    self.pprint(result)
+            nArgs = ((len(self) if modifiers.all else 1) if count is None
+                     else count)
+            if len(self) >= nArgs:
+                value = self.stack[-1] if nArgs == 1 else self.stack[-nArgs:]
+                self._finalize(value, modifiers, nPop=nArgs, noValue=True)
             else:
-                self.err('Cannot pop (stack is empty)')
+                self.err('Cannot pop %d item%s (stack length is %d)' %
+                         (nArgs, '' if nArgs == 1 else 's', len(self)))
         elif lcommand == 'swap':
             if len(self) > 1:
-                self.saveState()
-                self.stack[-2:] = reversed(self.stack[-2:])
+                self._finalize(reversed(self.stack[-2:]), modifiers=modifiers,
+                               nPop=2, extend=True)
             else:
                 self.err('Cannot swap (stack needs 2 items)')
+        elif lcommand == 'list':
+            if self.stack:
+                if count is None:
+                    self._finalize([self.stack[-1]], modifiers=modifiers,
+                                   nPop=1)
+                elif modifiers.all:
+                    self._finalize(list(self.stack), modifiers=modifiers,
+                                   nPop=len(self))
+                else:
+                    self._finalize(list(self.stack[-count:]), nPop=count,
+                                   modifiers=modifiers)
+            else:
+                self.err('Cannot run list (stack is empty)')
         elif lcommand == 'functions':
             for name, func in sorted(self._functions.items()):
                 self.report(name, func)
@@ -424,8 +448,8 @@ class Calculator:
                     self.err('The /= modifier makes no sense with %s' %
                              command)
                 else:
-                    self.saveState()
-                    self.stack = []
+                    self._finalize(None, nPop=len(self), modifiers=modifiers,
+                                   noValue=True)
         elif lcommand == 'dup' or lcommand == 'd':
             if self.stack:
                 if modifiers.preserveStack:
@@ -471,13 +495,10 @@ class Calculator:
             self._finalize(value, modifiers)
 
     def _tryExec(self, command):
-        self.saveState()
         try:
             exec(command, globals(), self._variables)
         except Exception as e:
             self.err('Could not exec(%r): %s' % (command, e))
-            self._variables = self._previousVariables
-            self.stack = self._previousStack
             return False
         else:
             self.debug('exec worked.')

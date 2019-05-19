@@ -43,6 +43,20 @@ class TestInput(TestCase):
         self.assertEqual((('"hey you"', strToModifiers('n'), None),),
                          tuple(splitInput('"hey you" :n')))
 
+    def testTwoCommandsSplitLines(self):
+        """Test two words on one line when splitLines is False"""
+        self.assertEqual(
+            (('hey you', Modifiers(), None),),
+            tuple(splitInput('hey you', splitLines=False)))
+
+    def testTwoCommandsSplitLinesOverridden(self):
+        """Test two words on one line when splitLines is False but the split
+        lines modifier is passed"""
+        self.assertEqual(
+            (('hey', strToModifiers('s'), None),
+             ('you', strToModifiers('s'), None),),
+            tuple(splitInput('hey you :s', splitLines=False)))
+
     def testCommandWithNoModifiersPrecededByWhitespace(self):
         """Test a command with no modifiers preceded by whitespace"""
         self.assertEqual((('hey', Modifiers(), None),),
