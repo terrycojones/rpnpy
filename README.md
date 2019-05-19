@@ -14,25 +14,31 @@ The calculator either works interactively from the shell using a
 
 Input lines are either comments (first non-whitespace character on the line
 is `#`) or are split into a command and optional modifiers. If given, the
-modifiers must follow a `/`. Hence:
+modifiers must follow a `:`.  The modifiers are a set of single letters and
+may also include a single number. Hence, for example,
 
 ```
-4
+abs
 ```
 
-is a simple command (push the value `4` onto the stack) with no modifiers,
-whereas
+is a simple command (apply the `abs` function to the value on the top of
+the stack) with no modifiers, whereas
 
 ```
-+ /3=
++ :p= 17
 ```
 
-is the `+` command with two modifiers (the number `3` and the letter `=`).
+run the `+` command with modifiers (`p`, `=`, and `17`).
 
 The full list of commands and modifiers is given below.
 
+#### Whitespace
 
-### Via standard input
+Leading and trailing whitespace in the command is ignored. Whitespace
+anywhere in the modifiers is ignored.
+
+
+## Operation via standard input
 
 When reading from standard input, lines will be split on whitespace and
 each field is treated as a separate command. This allows for simple
@@ -81,3 +87,25 @@ $ echo 4 5 | rpn.py --noPrint
 
 in which case you can print things yourself using the `p` command (see
 below).
+
+## REPL operation
+
+In REPL mode, the calculator repeatedly prints a prompt, reads a command,
+and executes it. For example:
+
+```sh
+$ rpn.py
+--> 4
+--> 5
+--> +
+--> p
+9
+```
+
+you can change the prompt using `--prompt` on the command line.
+
+## Commands
+
+There are two kinds of commands: normal and special. 
+
+## Modifiers

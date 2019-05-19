@@ -77,23 +77,18 @@ def parseArgs():
     return parser.parse_args()
 
 
-def stdin(calc, split, separator, print_):
+def stdin(calc, print_):
     """
     Read and execute commands from stdin.
 
     @param calc: A C{Calculator} instance.
-    @param split: If C{True}, split lines.
-    @param separator: The C{str} to split lines on (if C{split} is C{True}
-        or C{None} to split on whitespace.
     @param print_: If C{True}, print the stack after all commands are run.
     """
     for line in sys.stdin:
-        commands = line.split(separator) if split else (line,)
-        for command in commands:
-            try:
-                calc.execute(command)
-            except EOFError:
-                break
+        try:
+            calc.execute(line)
+        except EOFError:
+            break
     if print_ and calc.stack:
         calc.printStack(-1 if len(calc) == 1 else None)
 
@@ -122,9 +117,9 @@ if __name__ == '__main__':
         print(__version__)
     else:
         setupReadline()
-        calc = Calculator(debug=args.debug)
+        calc = Calculator(separator=args.separator, debug=args.debug)
 
         if os.isatty(0):
             repl(calc, args.prompt)
         else:
-            stdin(calc, args.split, args.separator, args.print)
+            stdin(calc, args.print)

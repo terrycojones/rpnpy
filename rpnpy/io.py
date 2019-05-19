@@ -1,41 +1,50 @@
 import re
 
-NUMBER_RE = re.compile(r'(\d+)')
+from rpnpy.modifiers import strToModifiers
 
 
-def splitInput(inputLine):
+_NUMBER_RE = re.compile(r'(\d+)')
+_SEPARATOR = ':'
+
+
+def splitInput(line, separator=None):
     """Split an input line into a command and modifiers
 
-    @param inputLine: A C{str} input line.
-    @return: A 3-tuple containing 1) the C{str} command, stripped of any
-        whitespace 2) a C{set} of lower-case modifiers, and 3) an C{int} count
-        (or C{None} if no count is found).
+    @param line: A C{str} input line.
+    @param separator: A C{str} to split the line into individual commands
+        with, or C{None} to indicate whitespace splitting.
+    @return: A generator that yields 3-C{tuple}s, each containing:
+            1) a C{str} command, stripped of any leading/trailing whitespace,
+            2) a C{Modifiers} instance, and
+            3) an C{int} count or C{None} if no count is found.
+        If the input line is empty or is a comment (i.e., starts with #), all
+        three returned values are C{None}.
     """
-    fields = inputLine.rsplit('/', 1)
+    fields = line.rsplit(_SEPARATOR, 1)
     try:
-        command, modifiers = fields
+        commands, modifiers = fields
     except ValueError:
-        command = inputLine.strip()
+        commands = line.strip()
         modifiers = ''
     else:
-        command = command.strip()
+        commands = commands.strip()
         modifiers = modifiers.strip()
 
-        if not (command or modifiers):
-            # This is a lone / on a line. This indicates division, not
-            # an empty command with no modifiers.
-            command = '/'
-
-    if command.startswith('#'):
-        # This is a comment.
-        return '', set(), None
-
-    match = NUMBER_RE.search(modifiers)
-    if match:
-        count = int(match.group(1))
-        modifiers = (modifiers[:match.start(1)].strip() +
-                     modifiers[match.end(1):].strip())
+    if not commands or commands.startswith('#'):
+        # This is an empty input line or a comment.
+        yield (None, None, None)
     else:
-        count = None
+        match = _NUMBER_RE.search(modifiers)
+        if match:
+            count = int(match.group(1))
+            modifiers = (modifiers[:match.start(1)].strip() +
+                         modifiers[match.end(1):].strip())
+        else:
+            count = None
 
-    return command.strip(), set(modifiers.strip().lower()), count
+        modifiers = strToModifiers(modifiers)
+        if modifiers.noSplit:
+            yield (commands, modifiers, count)
+        else:
+            for command in commands.split(separator):
+                yield command.strip(), modifiers, count
