@@ -157,3 +157,34 @@ class TestCalculator(TestCase):
         c.execute('[1,2,3]')
         c.execute('map :i')
         self.assertEqual(['1', '2', '3'], c.stack)
+
+    def testItemgetter(self):
+        """itemgetter must work correctly"""
+        c = Calculator()
+        c.execute('1')
+        c.execute('itemgetter')
+        c.execute('[[1, 2, 3], [4, 5, 6]] :n')
+        c.execute('map :i')
+        self.assertEqual([2, 5], c.stack)
+
+    def testApplyNoCount(self):
+        """apply must work correctly when not given a count"""
+        c = Calculator()
+        c.execute('-1')
+        c.execute('abs :!')
+        c.execute('apply')
+        self.assertEqual([1], c.stack)
+
+    def testApplyWithCount(self):
+        """apply must work correctly when given a count"""
+        c = Calculator()
+        c.execute('3 5')
+        c.execute('+ :!')
+        c.execute('apply :2')
+        self.assertEqual([8], c.stack)
+
+    def testPushList(self):
+        """It must be possible to push list onto the stack"""
+        c = Calculator()
+        c.execute('list :!')
+        self.assertIs(list, c.stack[0])

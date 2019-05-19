@@ -17,6 +17,7 @@ except ImportError:
     else:
         raise
 
+from rpnpy.functions import apply
 from rpnpy.inspect import countArgs
 from rpnpy.io import splitInput
 from rpnpy.errors import UnknownModifiersError, IncompatibleModifiersError
@@ -65,9 +66,11 @@ class Calculator:
         self.stack = []
         self._previousStack = self._previousVariables = None
         self._functions = {}
+        self._special = {}
         self._variables = {}
 
         self.addSpecialCases()
+        self.addSpecial()
         for module in math, operator, builtins, functools, decimal:
             self.importCallables(module)
         self.addAbbrevs()
@@ -103,6 +106,9 @@ class Calculator:
         for longName, shortNames in (
                 ('decimal.Decimal', ('Decimal',)),
                 ('math.log', ('log',)),
+                ('operator.attrgetter', ('attrgetter',)),
+                ('operator.itemgetter', ('itemgetter',)),
+                ('operator.methodcaller', ('methodcaller',)),
                 ('operator.add', ('+',)),
                 ('operator.eq', ('==',)),
                 ('operator.mul', ('*',)),
@@ -132,6 +138,13 @@ class Calculator:
                     else:
                         self.report(shortName, 'already known')
 
+    def addSpecial(self):
+        """
+        Add functions from rpnpy.functions
+        """
+        for func in (apply,):
+            self._special[func.__name__] = func
+
     def addSpecialCases(self):
         """
         Add argument counts for functions that cannot have their signatures
@@ -149,6 +162,9 @@ class Calculator:
                 (builtins, builtins.range, 1),
                 (functools, functools.reduce, 2),
                 (decimal, decimal.Decimal, 1),
+                (operator, operator.attrgetter, 1),
+                (operator, operator.itemgetter, 1),
+                (operator, operator.methodcaller, 1),
         ):
             longName = '%s.%s' % (module.__name__, func.__name__)
             try:
@@ -404,7 +420,9 @@ class Calculator:
     def _trySpecial(self, command, modifiers, count):
         lcommand = command.lower()
 
-        if lcommand == 'quit' or lcommand == 'q':
+        if lcommand in self._special:
+            self._special[lcommand](self, modifiers, count)
+        elif lcommand == 'quit' or lcommand == 'q':
             raise EOFError()
         elif lcommand == 'pop':
             nArgs = ((len(self) if modifiers.all else 1) if count is None
@@ -422,16 +440,22 @@ class Calculator:
             else:
                 self.err('Cannot swap (stack needs 2 items)')
         elif lcommand == 'list':
-            if self.stack:
+            if modifiers.push:
+                self._finalize(list, modifiers=modifiers)
+            elif self.stack:
                 if count is None:
-                    self._finalize([self.stack[-1]], modifiers=modifiers,
-                                   nPop=1)
+                    self._finalize(list(self.stack[-1]), modifiers=modifiers,
+                                   nPop=1, extend=True)
                 elif modifiers.all:
                     self._finalize(list(self.stack), modifiers=modifiers,
-                                   nPop=len(self))
+                                   nPop=len(self), extend=True)
                 else:
-                    self._finalize(list(self.stack[-count:]), nPop=count,
-                                   modifiers=modifiers)
+                    if len(self) >= count:
+                        self._finalize(list(self.stack[-count:]), nPop=count,
+                                       modifiers=modifiers, extend=True)
+                    else:
+                        self.err('Cannot list %d items (stack length is %d)' %
+                                 (count, len(self)))
             else:
                 self.err('Cannot run list (stack is empty)')
         elif lcommand == 'functions':

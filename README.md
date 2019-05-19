@@ -31,7 +31,7 @@ I wrote this for 3 reasons:
         [ldlm<pclald%0=cld2+sdlfx]sf[lap[is prime.]plsx]sp[ldplald/salfx]sc
         [[enter X : ]P?dsa0>n3sdllx]ss[[negative]plsx]snlsx
 
-    [The code](https://gist.github.com/terrycojones/bdc16bf8910ba16dd2dd6ccab8cd7e53)
+    [That code](https://gist.github.com/terrycojones/bdc16bf8910ba16dd2dd6ccab8cd7e53)
     still runs today, 35 years later, totally unchanged:
     
         $ dc factor
@@ -47,8 +47,8 @@ I wrote this for 3 reasons:
         887
         is prime.
     
-    `dc` has only a tiny set of operations, though. So while it's great to
-    be able to quickly use it from the command line (e.g., `echo 4 5 + p |
+    But `dc` has only a tiny set of operations. So while it's great to be
+    able to quickly use it from the command line (e.g., `echo 4 5 + p |
     dc`) you have to reach for a real calculator or use a full programming
     language, e.g., Perl or Python.
 1. I was curious what it would be like to have a Python RPN calculator that
@@ -57,7 +57,10 @@ I wrote this for 3 reasons:
    (lists, dicts, functions) onto the stack and operate on them. I'm
    curious what use I'll make of it, and what others might do with it too.
 
-## Example sessions
+*Note* that this is a work in progress! Everything may change. Suggestions
+ very welcome.
+
+## Example rpn.py sessions
 
 Before getting a bit more formal (and boring) in describing how you use
 `rpn.py`, here are some example sessions to give you a flavor.
@@ -67,10 +70,41 @@ Before getting a bit more formal (and boring) in describing how you use
 $ echo 4 5 + | rpn.py
 9
 
-# Sin 90 degrees.
+# Sine of 90 degrees (Python's sin function operates on radians).
 $ echo '90 pi 180 / * sin' | rpn.py
 1.0
 9
+```
+
+```sh
+# REPL usage
+$ rpn.py
+--> 4 5 6
+--> stack
+[4, 5, 6]
+--> f
+[4, 5, 6]
+--> clear
+--> f
+[]
+--> from numpy import log2 :n
+--> 32
+--> log2 :p
+5.0
+--> {'a':6, 'b':10, 'c':15} :n
+--> len
+--> p
+3
+--> [6,7,8]
+--> str :!
+--> f
+[[6, 7, 8], <class 'str'>]
+--> swap
+--> f
+[<class 'str'>, [6, 7, 8]]
+--> map :i
+--> f
+['6', '7', '8']
 ```
 
 ## Usage
@@ -83,8 +117,6 @@ The calculator either works interactively from the shell using a
 
 Input lines are either comments (first non-whitespace character on the line
 is `#`) or specify a command (or commands) followed by optional modifiers.
-A command with no modifiers is `abs`, which will apply the `abs` function
-to the value on the top of the stack.
 
 If given, modifiers must follow a `:`.  The modifiers are a set of single
 letters and may also include a single number. The input `+ :p= 17` causes
@@ -118,7 +150,7 @@ $ rpn.py
 --> [1,2,3]
 ```
 
-but if you try that with embedded spaces, you'll an error:
+but if you try that with embedded spaces, you'll get an error:
 
 ```sh
 $ rpn.py
@@ -129,16 +161,16 @@ Could not exec('3]'): invalid syntax (<string>, line 1)
 No action taken on input '3]'
 ```
 
-this is easily avoided with the `:n` (no split) modifier:
+this can be avoided with the `:n` (no split) modifier:
 
 ```sh
 $ rpn.py
 --> [1, 2, 3] :n
 ```
 
-If you want `rpn.py` not to split lines into multiple commands, run with
-the `--noSplit` command-line option. You can then use `:s` (split) if you
-instead want to write an input line that should be split. Hence:
+If you want `rpn.py` not to split lines into multiple commands at all, run
+with the `--noSplit` command-line option. You can then use `:s` (split) if
+you instead want to write an input line that should be split. Hence:
 
 ```sh
 $ rpn.py --noSplit
@@ -147,13 +179,13 @@ $ rpn.py --noSplit
 ```
 
 the above will first push the list `[1, 2, 3]` onto the stack, and then `4`
-and `5` will be split (on whitespace) and treated as two separate commands.
+and `5` will be split (on whitespace), treated as two separate commands,
+and result in two more values being pushed onto the stack.
 
 #### Whitespace
 
 Leading and trailing whitespace in the command is ignored. Whitespace
 anywhere in the modifiers is ignored.
-
 
 ## Operation via standard input
 
@@ -213,9 +245,7 @@ and executes it. For example:
 
 ```sh
 $ rpn.py
---> 4
---> 5
---> +
+--> 4 5 +
 --> p
 9
 ```

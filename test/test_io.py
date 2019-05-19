@@ -1,10 +1,10 @@
 from unittest import TestCase
 
-from rpnpy.io import splitInput
-from rpnpy.modifiers import Modifiers, strToModifiers
+from rpnpy.io import splitInput, findModifiers
+from rpnpy.modifiers import Modifiers, strToModifiers, MODIFIERS
 
 
-class TestInput(TestCase):
+class TestSplitInput(TestCase):
     """Test the splitInput function."""
 
     def testEmpty(self):
@@ -126,3 +126,45 @@ class TestInput(TestCase):
         """Test a command with modifiers before and after a count"""
         self.assertEqual((('hey', strToModifiers('=p*'), 16),),
                          tuple(splitInput('hey :=p 16 *')))
+
+    def testDict(self):
+        """A dict must not be confused for a string with modifiers."""
+        self.assertEqual((("{'a':6,'b':10,'c':15}", Modifiers(), None),),
+                         tuple(splitInput("{'a':6,'b':10,'c':15}")))
+
+
+class TestFindModifiers(TestCase):
+    """Test the findModifiers function."""
+
+    def testEmpty(self):
+        """Test an empty string."""
+        self.assertEqual((-1, Modifiers(), None), findModifiers(''))
+
+    def testSeparatorIsLastLetter(self):
+        """Test a string that ends with the separator."""
+        self.assertEqual((0, Modifiers(), None), findModifiers(':'))
+
+    def testStringWithNoModifierSeparator(self):
+        """Test a string with no modifier separator."""
+        self.assertEqual((-1, Modifiers(), None), findModifiers('hello'))
+
+    def testUnknownLetter(self):
+        """Test a string with a non-modifier letter."""
+        # Before testing, make sure '?' is not actually a valid modifier.
+        self.assertFalse('?' in MODIFIERS)
+        self.assertEqual((-1, Modifiers(), None), findModifiers('4 :?'))
+
+    def testDict(self):
+        """A dict must not be confused for a string with modifiers."""
+        self.assertEqual((-1, Modifiers(), None),
+                         findModifiers("{'a':6, 'b':10, 'c':15}"))
+
+    def testDictWithModifiers(self):
+        """A dict with modifiers must be processed correctly."""
+        self.assertEqual((24, strToModifiers('=p'), 17),
+                         findModifiers("{'a':6, 'b':10, 'c':15} :=p17"))
+
+    def testDuplicatedLetter(self):
+        """A string with a duplicated modifier must be processed correctly."""
+        self.assertEqual((4, strToModifiers('=p'), None),
+                         findModifiers("abs :=pp"))
