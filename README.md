@@ -80,8 +80,6 @@ $ echo '90 pi 180 / * sin' | rpn.py
 $ echo 'pi 10 10 * *' | rpn.py
 314.1592653589793
 
-# Same thing, but use 'dup' to duplicate the 10, and 'reduce' to multiply.
-
 # Equivalently, using reduce to do the multiplying.  The ':!' modifier
 # tells rpn.py to push the '*' function onto the stack instead of
 # immediately running it.
@@ -94,7 +92,7 @@ echo '[pi,10,10] *:! reduce' | rpn.py
 echo 'pi 10 10 mul:! reduce:3' | rpn.py
 314.1592653589793
 
-# Equivalently (the ':*' tells reduce to use the whole stack). The 10 is
+# Equivalently, using ':*' to tell reduce to use the whole stack. The 10 is
 # duplicated using 'dup'.
 echo 'pi 10 dup *:! reduce:*' | rpn.py
 314.1592653589793
