@@ -35,10 +35,6 @@ I wrote this for 3 reasons:
     still runs today, 35 years later, totally unchanged:
     
         $ dc factor
-        enter X : 34
-        2
-        17
-        is prime.
         enter X : 77
         7
         11
