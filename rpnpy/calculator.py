@@ -17,9 +17,9 @@ except ImportError:
     else:
         raise
 
-from rpnpy.functions import apply
+from rpnpy.functions import apply, reduce
 from rpnpy.inspect import countArgs
-from rpnpy.io import splitInput
+from rpnpy.io import findCommands
 from rpnpy.errors import UnknownModifiersError, IncompatibleModifiersError
 
 
@@ -54,7 +54,7 @@ class Variable:
 
 class Calculator:
 
-    OVERRIDES = set('builtins.list'.split())
+    OVERRIDES = set('builtins.list functools.reduce'.split())
 
     def __init__(self, splitLines=True, separator=None, outfp=sys.stdout,
                  errfp=sys.stderr, debug=False):
@@ -123,7 +123,6 @@ class Calculator:
                 ('builtins.print', ('print',)),
                 ('builtins.range', ('range',)),
                 ('builtins.str', ('str',)),
-                ('functools.reduce', ('reduce',)),
         ):
             try:
                 function = self._functions[longName]
@@ -142,7 +141,7 @@ class Calculator:
         """
         Add functions from rpnpy.functions
         """
-        for func in (apply,):
+        for func in (apply, reduce):
             self._special[func.__name__] = func
 
     def addSpecialCases(self):
@@ -160,7 +159,6 @@ class Calculator:
                 (builtins, builtins.print, 1),
                 (builtins, builtins.str, 1),
                 (builtins, builtins.range, 1),
-                (functools, functools.reduce, 2),
                 (decimal, decimal.Decimal, 1),
                 (operator, operator.attrgetter, 1),
                 (operator, operator.itemgetter, 1),
@@ -307,12 +305,12 @@ class Calculator:
 
         @param line: A C{str} command line to run.
         """
-        inputGen = splitInput(line, self._splitLines, self._separator)
+        commands = findCommands(line, self._splitLines, self._separator)
 
         try:
             while True:
                 try:
-                    command, modifiers, count = next(inputGen)
+                    command, modifiers, count = next(commands)
                 except UnknownModifiersError as e:
                     self.err('Unknown modifiers: %s' % ', '.join(e.args))
                     return
@@ -332,6 +330,11 @@ class Calculator:
         @param modifiers: A C{Modifiers} instance.
         @param count: An C{int} count, or C{None} if no count was given.
         """
+        if modifiers.split:
+            self._splitLines = True
+        elif modifiers.noSplit:
+            self._splitLines = False
+
         if not command:
             self.debug('Empty command')
             return
@@ -421,7 +424,10 @@ class Calculator:
         lcommand = command.lower()
 
         if lcommand in self._special:
-            self._special[lcommand](self, modifiers, count)
+            try:
+                self._special[lcommand](self, modifiers, count)
+            except Exception as e:
+                self.err('Could not run special command %r: %s' % (command, e))
         elif lcommand == 'quit' or lcommand == 'q':
             raise EOFError()
         elif lcommand == 'pop':

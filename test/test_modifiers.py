@@ -13,11 +13,18 @@ class TestModifiers(TestCase):
         self.assertRaisesRegex(
             UnknownModifiersError, error, strToModifiers, 'yxz')
 
-    def testIncompatibleModifiers(self):
+    def testIncompatibleModifiersPushAndPreserve(self):
         "Incompatible modifiers must be detected."
         error = r'= \(preserve stack\) makes no sense with ! \(push\)'
         self.assertRaisesRegex(
             IncompatibleModifiersError, error, strToModifiers, '!=')
+
+    def testIncompatibleModifiersSplitNoSplit(self):
+        "Incompatible modifiers split and noSplit must be detected."
+        error = r'\(split lines\) makes no sense with n \(do not split lines\)'
+
+        self.assertRaisesRegex(
+            IncompatibleModifiersError, error, strToModifiers, 'ns')
 
     def testKnownModifiers(self):
         "Make sure only known modifiers are present."

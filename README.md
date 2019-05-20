@@ -75,6 +75,20 @@ $ echo 4 5 + | rpn.py
 $ echo '90 pi 180 / * sin' | rpn.py
 1.0
 9
+
+# Area of a circle radius 10
+$ echo 'pi 10 10 * *' | rpn.py
+314.1592653589793
+
+# Same thing, but use 'dup' to duplicate the 10, and 'reduce' to multiply.
+# The :! modifier tells rpn.py to push the '*' function onto the stack
+# instead of immediately running it.
+$ rpn.py
+--> pi 10 dup
+--> * :!
+--> reduce
+--> p
+314.1592653589793
 ```
 
 ```sh

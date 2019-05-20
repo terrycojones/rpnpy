@@ -46,6 +46,9 @@ def strToModifiers(s):
         if modifiers.preserveStack:
             raise IncompatibleModifiersError(
                 '= (preserve stack) makes no sense with ! (push)')
-            return
+
+    if modifiers.split and modifiers.noSplit:
+        raise IncompatibleModifiersError(
+            's (split lines) makes no sense with n (do not split lines)')
 
     return modifiers

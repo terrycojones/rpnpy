@@ -160,10 +160,10 @@ class TestCalculator(TestCase):
 
     def testItemgetter(self):
         """itemgetter must work correctly"""
-        c = Calculator()
+        c = Calculator(splitLines=False)
         c.execute('1')
         c.execute('itemgetter')
-        c.execute('[[1, 2, 3], [4, 5, 6]] :n')
+        c.execute('[[1, 2, 3], [4, 5, 6]]')
         c.execute('map :i')
         self.assertEqual([2, 5], c.stack)
 

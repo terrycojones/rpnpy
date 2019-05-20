@@ -50,7 +50,54 @@ def findModifiers(line):
     return -1, Modifiers(), None
 
 
-def splitInput(line, splitLines=True, separator=None):
+def findCommands(line, splitLines=True, separator=None):
+    """Find all commands (and their modifiers) in an input line.
+
+    @param line: A C{str} input line.
+    @param splitLines: If C{True}, split lines using C{separator}.
+    @param separator: A C{str} to split the line into individual commands
+        with, or C{None} to indicate whitespace splitting.
+    """
+    fields = line.strip().split(separator) if splitLines else [line.strip()]
+    fieldIndex = 0
+
+    while True:
+        try:
+            field = fields[fieldIndex]
+        except IndexError:
+            break
+
+        index, modifiers, count = findModifiers(field)
+
+        if index == -1:
+            # This field has no modifiers. Check for them at the very start
+            # of the next field. This allows a command and its modifiers to
+            # be separated by whitespace, even when line splitting is on.
+            try:
+                nextField = fields[fieldIndex + 1]
+            except IndexError:
+                index = -1
+            else:
+                index, nextModifiers, nextCount = findModifiers(nextField)
+            if index == 0:
+                modifiers = nextModifiers
+                count = nextCount
+                fieldIndex += 1
+            command = field
+        else:
+            command = field[:index].strip()
+
+        if command and command.startswith('#'):
+            # This is a comment. Return an empty command and break.
+            yield '', modifiers, count
+            break
+
+        yield command, modifiers, count
+
+        fieldIndex += 1
+
+
+def xsplitInput(line, splitLines=True, separator=None):
     """Split an input line into a command and modifiers
 
     @param line: A C{str} input line.
@@ -63,22 +110,28 @@ def splitInput(line, splitLines=True, separator=None):
         If the input line is empty or is a comment (i.e., starts with #), all
         three returned values are C{None}.
     """
-    index, modifiers, count = findModifiers(line)
-    commands = (line if index == -1 else line[:index]).strip()
-
-    if not commands or commands.startswith('#'):
-        # This is an empty input line or a comment.
-        yield (None, None, None)
+    if splitLines:
+        commands = line.strip().split(separator)
     else:
-        if splitLines:
-            if modifiers.noSplit:
-                yield (commands, modifiers, count)
-            else:
-                for command in commands.split(separator):
-                    yield command.strip(), modifiers, count
+        commands = [line.strip()]
+
+    for command in commands:
+        index, modifiers, count = findModifiers(command)
+        command = (command if index == -1 else command[:index]).strip()
+
+        if not command or command.startswith('#'):
+            # This is an empty input line or a comment.
+            yield (None, None, None)
         else:
-            if modifiers.split:
-                for command in commands.split(separator):
-                    yield command.strip(), modifiers, count
+            if splitLines:
+                if modifiers.noSplit:
+                    yield (commands, modifiers, count)
+                else:
+                    for command in commands.split(separator):
+                        yield command.strip(), modifiers, count
             else:
-                yield (commands, modifiers, count)
+                if modifiers.split:
+                    for command in commands.split(separator):
+                        yield command.strip(), modifiers, count
+                else:
+                    yield (commands, modifiers, count)
