@@ -17,7 +17,7 @@ except ImportError:
     else:
         raise
 
-from rpnpy.functions import apply, reduce
+from rpnpy.functions import addSpecialFunctions
 from rpnpy.inspect import countArgs
 from rpnpy.io import findCommands
 from rpnpy.errors import UnknownModifiersError, IncompatibleModifiersError
@@ -54,7 +54,7 @@ class Variable:
 
 class Calculator:
 
-    OVERRIDES = set('builtins.list functools.reduce'.split())
+    OVERRIDES = set('builtins.list builtins.quit functools.reduce'.split())
 
     def __init__(self, splitLines=True, separator=None, outfp=sys.stdout,
                  errfp=sys.stderr, debug=False):
@@ -70,7 +70,7 @@ class Calculator:
         self._variables = {}
 
         self.addSpecialCases()
-        self.addSpecial()
+        addSpecialFunctions(self)
         for module in math, operator, builtins, functools, decimal:
             self.importCallables(module)
         self.addAbbrevs()
@@ -91,6 +91,47 @@ class Calculator:
 
     def pprint(self, *args, **kw):
         pprint(*args, stream=self._outfp, **kw)
+
+    def batch(self, fp, print_=False):
+        """Non-interactively read and execute commands from a file.
+
+        @param fp: An iterator to read commands from.
+        @param print_: If C{True}, print the stack after all commands are run.
+        """
+        for line in fp:
+            try:
+                self.execute(line)
+            except EOFError:
+                break
+        if print_ and self.stack:
+            self.printStack(-1 if len(self) == 1 else None)
+
+    def repl(self, prompt):
+        """Interactive read-eval-print loop.
+
+        @param prompt: The C{str} prompt to print at the start of each line.
+        """
+        while True:
+            try:
+                try:
+                    line = input(prompt)
+                except ValueError as e:
+                    if str(e) == 'I/O operation on closed file.':
+                        # The user may have typed 'quit()'.
+                        self.report()
+                        break
+                    else:
+                        raise
+                else:
+                    self.execute(line)
+            except EOFError:
+                break
+            except KeyboardInterrupt:
+                self.report()
+                break
+
+    def registerSpecial(self, func, name):
+        self._special[name] = func
 
     def register(self, func, name=None, nArgs=None, moduleName=None):
         name = name or func.__name__
@@ -137,13 +178,6 @@ class Calculator:
                     else:
                         self.report(shortName, 'already known')
 
-    def addSpecial(self):
-        """
-        Add functions from rpnpy.functions
-        """
-        for func in (apply, reduce):
-            self._special[func.__name__] = func
-
     def addSpecialCases(self):
         """
         Add argument counts for functions that cannot have their signatures
@@ -176,10 +210,10 @@ class Calculator:
     def addConstants(self):
         """Add some constants (well, constant in theory) from math"""
         constants = [
-                ('e', math.e),
-                ('inf', math.inf),
-                ('nan', math.nan),
-                ('pi', math.pi),
+            ('e', math.e),
+            ('inf', math.inf),
+            ('nan', math.nan),
+            ('pi', math.pi)
         ]
 
         if sys.version_info > (3, 5):
@@ -252,10 +286,10 @@ class Calculator:
             of the stack to print.
         """
         if n is None:
-            pprint(self.stack)
+            self.pprint(self.stack)
         else:
             try:
-                pprint(self.stack[n])
+                self.pprint(self.stack[n])
             except IndexError:
                 self.err(
                     'Cannot print stack item %d (stack has only %d item%s)' %
@@ -267,7 +301,7 @@ class Calculator:
         self._previousVariables = self._variables.copy()
 
     def _finalize(self, result, modifiers, nPop=0, extend=False,
-                  noValue=False):
+                  repeat=1, noValue=False):
         """Process the final result of executing a command.
 
         @param result: A C{list} or C{tuple} of results to add to the stack.
@@ -275,6 +309,7 @@ class Calculator:
         @param nPop: An C{int} number of stack items to pop.
         @param extend: If C{True}, use extend to add items to the end of the
             stack, else use append.
+        @param repeat: An C{int} number of times to add result to the stack.
         @param noValue: If C{True}, do not push any value (i.e., ignore
             C{result}).
         """
@@ -285,42 +320,50 @@ class Calculator:
                 self.stack[-nPop:] = []
 
         if modifiers.iterate:
-            if modifiers.print:
-                for i in result:
-                    self.pprint(i)
-            elif not (modifiers.preserveStack or noValue):
-                self.stack.extend(list(result))
-        else:
-            if modifiers.print:
-                self.pprint(result)
-            elif not (modifiers.preserveStack or noValue):
-                if extend:
-                    self.stack.extend(result)
-                else:
-                    self.stack.append(result)
+            try:
+                iterator = iter(result)
+            except TypeError:
+                pass
+            else:
+                print('b4', result)
+                result = list(iterator)
+                print('af', result)
+
+        if not (modifiers.preserveStack or noValue):
+            add = self.stack.extend if extend else self.stack.append
+            for _ in range(repeat):
+                add(result)
+
+        if modifiers.print:
+            self.printStack(-1)
 
     def execute(self, line):
         """
-        Execute a line of commands.
+        Execute a line of commands. Stop executing commands on any error.
 
         @param line: A C{str} command line to run.
+        @return: A C{bool} indicating if all commands ran without error.
         """
+        self.debug('Executing', line[:-1])
         commands = findCommands(line, self._splitLines, self._separator)
+        result = True
 
-        try:
-            while True:
-                try:
-                    command, modifiers, count = next(commands)
-                except UnknownModifiersError as e:
-                    self.err('Unknown modifiers: %s' % ', '.join(e.args))
-                    return
-                except IncompatibleModifiersError as e:
-                    self.err('Incompatible modifiers: %s' % e.args[0])
-                    return
-                else:
-                    self._executeOneCommand(command, modifiers, count)
-        except StopIteration:
-            return
+        while True:
+            try:
+                command, modifiers, count = next(commands)
+            except UnknownModifiersError as e:
+                self.err('Unknown modifiers: %s' % ', '.join(e.args))
+                return False
+            except IncompatibleModifiersError as e:
+                self.err('Incompatible modifiers: %s' % e.args[0])
+                return False
+            except StopIteration:
+                break
+            else:
+                if not self._executeOneCommand(command, modifiers, count):
+                    result = False
+
+        return result
 
     def _executeOneCommand(self, command, modifiers, count):
         """
@@ -329,15 +372,29 @@ class Calculator:
         @param command: A C{str} command to run.
         @param modifiers: A C{Modifiers} instance.
         @param count: An C{int} count, or C{None} if no count was given.
+        @return: A C{bool} indicating if the command ran without error.
         """
         if modifiers.split:
+            if not self._splitLines:
+                self.debug('Line splitting switched ON')
             self._splitLines = True
         elif modifiers.noSplit:
+            if self._splitLines:
+                self.debug('Line splitting switched OFF')
             self._splitLines = False
+
+        if modifiers.all:
+            stackLen = len(self)
+            if count is not None and count != stackLen:
+                self.err(
+                    '* modifier conflicts with explicit count %d '
+                    '(stack has %d item%s)' %
+                    (count, stackLen, '' if stackLen == 1 else 's'))
+                return False
 
         if not command:
             self.debug('Empty command')
-            return
+            return True
 
         done = self._tryFunction(command, modifiers, count)
 
@@ -347,17 +404,19 @@ class Calculator:
         if done is False:
             done = self._trySpecial(command, modifiers, count)
 
+        if done is False:
+            done = self._tryEval(command, modifiers, count)
+
         if done is False and count is not None:
             self.err('Modifier count %d will not be used' % count)
-
-        if done is False:
-            done = self._tryEval(command, modifiers)
 
         if done is False:
             done = self._tryExec(command)
 
         if done is False:
-            self.err('No action taken on input %r' % command)
+            return False
+
+        return True
 
     def _tryFunction(self, command, modifiers, count):
         if modifiers.forceCommand:
@@ -378,11 +437,7 @@ class Calculator:
         if count is None:
             nArgs = len(self) if modifiers.all else function.nArgs
         else:
-            nArgs = int(count)
-            if modifiers.all:
-                if len(self) != nArgs:
-                    self.err('/modifiers cannot have both a count and a *')
-                    return
+            nArgs = count
 
         if len(self) < nArgs:
             self.err(
@@ -403,7 +458,7 @@ class Calculator:
             self.debug('Calling %s with %r' % (function.name, tuple(args)))
             try:
                 result = function.func(*args)
-            except Exception as e:
+            except BaseException as e:
                 self.err('Exception running %s(%s): %s' %
                          (function.name, ', '.join(map(str, args)), e))
             else:
@@ -421,113 +476,33 @@ class Calculator:
             return False
 
     def _trySpecial(self, command, modifiers, count):
-        lcommand = command.lower()
-
-        if lcommand in self._special:
+        if command in self._special:
             try:
-                self._special[lcommand](self, modifiers, count)
-            except Exception as e:
+                self._special[command](self, modifiers, count)
+            except EOFError:
+                raise
+            except BaseException as e:
                 self.err('Could not run special command %r: %s' % (command, e))
-        elif lcommand == 'quit' or lcommand == 'q':
-            raise EOFError()
-        elif lcommand == 'pop':
-            nArgs = ((len(self) if modifiers.all else 1) if count is None
-                     else count)
-            if len(self) >= nArgs:
-                value = self.stack[-1] if nArgs == 1 else self.stack[-nArgs:]
-                self._finalize(value, modifiers, nPop=nArgs, noValue=True)
-            else:
-                self.err('Cannot pop %d item%s (stack length is %d)' %
-                         (nArgs, '' if nArgs == 1 else 's', len(self)))
-        elif lcommand == 'swap':
-            if len(self) > 1:
-                self._finalize(reversed(self.stack[-2:]), modifiers=modifiers,
-                               nPop=2, extend=True)
-            else:
-                self.err('Cannot swap (stack needs 2 items)')
-        elif lcommand == 'list':
-            if modifiers.push:
-                self._finalize(list, modifiers=modifiers)
-            elif self.stack:
-                if count is None:
-                    self._finalize(list(self.stack[-1]), modifiers=modifiers,
-                                   nPop=1, extend=True)
-                elif modifiers.all:
-                    self._finalize(list(self.stack), modifiers=modifiers,
-                                   nPop=len(self), extend=True)
-                else:
-                    if len(self) >= count:
-                        self._finalize(list(self.stack[-count:]), nPop=count,
-                                       modifiers=modifiers, extend=True)
-                    else:
-                        self.err('Cannot list %d items (stack length is %d)' %
-                                 (count, len(self)))
-            else:
-                self.err('Cannot run list (stack is empty)')
-        elif lcommand == 'functions':
-            for name, func in sorted(self._functions.items()):
-                self.report(name, func)
-        elif lcommand == 'stack' or lcommand == 's' or lcommand == 'f':
-            self.printStack()
-        elif lcommand == 'variables' or lcommand == 'v':
-            for name, value in sorted(self._variables.items()):
-                self.report('%s: %r' % (name, value))
-        elif lcommand == 'clear' or lcommand == 'c':
-            if self.stack:
-                if modifiers.preserveStack:
-                    self.err('The /= modifier makes no sense with %s' %
-                             command)
-                else:
-                    self._finalize(None, nPop=len(self), modifiers=modifiers,
-                                   noValue=True)
-        elif lcommand == 'dup' or lcommand == 'd':
-            if self.stack:
-                if modifiers.preserveStack:
-                    self.err('The /= modifier makes no sense with %s' %
-                             command)
-                else:
-                    self._finalize(self.stack[-1], modifiers)
-            else:
-                self.err('Cannot duplicate (stack is empty)')
-        elif lcommand == 'undo' or lcommand == 'u':
-            if self._previousStack is None:
-                self.err('Nothing to undo')
-            elif modifiers.preserveStack:
-                self.err('The /= modifier makes no sense with %s' %
-                         command)
-            elif modifiers.print:
-                self.err('The /p modifier makes no sense with %s' %
-                         command)
-            else:
-                self.stack = self._previousStack.copy()
-                self._variables = self._previousVariables.copy()
-        elif lcommand == 'print' or lcommand == 'p':
-            self.printStack(-1)
-        elif lcommand == 'none':
-            self._finalize(None, modifiers)
-        elif lcommand == 'true':
-            self._finalize(True, modifiers)
-        elif lcommand == 'false':
-            self._finalize(False, modifiers)
         elif modifiers.forceCommand:
             self.err('Unknown command: %s' % command)
         else:
             return False
 
-    def _tryEval(self, command, modifiers):
+    def _tryEval(self, command, modifiers, count):
         try:
             value = eval(command, globals(), self._variables)
-        except Exception as e:
+        except BaseException as e:
             self.debug('Could not eval(%r): %s' % (command, e))
             return False
         else:
             self.debug('eval %s worked: %r' % (command, value))
-            self._finalize(value, modifiers)
+            count = 1 if count is None else count
+            self._finalize(value, modifiers=modifiers, repeat=count)
 
     def _tryExec(self, command):
         try:
             exec(command, globals(), self._variables)
-        except Exception as e:
+        except BaseException as e:
             self.err('Could not exec(%r): %s' % (command, e))
             return False
         else:

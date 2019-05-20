@@ -11,6 +11,16 @@ from rpnpy import Calculator
 
 
 def setupReadline():
+    """Initialize the readline library and command history.
+
+    @return: A C{bool} to indicate whether standard input is a terminal
+        (and therefore interactive).
+    """
+    if not os.isatty(0):
+        # Standard input is closed or is a pipe etc. So there's no user
+        # typing at us, and so no point in setting up readline.
+        return False
+
     # Readline code from https://docs.python.org/3.7/library/readline.html
     histfile = os.path.join(os.path.expanduser('~'), '.pycalc_history')
 
@@ -38,18 +48,26 @@ def setupReadline():
 
         atexit.register(saveHistory, historyLen, histfile)
 
+    return True
+
 
 def parseArgs():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description=(
             'An RPN calculator for Python. Reads commands from standard input '
-            'or interactively with a read-eval-print loop and (optionally) '
-            'writes the final stack to standard output.'))
+            'and/or files or interactively with a read-eval-print loop and '
+            '(optionally) writes the final stack to standard output.'))
 
     parser.add_argument(
         '--prompt', default='--> ',
         help='The prompt to print at the start of each line when interactive.')
+
+    parser.add_argument(
+        'files', nargs='*',
+        help=('Files to read input from. If you use this option and you also '
+              'want standard input to be read at some point, use "-" as a '
+              'name in the list of file names.'))
 
     parser.add_argument(
         '--separator',
@@ -77,38 +95,6 @@ def parseArgs():
     return parser.parse_args()
 
 
-def stdin(calc, print_):
-    """
-    Read and execute commands from stdin.
-
-    @param calc: A C{Calculator} instance.
-    @param print_: If C{True}, print the stack after all commands are run.
-    """
-    for line in sys.stdin:
-        try:
-            calc.execute(line)
-        except EOFError:
-            break
-    if print_ and calc.stack:
-        calc.printStack(-1 if len(calc) == 1 else None)
-
-
-def repl(calc, prompt):
-    """
-    Interactive read-eval-print loop.
-
-    @param calc: A C{Calculator} instance.
-    @param prompt: The C{str} prompt to print at the start of each line.
-    """
-    while True:
-        try:
-            calc.execute(input(prompt))
-        except KeyboardInterrupt:
-            print()
-        except EOFError:
-            break
-
-
 if __name__ == '__main__':
     args = parseArgs()
 
@@ -116,11 +102,19 @@ if __name__ == '__main__':
         from rpnpy import __version__
         print(__version__)
     else:
-        setupReadline()
         calc = Calculator(splitLines=args.splitLines, separator=args.separator,
                           debug=args.debug)
 
-        if os.isatty(0):
-            repl(calc, args.prompt)
+        interactive = setupReadline()
+
+        if args.files:
+            for filename in args.files:
+                if filename == '-':
+                    calc.repl(args.prompt)
+                else:
+                    with open(filename) as fp:
+                        calc.batch(fp, False)
+        elif interactive:
+            calc.repl(args.prompt)
         else:
-            stdin(calc, args.print)
+            calc.batch(sys.stdin, args.print)

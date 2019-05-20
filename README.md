@@ -81,32 +81,44 @@ $ echo 'pi 10 10 * *' | rpn.py
 314.1592653589793
 
 # Same thing, but use 'dup' to duplicate the 10, and 'reduce' to multiply.
-# The :! modifier tells rpn.py to push the '*' function onto the stack
-# instead of immediately running it.
-$ rpn.py
---> pi 10 dup
---> * :!
---> reduce
---> p
+
+# Equivalently, using reduce to do the multiplying.  The ':!' modifier
+# tells rpn.py to push the '*' function onto the stack instead of
+# immediately running it.
+echo '[pi,10,10] *:! reduce' | rpn.py
+314.1592653589793
+
+# Same thing, but push the numbers individually onto the stack, then the
+# ':3' tells reduce to iterate over three stack items. Use 'mul' as an
+# alternative to '*'.
+echo 'pi 10 10 mul:! reduce:3' | rpn.py
+314.1592653589793
+
+# Equivalently (the ':*' tells reduce to use the whole stack). The 10 is
+# duplicated using 'dup'.
+echo 'pi 10 dup *:! reduce:*' | rpn.py
 314.1592653589793
 ```
 
 ```sh
-# REPL usage
-$ rpn.py
---> 4 5 6
+# REPL usage, with automatic line-splitting off (so one command per line)
+$ rpn.py --noSplit
+--> 4
+--> 5
+--> 6
 --> stack
 [4, 5, 6]
---> f
+--> f  # f is an alias for 'stack', as in dc.
 [4, 5, 6]
---> clear
+--> clear  # Or just 'c'
 --> f
 []
---> from numpy import log2 :n
+--> from numpy import log2
 --> 32
---> log2 :p
+--> log2
+--> p
 5.0
---> {'a':6, 'b':10, 'c':15} :n
+--> {'a':6, 'b':10, 'c':15}
 --> len
 --> p
 3
@@ -176,35 +188,45 @@ Could not exec('3]'): invalid syntax (<string>, line 1)
 No action taken on input '3]'
 ```
 
-this can be avoided with the `:n` (no split) modifier:
+this can be avoided with the `:n` (no split) modifier, but note that the
+modifier will only affect then next (and subsequent) lines. You can just
+give an empty command with the ':n' modifier to toggle to no line
+splitting:
 
 ```sh
 $ rpn.py
---> [1, 2, 3] :n
+--> :n  # no splitting of subsequent lines
+--> [1, 2, 3]
 ```
 
-If you want `rpn.py` not to split lines into multiple commands at all, run
-with the `--noSplit` command-line option. You can then use `:s` (split) if
-you instead want to write an input line that should be split. Hence:
+If you want `rpn.py` not to split lines into multiple commands by default,
+run with the `--noSplit` command-line option. You can then use `:s` (split)
+if you instead want to switch to writing input lines that should be
+split. Hence:
 
 ```sh
 $ rpn.py --noSplit
 --> [1, 2, 3]
---> 4 5 :s
+--> :s  # split subsequent lines
+--> 4 5
 ```
 
-the above will first push the list `[1, 2, 3]` onto the stack, and then `4`
-and `5` will be split (on whitespace), treated as two separate commands,
-and result in two more values being pushed onto the stack.
+the above will first push the list `[1, 2, 3]` onto the stack, then toggle
+to line splitting, and then `4` and `5` will be split (on whitespace),
+treated as two separate commands, and result in two more values being
+pushed onto the stack.
 
 #### Whitespace
 
 Leading and trailing whitespace in the command is ignored. Whitespace
-anywhere in the modifiers is ignored.
+anywhere in the modifiers is ignored (unless line splitting is on, in which
+case you will get errors).
 
 ## Operation via standard input
 
-When reading from standard input, lines will be split on whitespace and
+The default 
+
+When reading from standard input, the default lines will be split on whitespace and
 each field is treated as a separate command. This allows for simple
 command-line usage such as
 
@@ -272,3 +294,10 @@ you can change the prompt using `--prompt` on the command line.
 There are two kinds of commands: normal and special. 
 
 ## Modifiers
+
+## History
+
+`rpn.py` makes use of Python's
+[readline](https://docs.python.org/3.7/library/readline.html) library to 
+
+.pycalc_history
