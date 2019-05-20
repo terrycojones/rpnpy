@@ -1,3 +1,7 @@
+# 1.0.14 May 21, 2019
+
+Updated README examples, added more debug printing.
+
 # 1.0.13 May 21, 2019
 
 Make `apply` examine the function it is about to run for its number of

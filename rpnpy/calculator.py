@@ -87,7 +87,7 @@ class Calculator:
 
     def debug(self, *args, **kw):
         if self._debug:
-            print(*args, file=self._errfp, **kw)
+            print('      #', *args, file=self._errfp, **kw)
 
     def pprint(self, *args, **kw):
         pprint(*args, stream=self._outfp, **kw)
@@ -325,9 +325,7 @@ class Calculator:
             except TypeError:
                 pass
             else:
-                print('b4', result)
                 result = list(iterator)
-                print('af', result)
 
         if not (modifiers.preserveStack or noValue):
             add = self.stack.extend if extend else self.stack.append
@@ -344,7 +342,6 @@ class Calculator:
         @param line: A C{str} command line to run.
         @return: A C{bool} indicating if all commands ran without error.
         """
-        self.debug('Executing', line[:-1])
         commands = findCommands(line, self._splitLines, self._separator)
         result = True
 
@@ -414,6 +411,7 @@ class Calculator:
             done = self._tryExec(command)
 
         if done is False:
+            self.debug('Could not figure out how to run %r' % command)
             return False
 
         return True
@@ -425,7 +423,7 @@ class Calculator:
         try:
             function = self._functions[command]
         except KeyError:
-            self.debug('%s is not a known function' % (command,))
+            self.debug('%r is not a known function' % (command,))
             return False
 
         self.debug('Found function %r' % command)
@@ -469,10 +467,13 @@ class Calculator:
             return False
 
         if command in self._variables:
+            self.debug('%r is a variable (value %r)' %
+                       (command, self._variables[command]))
             self._finalize(
                 Variable(command, self._variables) if modifiers.push
                 else self._variables[command], modifiers)
         else:
+            self.debug('%r is not a variable' % command)
             return False
 
     def _trySpecial(self, command, modifiers, count):
@@ -506,4 +507,4 @@ class Calculator:
             self.err('Could not exec(%r): %s' % (command, e))
             return False
         else:
-            self.debug('exec worked.')
+            self.debug('exec(%r) worked.' % command)
