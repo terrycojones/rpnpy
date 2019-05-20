@@ -1,5 +1,7 @@
 import functools
 
+from rpnpy.inspect import countArgs
+
 # IMPORTANT
 #
 # If you add a special functions here:
@@ -140,8 +142,13 @@ def apply(calc, modifiers, count):
     @param modifiers: A C{Modifiers} instance.
     @param count: An C{int} count of the number of arguments to pass.
     """
+    func = calc.stack[-1]
+    if not callable(func):
+        calc.err('Top stack item (%r) is not callable' % func)
+        return
+
     if count is None:
-        count = len(calc) - 1 if modifiers.all else 1
+        count = len(calc) - 1 if modifiers.all else countArgs(func, 1)
 
     nargsAvail = len(calc) - 1
     if nargsAvail < count:
@@ -149,11 +156,6 @@ def apply(calc, modifiers, count):
                  '(stack has only %d item%s available)' %
                  (count, '' if count == 1 else 's',
                   nargsAvail, '' if nargsAvail == 1 else 's'))
-        return
-
-    func = calc.stack[-1]
-    if not callable(func):
-        calc.err('Top stack item (%r) is not callable' % func)
         return
 
     args = calc.stack[-(count + 1):-1]

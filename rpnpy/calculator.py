@@ -140,7 +140,7 @@ class Calculator:
                        'function named %r.' % name)
 
         moduleName = moduleName or 'calculator-registered-method'
-        nArgs = countArgs(func) if nArgs is None else nArgs
+        nArgs = countArgs(func, 1) if nArgs is None else nArgs
         self._functions[name] = Function(moduleName, name, func, nArgs)
 
     def addAbbrevs(self):

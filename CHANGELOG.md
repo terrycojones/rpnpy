@@ -1,3 +1,12 @@
+# 1.0.13 May 21, 2019
+
+Make `apply` examine the function it is about to run for its number of
+arguments.
+
+## 1.0.12 May 20, 2019
+
+Tons of small improvements.
+
 ## 1.0.11 May 20, 2019
 
 Updated README.md

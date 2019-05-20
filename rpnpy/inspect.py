@@ -1,11 +1,11 @@
 import inspect
 
 
-def countArgs(func):
+def countArgs(func, default=None):
     try:
         sig = inspect.signature(func)
     except ValueError:
-        return None
+        return default
     else:
         return len([
             p for p in sig.parameters.values() if

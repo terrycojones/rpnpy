@@ -22,3 +22,8 @@ class TestCountArgs(TestCase):
     def testLog(self):
         "The signature of math.log can't be inspected (at least in Python 3.7)"
         self.assertEqual(None, countArgs(log))
+
+    def testLogWithDefault(self):
+        """The signature of math.log can't be inspected (at least in Python
+           3.7). Pass a default value."""
+        self.assertEqual(3, countArgs(log, 3))
