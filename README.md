@@ -294,7 +294,24 @@ you can change the prompt using `--prompt` on the command line.
 
 There are two kinds of commands: normal and special. 
 
+### Special commands
+
+    apply, clear, dup, functions, list, pop, print, quit, reduce, stack,
+    swap, undo, variables
+
 ## Modifiers
+
+```
+    *: all
+    c: forceCommand
+    D: debug
+    i: iterate
+    n: noSplit
+    =: preserveStack
+    p: print
+    !: push
+    s: split
+```
 
 ## History
 

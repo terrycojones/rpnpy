@@ -11,8 +11,8 @@ MODIFIERS = {
     'n': 'noSplit',
     '=': 'preserveStack',
     'p': 'print',
-    's': 'split',
     '!': 'push',
+    's': 'split',
 }
 
 Modifiers = namedtuple(
