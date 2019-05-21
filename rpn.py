@@ -92,6 +92,12 @@ def parseArgs():
         help=('If given, do not print the stack after processing all commands '
               'from standard input.'))
 
+    parser.add_argument(
+        '--stdin', action='store_true', default=False,
+        help=('If the arguments on the command line are passed as input to '
+              'the calculator, you can use this option to also read commands '
+              'from standard input once the command line has been executed.'))
+
     return parser.parse_args()
 
 
@@ -108,12 +114,20 @@ if __name__ == '__main__':
         interactive = setupReadline()
 
         if args.files:
-            for filename in args.files:
-                if filename == '-':
+            if all(os.path.exists(f) or f == '-' for f in args.files):
+                # All arguments are existing files (or are '-', for stdin).
+                for filename in args.files:
+                    if filename == '-':
+                        calc.repl(args.prompt)
+                    else:
+                        with open(filename) as fp:
+                            calc.batch(fp, False)
+            else:
+                # Execute the command line as a set of commands, following
+                # great suggestion by David Pattinson.
+                calc.batch(' '.join(args.files), args.print)
+                if args.stdin:
                     calc.repl(args.prompt)
-                else:
-                    with open(filename) as fp:
-                        calc.batch(fp, False)
         elif interactive:
             calc.repl(args.prompt)
         else:

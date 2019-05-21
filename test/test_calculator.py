@@ -1,10 +1,66 @@
 import sys
 from unittest import TestCase
 from io import StringIO
+from decimal import Decimal
 
 import operator
 
 from rpnpy import Calculator
+
+
+class TestDebug(TestCase):
+    "Test setting/toggling debug output"
+
+    def testDebugOffByDefault(self):
+        "debugging must be off by default"
+        c = Calculator()
+        self.assertFalse(c._debug)
+
+    def testStartWithDebugOn(self):
+        "debugging must be settable via __init__"
+        c = Calculator(debug=True)
+        self.assertTrue(c._debug)
+
+    def testDebugOn(self):
+        "It must be possible to turn debugging on"
+        c = Calculator()
+        c.toggleDebug(True)
+        self.assertTrue(c._debug)
+
+    def testDebugOff(self):
+        "It must be possible to turn debugging off"
+        c = Calculator()
+        c.toggleDebug(False)
+        self.assertFalse(c._debug)
+
+    def testToggleDebugOn(self):
+        "It must be possible to toggle debugging on"
+        c = Calculator()
+        # Double-check it starts out off (don't rely on above test).
+        self.assertFalse(c._debug)
+        c.toggleDebug()
+        self.assertTrue(c._debug)
+
+    def testToggleDebugOff(self):
+        "It must be possible to toggle debugging on"
+        c = Calculator()
+        # Double-check it starts out off (don't rely on above test).
+        c.toggleDebug()
+        self.assertTrue(c._debug)
+        c.toggleDebug()
+        self.assertFalse(c._debug)
+
+    def testDebugOnViaModifier(self):
+        "It must be possible to turn debugging on using a modifier"
+        c = Calculator()
+        c.execute(':D')
+        self.assertTrue(c._debug)
+
+    def testDebugOffViaModifier(self):
+        "It must be possible to turn debugging off using a modifier"
+        c = Calculator(debug=True)
+        c.execute(':D')
+        self.assertFalse(c._debug)
 
 
 class TestCalculator(TestCase):
@@ -286,57 +342,37 @@ class TestCalculator(TestCase):
                  '(stack has 3 items)\n')
         self.assertEqual(error, errfp.getvalue())
 
-
-class TestDebug(TestCase):
-    "Test setting/toggling debug output"
-
-    def testDebugOffByDefault(self):
-        "debugging must be off by default"
+    def testFloat(self):
+        "It must be possible to convert something to a floa"
         c = Calculator()
-        self.assertFalse(c._debug)
+        c.execute('4 float')
+        (result,) = c.stack
+        self.assertEqual(4.0, result)
 
-    def testStartWithDebugOn(self):
-        "debugging must be settable via __init__"
-        c = Calculator(debug=True)
-        self.assertTrue(c._debug)
 
-    def testDebugOn(self):
-        "It must be possible to turn debugging on"
+class TestDecimal(TestCase):
+    "Test working with Decimal instances"
+
+    def testPush(self):
+        "It must be possible to push Decimal by itself"
         c = Calculator()
-        c.toggleDebug(True)
-        self.assertTrue(c._debug)
+        c.execute('Decimal :!')
+        (result,) = c.stack
+        self.assertIs(Decimal, result)
 
-    def testDebugOff(self):
-        "It must be possible to turn debugging off"
+    def testPushValue(self):
+        "It must be possible to push a Decimal value"
         c = Calculator()
-        c.toggleDebug(False)
-        self.assertFalse(c._debug)
+        c.execute('Decimal(4)')
+        (result,) = c.stack
+        self.assertEqual(Decimal(4), result)
 
-    def testToggleDebugOn(self):
-        "It must be possible to toggle debugging on"
+    def testArithmetic(self):
+        "It must be possible to operate on Decimals"
         c = Calculator()
-        # Double-check it starts out off (don't rely on above test).
-        self.assertFalse(c._debug)
-        c.toggleDebug()
-        self.assertTrue(c._debug)
-
-    def testToggleDebugOff(self):
-        "It must be possible to toggle debugging on"
-        c = Calculator()
-        # Double-check it starts out off (don't rely on above test).
-        c.toggleDebug()
-        self.assertTrue(c._debug)
-        c.toggleDebug()
-        self.assertFalse(c._debug)
-
-    def testDebugOnViaModifier(self):
-        "It must be possible to turn debugging on using a modifier"
-        c = Calculator()
-        c.execute(':D')
-        self.assertTrue(c._debug)
-
-    def testDebugOffViaModifier(self):
-        "It must be possible to turn debugging off using a modifier"
-        c = Calculator(debug=True)
-        c.execute(':D')
-        self.assertFalse(c._debug)
+        c.execute('Decimal(4) Decimal(6) +')
+        (result,) = c.stack
+        self.assertEqual(Decimal(10), result)
+        c.execute('int')
+        (result,) = c.stack
+        self.assertEqual(10, result)

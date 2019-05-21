@@ -1,3 +1,9 @@
+# 1.0.18 May 21, 2019
+
+Make `rpn.py` execute the command line args if they are not all existing
+files (or '-' to indicate stdin).  Added `--stdin` option to go with this
+so that `stdin` is read after the command line is executed.
+
 # 1.0.17 May 21, 2019
 
 Improved error output. Updated README with function examples.

@@ -1,11 +1,12 @@
-# rpnpy - A reverse-Polish notation calculator for Python
+# rpn.py - A reverse-Polish notation calculator for Python
 
 Here is `rpn.py`, a script implementing a
 [reverse-Polish notation](https://en.wikipedia.org/wiki/Reverse_Polish_notation)
 (RPN) calculator for Python.
 
-As well as providing for traditional numeric calculator operations, you can
-put Python objects and functions onto the stack and operate on them.
+As well as providing for traditional numeric calculator operations, it
+provides easy access to many Python functions, and you can put Python
+objects and functions onto the stack and operate on them.
 
 I wrote this for 3 reasons:
 
@@ -16,16 +17,16 @@ I wrote this for 3 reasons:
     1978, the Casio was like a toy compared to the HP-41C. I owned a 41C, a
     41CV, and then a 41CX, had a bunch of memory expansion packs, several
     other add-on packs (e.g., stats), a card reader/writer, and got it
-    overclocked by some hardware hacker friends. It was an amazing
-    machine. I still have one but don't use it.
+    overclocked by some hardware hacker friends. It was an amazing machine.
+    I still have one.
 1.  I have been using the [UNIX](https://en.wikipedia.org/wiki/Unix)
     [dc](https://en.wikipedia.org/wiki/Dc_(computer_program)) (desk
     calculator) command on almost a daily basis since 1983 or so. `dc` is
     ancient (in UNIX terms), predating even
     [the C programming language](https://en.wikipedia.org/wiki/C_(programming_language)). `dc`
-    provides a minimalist and rather cryptic RPN calculator. You can program
-    it, if you have a taste for mystery.  Here's a program I wrote in about
-    1984 to factor numbers:
+    provides a minimalist and rather cryptic RPN calculator. You can even
+    program it, if you have a taste for mystery.  Here's a program I wrote
+    in 1984 to factor numbers:
 
         [[neither]plsx]sn[c2pla2/sallx]se[ladv1+sm0=nla1=ncla2=pla2%0=elfx]sl
         [ldlm<pclald%0=cld2+sdlfx]sf[lap[is prime.]plsx]sp[ldplald/salfx]sc
@@ -345,3 +346,13 @@ There are two kinds of commands: normal and special.
 allow familiar/comfortable command line editing. Your input history will be
 saved to `~/.pycalc_history` if your version of readline has the
 `append_history_file` command (present only in Python >= 3.6)?
+
+## Todo
+
+* Add direct access to functionality from [numpy](https://www.numpy.org/).
+* Read start-up file of user-defined functions.
+
+## Thanks
+
+To [David Pattinson (@davipatti)](https://github.com/davipatti) for various
+nice ideas, including executing the command line arguments.

@@ -145,7 +145,7 @@ class Calculator:
 
     def addAbbrevs(self):
         for longName, shortNames in (
-                ('decimal.Decimal', ('Decimal',)),
+                # ('decimal.Decimal', ('Decimal',)),
                 ('math.log', ('log',)),
                 ('operator.attrgetter', ('attrgetter',)),
                 ('operator.itemgetter', ('itemgetter',)),
@@ -158,6 +158,7 @@ class Calculator:
                 ('operator.truediv', ('/', 'div')),
                 ('builtins.bool', ('bool',)),
                 ('builtins.int', ('int',)),
+                # ('builtins.float', ('float',)),
                 ('builtins.map', ('map',)),
                 ('builtins.max', ('max',)),
                 ('builtins.min', ('min',)),
@@ -187,6 +188,7 @@ class Calculator:
                 (math, math.log, 1),
                 (builtins, builtins.bool, 1),
                 (builtins, builtins.int, 1),
+                (builtins, builtins.float, 1),
                 (builtins, builtins.map, 2),
                 (builtins, builtins.max, 1),
                 (builtins, builtins.min, 1),
@@ -252,17 +254,16 @@ class Calculator:
                 continue
 
             if path in self._functions:
-                if path != 'decimal.Decimal':
+                if path not in ('decimal.Decimal', 'builtins.float'):
                     self.err('Function %r already exists' % path)
-                continue
-
-            # Add the function to our functions dict along with a default
-            # number of positional parameters it expects. This allows the
-            # user to call it and have the arguments taken from the stack
-            # (the number of arguments used can always be specified on the
-            # command line (e.g., :3)
-            exec('self._functions["%s"] = Function("%s", "%s", %s, %d)' %
-                 (path, moduleName, name, path, nArgs))
+            else:
+                # Add the function to our functions dict along with a
+                # default number of positional parameters it expects. This
+                # allows the user to call it and have the arguments taken
+                # from the stack (the number of arguments used can always
+                # be specified on the command line (e.g., :3)
+                exec('self._functions["%s"] = Function("%s", "%s", %s, %d)' %
+                     (path, moduleName, name, path, nArgs))
 
             # Import the function by name to allow the user to use it in a
             # command with an explicit argument, instead of applying it to
@@ -430,14 +431,19 @@ class Calculator:
             if errs:
                 errors.extend(errs)
 
-        for err in errors:
-            self.err(err)
-
         if done is False:
-            self.debug('Could not figure out how to run %r' % command)
-            return False
+            self.report('Could not find a way to execute %r' % command)
+            for err in errors:
+                self.err(err)
+        else:
+            # The command was run successfully one way or another. Report
+            # what would otherwise have been errors via the debug output.
+            for err in errors:
+                self.debug(err)
+            # Sanity check.
+            assert done is True
 
-        return True
+        return done
 
     def _tryFunction(self, command, modifiers, count):
         errors = []
@@ -462,20 +468,21 @@ class Calculator:
             nArgs = count
 
         if len(self) < nArgs:
-            errors.append(
+            self.err(
                 'Not enough args on stack! (%s needs %d arg%s, stack has '
                 '%d item%s)' %
                 (command, nArgs, '' if nArgs == 1 else 's',
                  len(self), '' if len(self) == 1 else 's'))
         else:
             args = []
-            for arg in self.stack[-nArgs:]:
-                if isinstance(arg, Function):
-                    args.append(arg.func)
-                elif isinstance(arg, Variable):
-                    args.append(self._variables[arg.name])
-                else:
-                    args.append(arg)
+            if nArgs:
+                for arg in self.stack[-nArgs:]:
+                    if isinstance(arg, Function):
+                        args.append(arg.func)
+                    elif isinstance(arg, Variable):
+                        args.append(self._variables[arg.name])
+                    else:
+                        args.append(arg)
 
             self.debug('Calling %s with %r' % (function.name, tuple(args)))
             try:
