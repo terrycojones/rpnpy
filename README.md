@@ -135,6 +135,23 @@ $ rpn.py --noSplit
 ['6', '7', '8']
 ```
 
+```sh
+$ rpn.py --noSplit
+--> def celcius(f): return (f - 32) / 1.8
+--> 212
+--> celcius
+--> f
+[212, <function celcius at 0x7fc975055f28>]
+--> apply :p
+100.0
+
+$ rpn.py --noSplit
+--> 212
+--> lambda f: (f - 32) / 1.8
+--> apply :p
+100.0
+```
+
 ## Usage
 
 The calculator either works interactively from the shell using a

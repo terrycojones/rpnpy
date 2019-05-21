@@ -402,22 +402,36 @@ class Calculator:
             self.debug('Empty command')
             return True
 
-        done = self._tryFunction(command, modifiers, count)
+        errors = []
+        done, errs = self._tryFunction(command, modifiers, count)
+        if errs:
+            errors.extend(errs)
 
         if done is False:
-            done = self._tryVariable(command, modifiers)
+            done, errs = self._tryVariable(command, modifiers)
+            if errs:
+                errors.extend(errs)
 
         if done is False:
-            done = self._trySpecial(command, modifiers, count)
+            done, errs = self._trySpecial(command, modifiers, count)
+            if errs:
+                errors.extend(errs)
 
         if done is False:
-            done = self._tryEval(command, modifiers, count)
+            done, errs = self._tryEval(command, modifiers, count)
+            if errs:
+                errors.extend(errs)
 
         if done is False and count is not None:
             self.err('Modifier count %d will not be used' % count)
 
         if done is False:
-            done = self._tryExec(command)
+            done, errs = self._tryExec(command)
+            if errs:
+                errors.extend(errs)
+
+        for err in errors:
+            self.err(err)
 
         if done is False:
             self.debug('Could not figure out how to run %r' % command)
@@ -426,20 +440,21 @@ class Calculator:
         return True
 
     def _tryFunction(self, command, modifiers, count):
+        errors = []
         if modifiers.forceCommand:
-            return False
+            return False, errors
 
         try:
             function = self._functions[command]
         except KeyError:
             self.debug('%r is not a known function' % (command,))
-            return False
+            return False, errors
 
         self.debug('Found function %r' % command)
 
         if modifiers.push:
             self._finalize(function.func, modifiers)
-            return
+            return True, errors
 
         if count is None:
             nArgs = len(self) if modifiers.all else function.nArgs
@@ -447,7 +462,7 @@ class Calculator:
             nArgs = count
 
         if len(self) < nArgs:
-            self.err(
+            errors.append(
                 'Not enough args on stack! (%s needs %d arg%s, stack has '
                 '%d item%s)' %
                 (command, nArgs, '' if nArgs == 1 else 's',
@@ -466,14 +481,16 @@ class Calculator:
             try:
                 result = function.func(*args)
             except BaseException as e:
-                self.err('Exception running %s(%s): %s' %
-                         (function.name, ', '.join(map(str, args)), e))
+                errors.append('Exception running %s(%s): %s' %
+                              (function.name, ', '.join(map(str, args)), e))
             else:
                 self._finalize(result, modifiers, nPop=nArgs)
 
+        return True, errors
+
     def _tryVariable(self, command, modifiers):
         if modifiers.forceCommand:
-            return False
+            return False, None
 
         if command in self._variables:
             self.debug('%r is a variable (value %r)' %
@@ -483,52 +500,64 @@ class Calculator:
                 else self._variables[command], modifiers)
         else:
             self.debug('%r is not a variable' % command)
-            return False
+            return False, None
+
+        return True, None
 
     def _trySpecial(self, command, modifiers, count):
+        errors = []
         if command in self._special:
             try:
                 self._special[command](self, modifiers, count)
             except EOFError:
                 raise
             except BaseException as e:
-                self.err('Could not run special command %r: %s' % (command, e))
+                errors.append('Could not run special command %r: %s' %
+                              (command, e))
         elif modifiers.forceCommand:
-            self.err('Unknown command: %s' % command)
+            errors.append('Unknown special command: %s' % command)
         else:
-            return False
+            return False, errors
+
+        return True, errors
 
     def _tryEval(self, command, modifiers, count):
+        errors = []
         try:
             value = eval(command, globals(), self._variables)
         except BaseException as e:
             err = str(e)
-            self.err('Could not eval(%r): %s' % (command, err))
+            self.debug('Could not eval(%r): %s' % (command, err))
             if (self._splitLines and
                 err.startswith(
                     'unexpected EOF while parsing (<string>, line 1)')):
                 self.debug('Did you accidentally include whitespace '
                            'in a command line?')
-            return False
+            return False, errors
         else:
             self.debug('eval %s worked: %r' % (command, value))
             count = 1 if count is None else count
             self._finalize(value, modifiers=modifiers, repeat=count)
 
+        return True, errors
+
     def _tryExec(self, command):
+        errors = []
         try:
             exec(command, globals(), self._variables)
         except BaseException as e:
             err = str(e)
-            self.err('Could not exec(%r): %s' % (command, err))
+            self.debug('Could not exec(%r): %s' % (command, err))
             if (self._splitLines and
                 err.startswith(
                     'unexpected EOF while parsing (<string>, line 1)')):
                 self.debug('Did you accidentally include whitespace '
                            'in a command line?')
-            return False
+            return False, errors
         else:
             self.debug('exec(%r) worked.' % command)
+
+        return True, errors
 
     def toggleDebug(self, newValue=None):
         """Turn debug on/off.

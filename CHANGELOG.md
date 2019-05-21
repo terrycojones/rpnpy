@@ -1,3 +1,7 @@
+# 1.0.17 May 21, 2019
+
+Improved error output. Updated README with function examples.
+
 # 1.0.16 May 21, 2019
 
 Added `count` processing to `dup`. Made debugging output more useful when
