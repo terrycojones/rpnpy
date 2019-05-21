@@ -1,3 +1,9 @@
+# 1.0.16 May 21, 2019
+
+Added `count` processing to `dup`. Made debugging output more useful when
+(perhaps) whitespace is in a command and line splitting is on. Stop
+executing commands on a line if an error is encountered.
+
 # 1.0.15 May 21, 2019
 
 Added toggling of debug.

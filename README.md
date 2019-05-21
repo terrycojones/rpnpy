@@ -225,9 +225,7 @@ case you will get errors).
 
 ## Operation via standard input
 
-The default 
-
-When reading from standard input, the default lines will be split on whitespace and
+When reading from standard input, the lines will be split on whitespace and
 each field is treated as a separate command. This allows for simple
 command-line usage such as
 
@@ -235,6 +233,16 @@ command-line usage such as
 $ echo 4 5 + | rpn.py
 9
 ```
+
+For convenience, modifiers can be preceded by whitespace:
+
+```sh
+$ echo 100 log10 :! apply | rpn.py
+2.0
+```
+
+In the above, the `:!` modifier applies to the preceding `log10` function
+(causing it to be pushed onto the stack).
 
 If you have a file of commands you want to pipe into `rpn.py` you might
 want to turn off this splitting:
@@ -316,6 +324,7 @@ There are two kinds of commands: normal and special.
 ## History
 
 `rpn.py` makes use of Python's
-[readline](https://docs.python.org/3.7/library/readline.html) library to 
-
-.pycalc_history
+[readline](https://docs.python.org/3.7/library/readline.html) library to
+allow familiar/comfortable command line editing. Your input history will be
+saved to `~/.pycalc_history` if your version of readline has the
+`append_history_file` command (present only in Python >= 3.6)?

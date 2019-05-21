@@ -343,7 +343,6 @@ class Calculator:
         @return: A C{bool} indicating if all commands ran without error.
         """
         commands = findCommands(line, self._splitLines, self._separator)
-        result = True
 
         while True:
             try:
@@ -358,9 +357,16 @@ class Calculator:
                 break
             else:
                 if not self._executeOneCommand(command, modifiers, count):
-                    result = False
-
-        return result
+                    # Print a debug message if there were pending commands
+                    # that did not get run at all.
+                    try:
+                        command, modifiers, count = next(commands)
+                    except StopIteration:
+                        pass
+                    else:
+                        self.debug('Ignoring commands from %r on due to '
+                                   'previous error' % command)
+                    return False
 
     def _executeOneCommand(self, command, modifiers, count):
         """
@@ -496,7 +502,13 @@ class Calculator:
         try:
             value = eval(command, globals(), self._variables)
         except BaseException as e:
-            self.debug('Could not eval(%r): %s' % (command, e))
+            err = str(e)
+            self.err('Could not eval(%r): %s' % (command, err))
+            if (self._splitLines and
+                err.startswith(
+                    'unexpected EOF while parsing (<string>, line 1)')):
+                self.debug('Did you accidentally include whitespace '
+                           'in a command line?')
             return False
         else:
             self.debug('eval %s worked: %r' % (command, value))
@@ -507,7 +519,13 @@ class Calculator:
         try:
             exec(command, globals(), self._variables)
         except BaseException as e:
-            self.err('Could not exec(%r): %s' % (command, e))
+            err = str(e)
+            self.err('Could not exec(%r): %s' % (command, err))
+            if (self._splitLines and
+                err.startswith(
+                    'unexpected EOF while parsing (<string>, line 1)')):
+                self.debug('Did you accidentally include whitespace '
+                           'in a command line?')
             return False
         else:
             self.debug('exec(%r) worked.' % command)

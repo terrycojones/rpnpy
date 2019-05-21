@@ -86,7 +86,7 @@ clear.names = ('clear', 'c')
 
 
 def dup(calc, modifiers, count):
-    """Duplicate the top of stack.
+    """Duplicate the top of stack a number of times.
 
     @param calc: A C{Calculator} instance.
     @param modifiers: A C{Modifiers} instance.
@@ -96,7 +96,8 @@ def dup(calc, modifiers, count):
         if modifiers.preserveStack:
             calc.err('The /= modifier makes no sense with dup')
         else:
-            calc._finalize(calc.stack[-1], modifiers)
+            count = 1 if count is None else count
+            calc._finalize(calc.stack[-1], modifiers, repeat=count)
     else:
         calc.err('Cannot duplicate (stack is empty)')
 
