@@ -1,3 +1,7 @@
+# 1.0.15 May 21, 2019
+
+Added toggling of debug.
+
 # 1.0.14 May 21, 2019
 
 Updated README examples, added more debug printing.

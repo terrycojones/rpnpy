@@ -389,6 +389,9 @@ class Calculator:
                     (count, stackLen, '' if stackLen == 1 else 's'))
                 return False
 
+        if modifiers.debug:
+            self.toggleDebug()
+
         if not command:
             self.debug('Empty command')
             return True
@@ -508,3 +511,23 @@ class Calculator:
             return False
         else:
             self.debug('exec(%r) worked.' % command)
+
+    def toggleDebug(self, newValue=None):
+        """Turn debug on/off.
+
+        @param newValue: A C{bool} new setting or C{None} to toggle.
+        """
+        if newValue is None:
+            if self._debug:
+                self.debug('Debug off')
+                self._debug = False
+            else:
+                self._debug = True
+                self.debug('Debug on')
+        else:
+            if newValue:
+                self._debug = True
+                self.debug('Debug on')
+            else:
+                self.debug('Debug off')
+                self._debug = False

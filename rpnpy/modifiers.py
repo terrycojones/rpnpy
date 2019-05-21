@@ -6,6 +6,7 @@ from rpnpy.errors import UnknownModifiersError, IncompatibleModifiersError
 MODIFIERS = {
     '*': 'all',
     'c': 'forceCommand',
+    'D': 'debug',
     'i': 'iterate',
     'n': 'noSplit',
     '=': 'preserveStack',
