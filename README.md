@@ -70,7 +70,8 @@ $ rpn.py 4 5 +
 
 # Do the same thing, but read from standard input (all the commands below
 # could also be run in this way).
-$ echo 4 5 + | rpn.py 9
+$ echo 4 5 + | rpn.py
+9
 
 # Sine of 90 degrees (note that Python's sin function operates on
 # radians). The commands are in quotes so the shell doesn't expand the `*`.
