@@ -111,8 +111,10 @@ commutative operations like `+` and `*`, but is important for `/` and `-`.
 
 In Python we have various functions like
 [`map`](https://docs.python.org/3.5/library/functions.html#map),
-[`filter`](https://docs.python.org/3.5/library/functions.html#filter), and
+[`filter`](https://docs.python.org/3.5/library/functions.html#filter),
 [`functools.reduce`](https://docs.python.org/3.5/library/functools.html#functools.reduce),
+and the long-ago deprecated Python 2
+[`apply`](https://docs.python.org/2/library/functions.html#apply) function.
 These are typically thought of as having a prefix or
 [Polish notation](https://en.wikipedia.org/wiki/Polish_notation) signature,
 accepting a function followed by an iterable. E.g.,
