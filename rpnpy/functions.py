@@ -166,6 +166,41 @@ def apply(calc, modifiers, count):
 apply.names = ('apply',)
 
 
+def join(calc, modifiers, count):
+    """Join some stack items into a single string.
+
+    @param calc: A C{Calculator} instance.
+    @param modifiers: A C{Modifiers} instance.
+    @param count: An C{int} count of the number of arguments to pass.
+    """
+    sep = str(calc.stack[-1])
+
+    if count is None:
+        count = len(calc) - 1 if modifiers.all else 1
+
+    nargsAvail = len(calc) - 1
+    if nargsAvail < count:
+        calc.err('Cannot call join with %d argument%s '
+                 '(stack has only %d item%s available)' %
+                 (count, '' if count == 1 else 's',
+                  nargsAvail, '' if nargsAvail == 1 else 's'))
+        return
+
+    if count == 1:
+        # Run on the first stack item after the separator (which will
+        # obviously need to be iterable).
+        args = calc.stack[-2]
+    else:
+        # Collect several stack items into a list and run on that list.
+        args = calc.stack[-(count + 1):-1]
+
+    result = sep.join(map(str, args))
+    calc._finalize(result, modifiers, nPop=count + 1)
+
+
+join.names = ('join',)
+
+
 def reduce(calc, modifiers, count):
     """Apply a function to some arguments using reduce.
 
@@ -222,6 +257,26 @@ def pop(calc, modifiers, count):
 pop.names = ('pop',)
 
 
+def reverse(calc, modifiers, count):
+    """Reverse some number of arguments (default 2) on the stack.
+
+    @param calc: A C{Calculator} instance.
+    @param modifiers: A C{Modifiers} instance.
+    @param count: An C{int} count of the number of arguments to pass.
+    """
+    nArgs = (len(calc) if modifiers.all else 2) if count is None else count
+    if len(calc) >= nArgs:
+        if nArgs > 1:
+            value = calc.stack[-nArgs:][::-1]
+            calc._finalize(value, modifiers, nPop=nArgs, extend=True)
+    else:
+        calc.err('Cannot reverse %d item%s (stack length is %d)' %
+                 (nArgs, '' if nArgs == 1 else 's', len(calc)))
+
+
+reverse.names = ('reverse', 'rev')
+
+
 def swap(calc, modifiers, _):
     """Swap the top two items on the stack.
 
@@ -229,7 +284,7 @@ def swap(calc, modifiers, _):
     @param modifiers: A C{Modifiers} instance.
     """
     if len(calc) > 1:
-        calc._finalize(reversed(calc.stack[-2:]), modifiers=modifiers,
+        calc._finalize(calc.stack[-2:][::-1], modifiers=modifiers,
                        nPop=2, extend=True)
     else:
         calc.err('Cannot swap (stack needs 2 items)')
@@ -274,8 +329,8 @@ list_.names = ('list',)
 
 
 FUNCTIONS = (
-    apply, clear, dup, functions, list_, pop, print_, quit, reduce, stack,
-    swap, undo, variables)
+    apply, clear, dup, functions, join, list_, pop, print_, quit, reduce,
+    reverse, stack, swap, undo, variables)
 
 
 def addSpecialFunctions(calc):

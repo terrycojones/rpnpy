@@ -12,6 +12,7 @@ MODIFIERS = {
     '=': 'preserveStack',
     'p': 'print',
     '!': 'push',
+    'r': 'reverse',
     's': 'split',
 }
 

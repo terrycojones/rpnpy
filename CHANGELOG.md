@@ -1,3 +1,8 @@
+# 1.0.19 May 22, 2019
+
+Added `join` special function and `:r` (reverse args) modifier, plus
+tests. Updated README.
+
 # 1.0.18 May 21, 2019
 
 Make `rpn.py` execute the command line args if they are not all existing

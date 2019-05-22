@@ -343,11 +343,61 @@ class TestCalculator(TestCase):
         self.assertEqual(error, errfp.getvalue())
 
     def testFloat(self):
-        "It must be possible to convert something to a floa"
+        "It must be possible to convert something to a float"
         c = Calculator()
         c.execute('4 float')
         (result,) = c.stack
         self.assertEqual(4.0, result)
+
+
+class TestReverseModifier(TestCase):
+    "Test the reverse modifier"
+
+    def testReverseSubtractionArgs(self):
+        "Reverse the args in a subtraction"
+        c = Calculator()
+        c.execute('5 4 -:r')
+        (result,) = c.stack
+        self.assertEqual(-1, result)
+
+    def testMap(self):
+        "Call map with args reversed from their normal order"
+        c = Calculator()
+        c.execute('[1,2,3]')
+        c.execute('str :!')
+        c.execute('map :ir')
+        (result,) = c.stack
+        self.assertEqual(['1', '2', '3'], result)
+
+
+class TestReverseSpecialCommand(TestCase):
+    "Test the reverse special command"
+
+    def testReverse1(self):
+        "Reversing just the top element of the stack does nothing"
+        c = Calculator()
+        c.execute('4 5 reverse:1')
+        self.assertEqual([4, 5], c.stack)
+
+    def testReverse(self):
+        "Reverse (by default) the top two elements of the stack"
+        c = Calculator()
+        c.execute('4 5 reverse')
+        self.assertEqual([5, 4], c.stack)
+
+    def testReverseAll(self):
+        "It must be possible to reverse all the stack"
+        c = Calculator()
+        c.execute('4 6 5 reverse:*')
+        self.assertEqual([5, 6, 4], c.stack)
+
+    def testReverseWithStackTooSmall(self):
+        "It's an error if an attempt is made to reverse too many things"
+        errfp = StringIO()
+        c = Calculator(errfp=errfp)
+        self.assertFalse(c.execute('4 5 6 reverse:10'))
+        error = ('Cannot reverse 10 items (stack length is 3)\n')
+        self.assertEqual(error, errfp.getvalue())
 
 
 class TestDecimal(TestCase):
@@ -376,3 +426,41 @@ class TestDecimal(TestCase):
         c.execute('int')
         (result,) = c.stack
         self.assertEqual(10, result)
+
+
+class TestJoin(TestCase):
+    "Test the join special function"
+
+    def testEmptyString(self):
+        "Joining on an empty string must work"
+        c = Calculator()
+        c.execute('["4","5","6"] "" join')
+        (result,) = c.stack
+        self.assertEqual('456', result)
+
+    def testNonEmptyString(self):
+        "Joining on a non-empty string must work"
+        c = Calculator()
+        c.execute('["4","5","6"] "-" join')
+        (result,) = c.stack
+        self.assertEqual('4-5-6', result)
+
+    def testNonStrings(self):
+        "Joining things that are not string must work"
+        c = Calculator()
+        c.execute('[4,5,6] "-" join')
+        (result,) = c.stack
+        self.assertEqual('4-5-6', result)
+
+    def testWithCount(self):
+        "Joining several stack items must work"
+        c = Calculator()
+        c.execute('3 4 5 6 "-" join:3')
+        self.assertEqual([3, '4-5-6'], c.stack)
+
+    def testAllStack(self):
+        "Joining the whole stack"
+        c = Calculator()
+        c.execute('3 4 5 6 "-" join:*')
+        (result,) = c.stack
+        self.assertEqual('3-4-5-6', result)

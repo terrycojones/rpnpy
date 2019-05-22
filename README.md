@@ -1,4 +1,4 @@
-# rpn.py - A reverse-Polish notation calculator for Python
+# rpn.py - a reverse-Polish notation calculator for Python
 
 Here is `rpn.py`, a script implementing a
 [reverse-Polish notation](https://en.wikipedia.org/wiki/Reverse_Polish_notation)
@@ -64,46 +64,186 @@ Before getting a bit more formal (and boring) in describing how you use
 `rpn.py`, here are some example sessions to give you a flavor.
 
 ```sh
-# Add two numbers. The stack is printed on exit when reading from stdin.
-$ echo 4 5 + | rpn.py
+# Add two numbers. The stack is printed after all commands are run.
+$ rpn.py 4 5 +
 9
 
-# Sine of 90 degrees (Python's sin function operates on radians).
-$ echo '90 pi 180 / * sin' | rpn.py
+# Do the same thing, but read from standard input (all the commands below
+# could also be run in this way).
+$ echo 4 5 + | rpn.py 9
+
+# Sine of 90 degrees (note that Python's sin function operates on
+# radians). The commands are in quotes so the shell doesn't expand the `*`.
+$ rpn.py '90 pi 180 / * sin'
 1.0
-9
+
+# Same thing, different quoting.
+$ rpn.py 90 pi 180 / \* sin
+1.0
+
+# Same thing, use `mul` instead of `*`.
+$ rpn.py 90 pi 180 / mul sin
+1.0
 
 # Area of a circle radius 10
-$ echo 'pi 10 10 * *' | rpn.py
+$ rpn.py 'pi 10 10 * *'
 314.1592653589793
 
-# Equivalently, using ':2' to push 10 onto the stack twice.
-echo 'pi 10:2 * *' | rpn.py
+# Equivalently, using `:2` to push 10 onto the stack twice.
+$ rpn.py 'pi 10:2 * *'
 314.1592653589793
 
-# Equivalently, using 'dup' to duplicate the 10.
-echo 'pi 10 dup * *' | rpn.py
-314.1592653589793
-
-# Equivalently, using reduce to do the multiplying.  The ':!' modifier
-# tells rpn.py to push the '*' function onto the stack instead of
-# immediately running it.
-echo '[pi,10,10] *:! reduce' | rpn.py
-314.1592653589793
-
-# Same thing, but push the numbers individually onto the stack, then the
-# ':3' tells reduce to iterate over three stack items. Use 'mul' as an
-# alternative to '*'.
-echo 'pi 10 dup mul:! reduce:3' | rpn.py
-314.1592653589793
-
-# Equivalently, using ':*' to tell reduce to use the whole stack.
-echo 'pi 10 dup *:! reduce:*' | rpn.py
+# Equivalently, using 'dup' to duplicate the 10 and `mul` instead of `*`
+$ rpn.py pi 10 dup mul mul
 314.1592653589793
 ```
 
+### Function calling argument push order
+
+On a regular RPN calculator you would do what we normally think of as an
+[infix](https://en.wikipedia.org/wiki/Infix_notation) operation such as
+`5 - 4` by pushing `5` onto the stack, then pushing `4`, and finally
+running the `-` function. The operator is taken out of middle and given at
+the end and the original infix order of the arguments is the order you push
+them onto the stack. Of course this doesn't make any difference for
+commutative operations like `+` and `*`, but is important for `/` and `-`.
+
+In Python we have various functions like `map`, `reduce`, and `filter` that
+have a prefix or
+[Polish notation](https://en.wikipedia.org/wiki/Polish_notation) signature
+that's a function followed by an iterable, for example
+[map(function, iterable)](https://docs.python.org/3.5/library/functions.html#map).
+
+To be consistent, with RPN argument pushing just described for the numeric
+operations, in the case of (what we normally think of as) prefix functions
+such as `map`, we should therefore push the function to be run, then push
+the iterable, then call `map` (`reduce`, `filter`, etc).
+
+Like this:
+
 ```sh
-# REPL usage, with automatic line-splitting off (so one command per line)
+$ rpn.py 'str:! [6,7,8] map:i'
+['6', '7', '8']
+```
+
+(Here the `:!` modifier causes the `str` function to be pushed onto the
+stack instead of being run, and the `:i` modifier causes the result of
+`map` to be iterated before being added to the stack.)
+
+But you might find it more natural to use `map` and friends the other way
+around. I.e., first push the iterable, then push the function to be
+applied, and then call `map`.  In that case, you can use the `:r` modifier
+to tell the calculator to reverse the order of the arguments passed to a
+function. In the following, we push in the other order and then use
+`map:ir` (the `i` is just to iterate the `map` result to produce a list).
+
+```sh
+$ rpn.py '[6,7,8] str:! map:ir'
+['6', '7', '8']
+```
+
+Continuing on the map theme, you could instead simply reverse part of the
+stack before running a function:
+
+```sh
+$ rpn.py '[6,7,8] str:! reverse map:i'
+['6', '7', '8']
+```
+
+The `reverse` command operates on two stack items by default, but it can
+take a numeric argument or you can run it with the `:*` modifier which will
+cause it to be run on the whole stack:
+
+```sh
+# Reverse the top 3 stack elements then reverse the whole of the stack.
+$ rpn.py '5 6 7 8 reverse:3 reverse:*'
+[6, 7, 8, 5]
+```
+
+### More examples
+
+```sh
+# The area of a circle again, but using reduce to do the multiplying.  The
+# ':!' modifier tells rpn.py to push the `*` function onto the stack
+# instead of immediately running it.
+$ rpn.py '*:! [pi,10,10] reduce'
+314.1592653589793
+
+# Same thing, but push the numbers individually onto the stack, then the
+# `:3` tells reduce to iterate over three stack items. Use `mul` as an
+# alternative to `*`.
+$ rpn.py 'pi 10 dup mul:! reduce:3'
+314.1592653589793
+
+# Equivalently, using `:*` to tell reduce to use the whole stack.
+$ rpn.py 'pi 10 dup *:! reduce:*'
+314.1592653589793
+
+# Push `True` onto the stack 5 times, turn the whole stack (`*`) into a
+# list and print it (`p`), then pass that list to `sum`.
+$ rpn.py 'True:5 list:*p sum'
+[True, True, True, True, True]
+5
+
+# Here's something a bit more long-winded (and totally pointless):
+#
+# Push 0..9 onto the stack
+# call Python's `reversed` function
+# push the `str` function
+# use `map` to convert the list of digits to strings
+# join the string digits with the empty string
+# convert the result to an int
+# take the square root
+# push 3 onto the stack
+# swap the top two stack elements
+# call `round` to round the result to three decimal places
+#
+# the `:i` modifier (used here twice) causes the value from the command
+# to be iterated and the result to be put on the stack as a single list.
+# It's a convenient way to iterate over a generator, a range, a map,
+# dictionary keys, etc.
+$ rpn.py 'range(10):i reversed str:! map:i "" join int sqrt 3 swap round:2'
+9876543210
+```
+
+You could do that last one in Python with a bunch of parens:
+
+```python
+from math import sqrt
+print(round(sqrt(int(''.join(map(str, reversed(range(10)))))), 3))
+```
+
+The elimination of parens is the main beauty of RPN (at least
+esthetically - the stack model of computation is a pretty awesome idea
+too). The price is that you have to learn to think in postfix. On that
+subject, I could have pushed the `3` (the number of decimal places to round
+to) onto the stack at the very start of the last `rpn.py` command above,
+but I didn't think that far ahead, so I pushed it at the end and then
+called `swap` to swap around the top two stack elements. I.e., this works
+too:
+
+```sh
+$ rpn.py '3 range(10):i reversed str:! map:i "" join int sqrt round:2'
+99380.799
+```
+
+There's another way to skin this cat, using the `:r` modifier, which
+reverses the order of the arguments being passed to a function. So instead
+of putting the `3` out front or putting it at the end and then calling
+`swap` (as I did originally), we can just ask for the arguments to be
+passed to round the other way around.
+
+```sh
+$ rpn.py 'range(10):i reversed str:! map:i "" join int sqrt 3 round:2r'
+99380.799
+```
+
+
+More involved calculations can be done in an interactive REPL session:
+
+```sh
+# REPL usage, with automatic splitting of whitespace turned off
+# (so we give one command per line).
 $ rpn.py --noSplit
 --> 4
 --> 5
@@ -336,6 +476,7 @@ There are two kinds of commands: normal and special.
     =: preserveStack
     p: print
     !: push
+    r: reverse
     s: split
 ```
 
@@ -351,6 +492,7 @@ saved to `~/.pycalc_history` if your version of readline has the
 
 * Add direct access to functionality from [numpy](https://www.numpy.org/).
 * Read start-up file of user-defined functions.
+* Add an `r` modifier to reverse the order of args to a function call.
 
 ## Thanks
 

@@ -145,7 +145,6 @@ class Calculator:
 
     def addAbbrevs(self):
         for longName, shortNames in (
-                # ('decimal.Decimal', ('Decimal',)),
                 ('math.log', ('log',)),
                 ('operator.attrgetter', ('attrgetter',)),
                 ('operator.itemgetter', ('itemgetter',)),
@@ -158,7 +157,6 @@ class Calculator:
                 ('operator.truediv', ('/', 'div')),
                 ('builtins.bool', ('bool',)),
                 ('builtins.int', ('int',)),
-                # ('builtins.float', ('float',)),
                 ('builtins.map', ('map',)),
                 ('builtins.max', ('max',)),
                 ('builtins.min', ('min',)),
@@ -484,6 +482,11 @@ class Calculator:
                     else:
                         args.append(arg)
 
+                if modifiers.reverse:
+                    # Reverse the order of args so that the top of the
+                    # stack (last element of the stack list) becomes the
+                    # first argument to the function instead of the last.
+                    args = args[::-1]
             self.debug('Calling %s with %r' % (function.name, tuple(args)))
             try:
                 result = function.func(*args)

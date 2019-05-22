@@ -125,7 +125,7 @@ if __name__ == '__main__':
             else:
                 # Execute the command line as a set of commands, following
                 # great suggestion by David Pattinson.
-                calc.batch(' '.join(args.files), args.print)
+                calc.batch((' '.join(args.files),), args.print)
                 if args.stdin:
                     calc.repl(args.prompt)
         elif interactive:
