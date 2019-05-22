@@ -56,7 +56,7 @@ I wrote this for 3 reasons:
    curious what use I'll make of it, and what others might do with it too.
 
 *Note* that this is a work in progress! Everything may change. Suggestions
- very welcome.
+very welcome.
 
 ## Example rpn.py sessions
 
@@ -74,7 +74,7 @@ $ echo 4 5 + | rpn.py
 9
 
 # Sine of 90 degrees (note that Python's sin function operates on
-# radians). The commands are in quotes so the shell doesn't expand the `*`.
+# radians). The commands are in quotes so the shell doesn't expand the '*'.
 $ rpn.py '90 pi 180 / * sin'
 1.0
 
@@ -82,7 +82,7 @@ $ rpn.py '90 pi 180 / * sin'
 $ rpn.py 90 pi 180 / \* sin
 1.0
 
-# Same thing, use `mul` instead of `*`.
+# Same thing, use 'mul' instead of '*'.
 $ rpn.py 90 pi 180 / mul sin
 1.0
 
@@ -90,11 +90,11 @@ $ rpn.py 90 pi 180 / mul sin
 $ rpn.py 'pi 10 10 * *'
 314.1592653589793
 
-# Equivalently, using `:2` to push 10 onto the stack twice.
+# Equivalently, using ':2' to push 10 onto the stack twice.
 $ rpn.py 'pi 10:2 * *'
 314.1592653589793
 
-# Equivalently, using 'dup' to duplicate the 10 and `mul` instead of `*`
+# Equivalently, using 'dup' to duplicate the 10 and 'mul' instead of '*'
 $ rpn.py pi 10 dup mul mul
 314.1592653589793
 ```
@@ -113,7 +113,7 @@ In Python we have various functions like `map`, `reduce`, and `filter` that
 have a prefix or
 [Polish notation](https://en.wikipedia.org/wiki/Polish_notation) signature
 that's a function followed by an iterable, for example
-[map(function, iterable)](https://docs.python.org/3.5/library/functions.html#map).
+[`map(function, iterable)`](https://docs.python.org/3.5/library/functions.html#map).
 
 To be consistent, with RPN argument pushing just described for the numeric
 operations, in the case of (what we normally think of as) prefix functions
@@ -165,23 +165,23 @@ $ rpn.py '5 6 7 8 reverse:3 reverse:*'
 
 ```sh
 # The area of a circle again, but using reduce to do the multiplying.  The
-# ':!' modifier tells rpn.py to push the `*` function onto the stack
+# ':!' modifier tells rpn.py to push the '*' function onto the stack
 # instead of immediately running it.
 $ rpn.py '*:! [pi,10,10] reduce'
 314.1592653589793
 
 # Same thing, but push the numbers individually onto the stack, then the
-# `:3` tells reduce to iterate over three stack items. Use `mul` as an
-# alternative to `*`.
+# ':3' tells reduce to iterate over three stack items. Use 'mul' as an
+# alternative to '*'.
 $ rpn.py 'pi 10 dup mul:! reduce:3'
 314.1592653589793
 
-# Equivalently, using `:*` to tell reduce to use the whole stack.
+# Equivalently, using ':*' to tell reduce to use the whole stack.
 $ rpn.py 'pi 10 dup *:! reduce:*'
 314.1592653589793
 
-# Push `True` onto the stack 5 times, turn the whole stack (`*`) into a
-# list and print it (`p`), then pass that list to `sum`.
+# Push 'True' onto the stack 5 times, turn the whole stack ('*') into a
+# list and print it ('p'), then pass that list to 'sum'.
 $ rpn.py 'True:5 list:*p sum'
 [True, True, True, True, True]
 5
@@ -189,17 +189,17 @@ $ rpn.py 'True:5 list:*p sum'
 # Here's something a bit more long-winded (and totally pointless):
 #
 # Push 0..9 onto the stack
-# call Python's `reversed` function
-# push the `str` function
-# use `map` to convert the list of digits to strings
+# call Python's 'reversed' function
+# push the 'str' function
+# use 'map' to convert the list of digits to strings
 # join the string digits with the empty string
 # convert the result to an int
 # take the square root
 # push 3 onto the stack
 # swap the top two stack elements
-# call `round` to round the result to three decimal places
+# call 'round' to round the result to three decimal places
 #
-# the `:i` modifier (used here twice) causes the value from the command
+# the ':i' modifier (used here twice) causes the value from the command
 # to be iterated and the result to be put on the stack as a single list.
 # It's a convenient way to iterate over a generator, a range, a map,
 # dictionary keys, etc.

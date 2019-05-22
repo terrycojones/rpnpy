@@ -329,8 +329,22 @@ list_.names = ('list',)
 
 
 FUNCTIONS = (
-    apply, clear, dup, functions, join, list_, pop, print_, quit, reduce,
-    reverse, stack, swap, undo, variables)
+    apply,
+    clear,
+    dup,
+    functions,
+    join,
+    list_,
+    pop,
+    print_,
+    quit,
+    reduce,
+    reverse,
+    stack,
+    swap,
+    undo,
+    variables,
+)
 
 
 def addSpecialFunctions(calc):
