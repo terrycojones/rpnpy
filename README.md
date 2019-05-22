@@ -109,10 +109,13 @@ the end and the original infix order of the arguments is the order you push
 them onto the stack. Of course this doesn't make any difference for
 commutative operations like `+` and `*`, but is important for `/` and `-`.
 
-In Python we have various functions like `map`, `reduce`, and `filter` that
-have a prefix or
-[Polish notation](https://en.wikipedia.org/wiki/Polish_notation) signature
-that's a function followed by an iterable, for example
+In Python we have various functions like
+[`map`](https://docs.python.org/3.5/library/functions.html#map),
+[`filter`](https://docs.python.org/3.5/library/functions.html#filter), and
+[`functools.reduce`](https://docs.python.org/3.5/library/functools.html#functools.reduce),
+These are typically thought of as having a prefix or
+[Polish notation](https://en.wikipedia.org/wiki/Polish_notation) signature,
+accepting a function followed by an iterable. E.g.,
 [`map(function, iterable)`](https://docs.python.org/3.5/library/functions.html#map).
 
 To be consistent, with RPN argument pushing just described for the numeric
