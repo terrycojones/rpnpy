@@ -6,6 +6,7 @@ import math
 import operator
 
 from rpnpy import Calculator
+from rpnpy.errors import StackError
 from rpnpy.modifiers import Modifiers, strToModifiers
 
 
@@ -488,22 +489,20 @@ class TestFindCallableAndArgs(TestCase):
 
     def testEmptyStack(self):
         "Calling on an empty stack must return None, None"
-        errfp = StringIO()
-        c = Calculator(errfp=errfp)
-        func, args = c.findCallableAndArgs('cmd', Modifiers(), None)
-        self.assertEqual((None, None), (func, args))
-        error = "Cannot run 'cmd' (stack has only 0 items)\n"
-        self.assertEqual(error, errfp.getvalue())
+        c = Calculator()
+
+        error = r"^Cannot run 'cmd' \(stack has only 0 items\)$"
+        self.assertRaisesRegex(StackError, error, c.findCallableAndArgs,
+                               'cmd', Modifiers(), None)
 
     def testStackLengthOne(self):
         "Calling on a stack with only one item must return None, None"
         errfp = StringIO()
         c = Calculator(errfp=errfp)
         c.execute('4')
-        func, args = c.findCallableAndArgs('cmd', Modifiers(), None)
-        self.assertEqual((None, None), (func, args))
-        error = "Cannot run 'cmd' (stack has only 1 item)\n"
-        self.assertEqual(error, errfp.getvalue())
+        error = r"^Cannot run 'cmd' \(stack has only 1 item\)$"
+        self.assertRaisesRegex(StackError, error, c.findCallableAndArgs,
+                               'cmd', Modifiers(), None)
 
     def testStackLengthTwoNoCount(self):
         """Calling on a stack with two items and no count must return
@@ -534,12 +533,10 @@ class TestFindCallableAndArgs(TestCase):
         c.execute('log10 :!')
         c.execute('4')
         c.execute('5')
-        func, args = c.findCallableAndArgs('cmd', Modifiers(), 1)
-        self.assertIs(None, func)
-        self.assertEqual(None, args)
-        error = ("Cannot run 'cmd' with 1 argument. Stack item (4) is "
-                 "not callable\n")
-        self.assertEqual(error, errfp.getvalue())
+        error = (r"^Cannot run 'cmd' with 1 argument. Stack item \(4\) is "
+                 r"not callable$")
+        self.assertRaisesRegex(StackError, error, c.findCallableAndArgs,
+                               'cmd', Modifiers(), 1)
 
     def testStackLengthThree(self):
         "Calling on a stack with three items (count=2) must return correctly"
@@ -568,22 +565,18 @@ class TestFindCallableAndArgsReversed(TestCase):
 
     def testEmptyStack(self):
         "Calling on an empty stack must return None, None"
-        errfp = StringIO()
-        c = Calculator(errfp=errfp)
-        func, args = c.findCallableAndArgs('cmd', strToModifiers('r'), None)
-        self.assertEqual((None, None), (func, args))
-        error = "Cannot run 'cmd' (stack has only 0 items)\n"
-        self.assertEqual(error, errfp.getvalue())
+        c = Calculator()
+        error = r"Cannot run 'cmd' \(stack has only 0 items\)$"
+        self.assertRaisesRegex(StackError, error, c.findStringAndArgs,
+                               'cmd', strToModifiers('r'), None)
 
     def testStackLengthOne(self):
         "Calling on a stack with only one item must return None, None"
-        errfp = StringIO()
-        c = Calculator(errfp=errfp)
+        c = Calculator()
         c.execute('4')
-        func, args = c.findCallableAndArgs('cmd', strToModifiers('r'), None)
-        self.assertEqual((None, None), (func, args))
-        error = "Cannot run 'cmd' (stack has only 1 item)\n"
-        self.assertEqual(error, errfp.getvalue())
+        error = r"Cannot run 'cmd' \(stack has only 1 item\)$"
+        self.assertRaisesRegex(StackError, error, c.findStringAndArgs,
+                               'cmd', strToModifiers('r'), None)
 
     def testStackLengthTwoNoCount(self):
         """Calling on a stack with two items and no count must return
@@ -633,22 +626,18 @@ class TestFindStringAndArgs(TestCase):
 
     def testEmptyStack(self):
         "Calling on an empty stack must return None, None"
-        errfp = StringIO()
-        c = Calculator(errfp=errfp)
-        string, args = c.findStringAndArgs('cmd', Modifiers(), None)
-        self.assertEqual((None, None), (string, args))
-        error = "Cannot run 'cmd' (stack has only 0 items)\n"
-        self.assertEqual(error, errfp.getvalue())
+        c = Calculator()
+        error = r"^Cannot run 'cmd' \(stack has only 0 items\)$"
+        self.assertRaisesRegex(StackError, error, c.findStringAndArgs,
+                               'cmd', Modifiers(), None)
 
     def testStackLengthOne(self):
         "Calling on a stack with only one item must return None, None"
-        errfp = StringIO()
-        c = Calculator(errfp=errfp)
+        c = Calculator()
         c.execute('4')
-        string, args = c.findStringAndArgs('cmd', Modifiers(), None)
-        self.assertEqual((None, None), (string, args))
-        error = "Cannot run 'cmd' (stack has only 1 item)\n"
-        self.assertEqual(error, errfp.getvalue())
+        error = r"^Cannot run 'cmd' \(stack has only 1 item\)$"
+        self.assertRaisesRegex(StackError, error, c.findStringAndArgs,
+                               'cmd', Modifiers(), None)
 
     def testStackLengthTwoNoCount(self):
         """Calling on a stack with two items and no count must return
@@ -674,17 +663,14 @@ class TestFindStringAndArgs(TestCase):
     def testStackLengthThreeWithCountError(self):
         """Calling on a stack with three items and a count that points to a
         non-string must result in an error"""
-        errfp = StringIO()
-        c = Calculator(errfp=errfp)
+        c = Calculator()
         c.execute("'string'")
         c.execute('4')
         c.execute('5')
-        string, args = c.findStringAndArgs('cmd', Modifiers(), 1)
-        self.assertIs(None, string)
-        self.assertEqual(None, args)
-        error = ("Cannot run 'cmd' with 1 argument. Stack item (4) is "
-                 "not a string\n")
-        self.assertEqual(error, errfp.getvalue())
+        error = (r"^Cannot run 'cmd' with 1 argument. Stack item \(4\) is "
+                 r"not a string$")
+        self.assertRaisesRegex(StackError, error, c.findStringAndArgs,
+                               'cmd', Modifiers(), 1)
 
     def testStackLengthThree(self):
         "Calling on a stack with three items (count=2) must return correctly"
@@ -713,22 +699,18 @@ class TestFindStringAndArgsReversed(TestCase):
 
     def testEmptyStack(self):
         "Calling on an empty stack must return None, None"
-        errfp = StringIO()
-        c = Calculator(errfp=errfp)
-        string, args = c.findStringAndArgs('cmd', strToModifiers('r'), None)
-        self.assertEqual((None, None), (string, args))
-        error = "Cannot run 'cmd' (stack has only 0 items)\n"
-        self.assertEqual(error, errfp.getvalue())
+        c = Calculator()
+        error = r"^Cannot run 'cmd' \(stack has only 0 items\)$"
+        self.assertRaisesRegex(StackError, error, c.findStringAndArgs,
+                               'cmd', strToModifiers('r'), None)
 
     def testStackLengthOne(self):
-        "Calling on a stack with only one item must return None, None"
-        errfp = StringIO()
-        c = Calculator(errfp=errfp)
+        "Calling on a stack with only one item must result in a StackError"
+        c = Calculator()
         c.execute('4')
-        string, args = c.findStringAndArgs('cmd', strToModifiers('r'), None)
-        self.assertEqual((None, None), (string, args))
-        error = "Cannot run 'cmd' (stack has only 1 item)\n"
-        self.assertEqual(error, errfp.getvalue())
+        error = r"^Cannot run 'cmd' \(stack has only 1 item\)$"
+        self.assertRaisesRegex(StackError, error, c.findStringAndArgs,
+                               'cmd', strToModifiers('r'), None)
 
     def testStackLengthTwoNoCount(self):
         """Calling on a stack with two items and no count must return

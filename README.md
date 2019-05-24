@@ -498,6 +498,32 @@ There are two kinds of commands: normal and special.
     s: split
 ```
 
+## Variables
+
+You can set variables and push them (or their values) onto the stack:
+
+```sh
+$ rpn.py --noSplit
+--> a = 4
+--> a
+--> f
+[4]
+--> a:!
+--> f
+[4, Variable(a, current value: 4)]
+--> a = 10
+--> f
+[4, Variable(a, current value: 10)]
+--> 20
+--> +:p
+30
+```
+
+## Undo
+
+The effect of commands on the stack and variables can be undone with the
+`undo` command. There is currently only one level of undo.
+
 ## History
 
 `rpn.py` makes use of Python's
@@ -510,8 +536,9 @@ saved to `~/.pycalc_history` if your version of readline has the
 
 * Add direct access to functionality from [numpy](https://www.numpy.org/).
 * Read start-up file of user-defined functions.
-* Add an `r` modifier to reverse the order of args to a function call.
 * Outlaw zero count.
+* When taking things off the stack to give to functions, we should check to
+  see if they are `Variable` or `Function` instances.
 
 ## Thanks
 

@@ -17,10 +17,13 @@ except ImportError:
     else:
         raise
 
+from rpnpy.errors import StackError
 from rpnpy.functions import addSpecialFunctions
 from rpnpy.inspect import countArgs
 from rpnpy.io import findCommands
-from rpnpy.errors import UnknownModifiersError, IncompatibleModifiersError
+from rpnpy.errors import (
+    UnknownModifiersError, IncompatibleModifiersError,
+    HANDLED_CLEANLY, HANDLED_WITH_ERRORS, UNHANDLED)
 
 
 class Function:
@@ -290,9 +293,12 @@ class Calculator:
             try:
                 self.pprint(self.stack[n])
             except IndexError:
-                self.err(
-                    'Cannot print stack item %d (stack has only %d item%s)' %
-                    (n, len(self), '' if len(self) == 1 else 's'))
+                if n == -1:
+                    self.err('Cannot print top of stack item (stack is empty)')
+                else:
+                    self.err(
+                        'Cannot print stack item %d (stack has only %d item%s)'
+                        % (n, len(self), '' if len(self) == 1 else 's'))
 
     def saveState(self):
         """Save the stack and variable state."""
@@ -332,7 +338,8 @@ class Calculator:
                 add(result)
 
         if modifiers.print:
-            self.printStack(-1)
+            # self.printStack(-1)
+            self.pprint(result)
 
     def execute(self, line):
         """
@@ -402,63 +409,65 @@ class Calculator:
             return True
 
         errors = []
-        done, errs = self._tryFunction(command, modifiers, count)
+        status, errs = self._tryFunction(command, modifiers, count)
         if errs:
             errors.extend(errs)
 
-        if done is False:
-            done, errs = self._tryVariable(command, modifiers)
+        if status == UNHANDLED:
+            status, errs = self._tryVariable(command, modifiers)
             if errs:
                 errors.extend(errs)
 
-        if done is False:
-            done, errs = self._trySpecial(command, modifiers, count)
+        if status == UNHANDLED:
+            status, errs = self._trySpecial(command, modifiers, count)
             if errs:
                 errors.extend(errs)
 
-        if done is False:
-            done, errs = self._tryEval(command, modifiers, count)
+        if status == UNHANDLED:
+            status, errs = self._tryEval(command, modifiers, count)
             if errs:
                 errors.extend(errs)
 
-        if done is False and count is not None:
-            self.err('Modifier count %d will not be used' % count)
+        if status == UNHANDLED and count is not None:
+            self.debug('Modifier count %d will not be used' % count)
 
-        if done is False:
-            done, errs = self._tryExec(command)
+        if status in (UNHANDLED, HANDLED_WITH_ERRORS):
+            status, errs = self._tryExec(command)
             if errs:
                 errors.extend(errs)
 
-        if done is False:
+        if status == UNHANDLED:
             self.report('Could not find a way to execute %r' % command)
             for err in errors:
                 self.err(err)
-        else:
+        elif status == HANDLED_CLEANLY:
             # The command was run successfully one way or another. Report
             # what would otherwise have been errors via the debug output.
             for err in errors:
                 self.debug(err)
-            # Sanity check.
-            assert done is True
+        else:
+            assert status is HANDLED_WITH_ERRORS
+            for err in errors:
+                self.err(err)
 
-        return done
+        return status == HANDLED_CLEANLY
 
     def _tryFunction(self, command, modifiers, count):
         errors = []
         if modifiers.forceCommand:
-            return False, errors
+            return UNHANDLED, errors
 
         try:
             function = self._functions[command]
         except KeyError:
             self.debug('%r is not a known function' % (command,))
-            return False, errors
+            return UNHANDLED, errors
 
         self.debug('Found function %r' % command)
 
         if modifiers.push:
             self._finalize(function.func, modifiers)
-            return True, errors
+            return HANDLED_CLEANLY, errors
 
         if count is None:
             nArgs = len(self) if modifiers.all else function.nArgs
@@ -496,11 +505,11 @@ class Calculator:
             else:
                 self._finalize(result, modifiers, nPop=nArgs)
 
-        return True, errors
+        return (HANDLED_WITH_ERRORS if errors else HANDLED_CLEANLY), errors
 
     def _tryVariable(self, command, modifiers):
         if modifiers.forceCommand:
-            return False, None
+            return UNHANDLED, []
 
         if command in self._variables:
             self.debug('%r is a variable (value %r)' %
@@ -510,9 +519,9 @@ class Calculator:
                 else self._variables[command], modifiers)
         else:
             self.debug('%r is not a variable' % command)
-            return False, None
+            return UNHANDLED, []
 
-        return True, None
+        return HANDLED_CLEANLY, []
 
     def _trySpecial(self, command, modifiers, count):
         errors = []
@@ -521,16 +530,17 @@ class Calculator:
                 self._special[command](self, modifiers, count)
             except EOFError:
                 raise
+            except StackError as e:
+                errors.extend(e.args)
             except BaseException as e:
                 errors.append('Could not run special command %r: %s' %
                               (command, e))
-                raise
         elif modifiers.forceCommand:
             errors.append('Unknown special command: %s' % command)
         else:
-            return False, errors
+            return UNHANDLED, errors
 
-        return True, errors
+        return (HANDLED_WITH_ERRORS if errors else HANDLED_CLEANLY), errors
 
     def _tryEval(self, command, modifiers, count):
         errors = []
@@ -538,19 +548,18 @@ class Calculator:
             value = eval(command, globals(), self._variables)
         except BaseException as e:
             err = str(e)
-            self.debug('Could not eval(%r): %s' % (command, err))
+            errors.append('Could not eval(%r): %s' % (command, err))
             if (self._splitLines and
                 err.startswith(
                     'unexpected EOF while parsing (<string>, line 1)')):
-                self.debug('Did you accidentally include whitespace '
-                           'in a command line?')
-            return False, errors
+                errors.append('Did you accidentally include whitespace '
+                              'in a command line?')
+            return HANDLED_WITH_ERRORS, errors
         else:
             self.debug('eval %s worked: %r' % (command, value))
             count = 1 if count is None else count
             self._finalize(value, modifiers=modifiers, repeat=count)
-
-        return True, errors
+            return (HANDLED_WITH_ERRORS if errors else HANDLED_CLEANLY), errors
 
     def _tryExec(self, command):
         errors = []
@@ -558,17 +567,16 @@ class Calculator:
             exec(command, globals(), self._variables)
         except BaseException as e:
             err = str(e)
-            self.debug('Could not exec(%r): %s' % (command, err))
+            errors.append('Could not exec(%r): %s' % (command, err))
             if (self._splitLines and
                 err.startswith(
                     'unexpected EOF while parsing (<string>, line 1)')):
-                self.debug('Did you accidentally include whitespace '
-                           'in a command line?')
-            return False, errors
+                errors.append('Did you accidentally include whitespace '
+                              'in a command line?')
+            return HANDLED_WITH_ERRORS, errors
         else:
             self.debug('exec(%r) worked.' % command)
-
-        return True, errors
+            return HANDLED_CLEANLY, []
 
     def toggleDebug(self, newValue=None):
         """Turn debug on/off.
@@ -606,22 +614,22 @@ class Calculator:
         @param modifier: A C{Modifiers} instance.
         @param count: An C{int} count of the number of arguments wanted (or
             C{None} if no count was given).
+        @raise StackError: If there is a problem.
         @return: A 2-C{tuple} of the function and a C{tuple} of its arguments.
             If a suitable stack item cannot be found, return (None, None).
         """
         stackLen = len(self)
 
         if stackLen < 2 or count is not None and stackLen < count + 1:
-            self.err('Cannot run %r (stack has only %d item%s)' %
-                     (command, stackLen, '' if stackLen == 1 else 's'))
-            return None, None
+            raise StackError('Cannot run %r (stack has only %d item%s)' %
+                             (command, stackLen, '' if stackLen == 1 else 's'))
 
         if modifiers.reverse:
             item = self.stack[-1]
 
             if not predicate(item):
-                self.err('Top stack item (%r) is not %s' % (item, description))
-                return None, None
+                raise StackError('Top stack item (%r) is not %s' %
+                                 (item, description))
 
             if count is None:
                 count = (stackLen - 1 if modifiers.all else
@@ -629,11 +637,11 @@ class Calculator:
 
             nargsAvail = stackLen - 1
             if nargsAvail < count:
-                self.err('Cannot run %r with %d argument%s '
-                         '(stack has only %d item%s available)' %
-                         (command, count, '' if count == 1 else 's',
-                          nargsAvail, '' if nargsAvail == 1 else 's'))
-                return None, None
+                raise StackError(
+                    'Cannot run %r with %d argument%s '
+                    '(stack has only %d item%s available)' %
+                    (command, count, '' if count == 1 else 's',
+                     nargsAvail, '' if nargsAvail == 1 else 's'))
 
             args = self.stack[-(count + 1):-1]
         else:
@@ -649,9 +657,8 @@ class Calculator:
                         else:
                             args.append(arg)
                     else:
-                        self.err('Could not find %s item on stack' %
-                                 description)
-                        return None, None
+                        raise StackError('Could not find %s item on stack' %
+                                         description)
 
                     item = self.stack[-(len(args) + 1)]
                     args = args[::-1]
@@ -659,11 +666,10 @@ class Calculator:
                 item = self.stack[-(count + 1)]
 
                 if not predicate(item):
-                    self.err('Cannot run %r with %d argument%s. Stack item '
-                             '(%r) is not %s' % (
-                                 command, count, '' if count == 1 else 's',
-                                 item, description))
-                    return None, None
+                    raise StackError(
+                        'Cannot run %r with %d argument%s. Stack item (%r) is '
+                        'not %s' % (command, count, '' if count == 1 else 's',
+                                    item, description))
 
                 args = self.stack[-count:]
 
