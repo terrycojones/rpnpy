@@ -524,6 +524,7 @@ class Calculator:
             except BaseException as e:
                 errors.append('Could not run special command %r: %s' %
                               (command, e))
+                raise
         elif modifiers.forceCommand:
             errors.append('Unknown special command: %s' % command)
         else:
@@ -588,3 +589,109 @@ class Calculator:
             else:
                 self.debug('Debug off')
                 self._debug = False
+
+    def _findWithArgs(self, command, description, predicate, defaultArgCount,
+                      modifiers, count):
+        """Look for a callable function and its arguments on the stack.
+
+        @param command: The C{str} name of the command that was invoked.
+        @param description: A C{str} describing what is being sought. Used in
+            error messages if not suitable stack item is found.
+        @param predicate: A one-arg C{callable} that will be passed stack
+            items and must return C{True} when it identifies something that
+            satisfies the need of the caller.
+        @param defaultArgCount: A C{callable} that can be passed the found
+            stack item and which reurns an C{int} indicating how many
+            arguments should be associated with it.
+        @param modifier: A C{Modifiers} instance.
+        @param count: An C{int} count of the number of arguments wanted (or
+            C{None} if no count was given).
+        @return: A 2-C{tuple} of the function and a C{tuple} of its arguments.
+            If a suitable stack item cannot be found, return (None, None).
+        """
+        stackLen = len(self)
+
+        if stackLen < 2 or count is not None and stackLen < count + 1:
+            self.err('Cannot run %r (stack has only %d item%s)' %
+                     (command, stackLen, '' if stackLen == 1 else 's'))
+            return None, None
+
+        if modifiers.reverse:
+            item = self.stack[-1]
+
+            if not predicate(item):
+                self.err('Top stack item (%r) is not %s' % (item, description))
+                return None, None
+
+            if count is None:
+                count = (stackLen - 1 if modifiers.all else
+                         defaultArgCount(item))
+
+            nargsAvail = stackLen - 1
+            if nargsAvail < count:
+                self.err('Cannot run %r with %d argument%s '
+                         '(stack has only %d item%s available)' %
+                         (command, count, '' if count == 1 else 's',
+                          nargsAvail, '' if nargsAvail == 1 else 's'))
+                return None, None
+
+            args = self.stack[-(count + 1):-1]
+        else:
+            if count is None:
+                if modifiers.all:
+                    item = self.stack[0]
+                    args = self.stack[1:]
+                else:
+                    args = []
+                    for arg in reversed(self.stack):
+                        if predicate(arg):
+                            break
+                        else:
+                            args.append(arg)
+                    else:
+                        self.err('Could not find %s item on stack' %
+                                 description)
+                        return None, None
+
+                    item = self.stack[-(len(args) + 1)]
+                    args = args[::-1]
+            else:
+                item = self.stack[-(count + 1)]
+
+                if not predicate(item):
+                    self.err('Cannot run %r with %d argument%s. Stack item '
+                             '(%r) is not %s' % (
+                                 command, count, '' if count == 1 else 's',
+                                 item, description))
+                    return None, None
+
+                args = self.stack[-count:]
+
+        return item, args
+
+    def findCallableAndArgs(self, command, modifiers, count):
+        """Look for a callable function and its arguments on the stack.
+
+        @param modifier: A C{Modifiers} instance.
+        @return: A 2-C{tuple} of the function and a C{tuple} of its arguments.
+        """
+        def defaultArgCount(func):
+            return countArgs(func, 1)
+
+        return self._findWithArgs(command, 'callable', callable,
+                                  defaultArgCount, modifiers, count)
+
+    def findStringAndArgs(self, command, modifiers, count):
+        """Look for a string its arguments on the stack.
+
+        @param modifier: A C{Modifiers} instance.
+        @return: A 2-C{tuple} of the function and a C{tuple} of its arguments.
+        """
+        def predicate(x):
+            return isinstance(x, str)
+
+        def defaultArgCount(x):
+            return 1
+
+        return self._findWithArgs(command, 'a string', predicate,
+                                  defaultArgCount, modifiers, count)

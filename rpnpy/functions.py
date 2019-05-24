@@ -1,7 +1,5 @@
 import functools
 
-from rpnpy.inspect import countArgs
-
 # IMPORTANT
 #
 # If you add a special functions here:
@@ -143,24 +141,11 @@ def apply(calc, modifiers, count):
     @param modifiers: A C{Modifiers} instance.
     @param count: An C{int} count of the number of arguments to pass.
     """
-    func = calc.stack[-1]
-    if not callable(func):
-        calc.err('Top stack item (%r) is not callable' % func)
+    func, args = calc.findCallableAndArgs('apply', modifiers, count)
+    if func is None:
         return
-
-    if count is None:
-        count = len(calc) - 1 if modifiers.all else countArgs(func, 1)
-
-    nargsAvail = len(calc) - 1
-    if nargsAvail < count:
-        calc.err('Cannot call apply with %d argument%s '
-                 '(stack has only %d item%s available)' %
-                 (count, '' if count == 1 else 's',
-                  nargsAvail, '' if nargsAvail == 1 else 's'))
-        return
-
-    args = calc.stack[-(count + 1):-1]
-    calc._finalize(func(*args), modifiers, nPop=count + 1)
+    result = func(*args)
+    calc._finalize(result, modifiers, nPop=len(args) + 1)
 
 
 apply.names = ('apply',)
@@ -173,29 +158,17 @@ def join(calc, modifiers, count):
     @param modifiers: A C{Modifiers} instance.
     @param count: An C{int} count of the number of arguments to pass.
     """
-    sep = str(calc.stack[-1])
-
-    if count is None:
-        count = len(calc) - 1 if modifiers.all else 1
-
-    nargsAvail = len(calc) - 1
-    if nargsAvail < count:
-        calc.err('Cannot call join with %d argument%s '
-                 '(stack has only %d item%s available)' %
-                 (count, '' if count == 1 else 's',
-                  nargsAvail, '' if nargsAvail == 1 else 's'))
+    sep, args = calc.findStringAndArgs('join', modifiers, count)
+    if sep is None:
         return
-
-    if count == 1:
-        # Run on the first stack item after the separator (which will
-        # obviously need to be iterable).
-        args = calc.stack[-2]
-    else:
-        # Collect several stack items into a list and run on that list.
-        args = calc.stack[-(count + 1):-1]
-
+    if len(args) == 1:
+        # Only one argument from the stack, so run join on the value of
+        # that stack item rather than on a list with just that one stack
+        # item. Of course the stack item will need to be iterable or this
+        # will fail (as it should).
+        args = args[0]
     result = sep.join(map(str, args))
-    calc._finalize(result, modifiers, nPop=count + 1)
+    calc._finalize(result, modifiers, nPop=len(args) + 1)
 
 
 join.names = ('join',)
@@ -208,31 +181,16 @@ def reduce(calc, modifiers, count):
     @param modifiers: A C{Modifiers} instance.
     @param count: An C{int} count of the number of arguments to pass.
     """
-    if count is None:
-        count = len(calc) - 1 if modifiers.all else 1
-
-    nargsAvail = len(calc) - 1
-    if nargsAvail < count:
-        calc.err('Cannot call reduce with %d argument%s '
-                 '(stack has only %d item%s available)' %
-                 (count, '' if count == 1 else 's',
-                  nargsAvail, '' if nargsAvail == 1 else 's'))
+    func, args = calc.findCallableAndArgs('apply', modifiers, count)
+    if func is None:
         return
-
-    func = calc.stack[-1]
-    if not callable(func):
-        calc.err('Top stack item (%r) is not callable' % func)
-        return
-
-    if count == 1:
-        # Run on the first stack item after the function (which will
-        # obviously need to be iterable).
-        args = calc.stack[-2]
-    else:
-        # Collect several stack items into a list and run on that list.
-        args = calc.stack[-(count + 1):-1]
-
-    calc._finalize(functools.reduce(func, args), modifiers, nPop=count + 1)
+    if len(args) == 1:
+        # Only one argument from the stack, so run reduce on the value of
+        # that stack item rather than on a list with just that one stack
+        # item. Of course the stack item will need to be iterable or this
+        # will fail (as it should).
+        args = args[0]
+    calc._finalize(functools.reduce(func, args), modifiers, nPop=len(args) + 1)
 
 
 reduce.names = ('reduce',)

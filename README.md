@@ -132,11 +132,23 @@ $ rpn.py 'str:! [6,7,8] map:i'
 ['6', '7', '8']
 ```
 
-(Here the `:!` modifier causes the `str` function to be pushed onto the
-stack instead of being run, and the `:i` modifier causes the result of
-`map` to be iterated before being added to the stack.)
+### Notes
+1. Here the `:!` modifier causes the `str` function to be pushed onto the
+   stack instead of being run, and the `:i` modifier causes the result of
+   `map` to be iterated before being added to the stack.
+1. When you run a function (like `map`, or `apply`) that needs a callable
+   (or a function like `join` that needs a string) and you don't specify a
+   count (using `:3` for example), `rpn.py` will search the stack for a
+   suitable item and use the first one it finds. It doesn't really have a
+   choice in this case because it doesn't know how many arguments the
+   function (once it is found) will be applied to.  This should usually
+   work just fine. You can always use an explicit count (like `:3`) if not.
+   Note that this situation does not apply if you use the `:r` modifier
+   (see below) because in that case the callable (or string, in the case of
+   `join`) will be expected to be on the top of the stack (and its
+   signature can then be examined to know how many arguments to pass it).
 
-But you might find it more natural to use `map` and friends the other way
+You might find it more natural to use `map` and friends the other way
 around. I.e., first push the iterable, then push the function to be
 applied, and then call `map`.  In that case, you can use the `:r` modifier
 to tell the calculator to reverse the order of the arguments passed to a
@@ -499,6 +511,7 @@ saved to `~/.pycalc_history` if your version of readline has the
 * Add direct access to functionality from [numpy](https://www.numpy.org/).
 * Read start-up file of user-defined functions.
 * Add an `r` modifier to reverse the order of args to a function call.
+* Outlaw zero count.
 
 ## Thanks
 

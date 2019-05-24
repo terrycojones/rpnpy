@@ -1,3 +1,9 @@
+# 1.0.20 May 24, 2019
+
+Use new `findStringAndArgs` and `findCallableAndArgs` utility functions to
+find strings (for `join`) and callables (for `map`, `apply`, etc) plus
+their arguments on the stack
+
 # 1.0.19 May 22, 2019
 
 Added `join` special function and `:r` (reverse args) modifier, plus
