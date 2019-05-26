@@ -1,4 +1,10 @@
-# 1.0.21
+# 1.0.22 May 26, 2019
+
+Make sure processing of stack items converts them all from `Variable` and
+`Function` instances to the right thing for special commands. Added more
+tests. Improved README.
+
+# 1.0.21 May 26, 2019
 
 Improved error handling / reporting. Added `--print` option to auto-print
 results of operations.

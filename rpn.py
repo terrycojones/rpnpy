@@ -92,7 +92,8 @@ def parseArgs():
               'separate commands, treat each line as an entire command.'))
 
     parser.add_argument(
-        '--noPrint', action='store_false', default=True, dest='print',
+        '--noFinalPrint', action='store_false', default=True,
+        dest='finalPrint',
         help=('If given, do not print the stack after processing all commands '
               'from standard input.'))
 
@@ -129,10 +130,10 @@ if __name__ == '__main__':
             else:
                 # Execute the command line as a set of commands, following
                 # great suggestion by David Pattinson.
-                calc.batch((' '.join(args.files),), args.print)
+                calc.batch((' '.join(args.files),), args.finalPrint)
                 if args.stdin:
                     calc.repl(args.prompt)
         elif interactive:
             calc.repl(args.prompt)
         else:
-            calc.batch(sys.stdin, args.print)
+            calc.batch(sys.stdin, args.finalPrint)

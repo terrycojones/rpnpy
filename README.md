@@ -523,11 +523,24 @@ argument to `rpn.py`.
 `!`: Push the given thing (either a function or a variable) onto the stack,
 do not try to run or evaluate it.
 
-`r`: Reverse how a function (for `map`, `apply`, `reduce`) or a string
-(for `join`) is looked for on the stack. Normally the function or string
-argument to one of those special functions has to be pushed onto the stack
-first. If `:r` is used, the function or string can be given last (i.e., can
-be on the top of the stack).
+`r`: When applied to a special command, reverses how the function (for
+`map`, `apply`, `reduce`) or a string (for `join`) is looked for on the
+stack. Normally the function or string argument to one of those special
+functions has to be pushed onto the stack first. If `:r` is used, the
+function or string can be given last (i.e., can be on the top of the
+stack). In other contexts, causes all arguments given to a function to be
+reversed (i.e., to use a stack order opposite to the normal).
+
+```sh
+$ rpn.py '+:! 5 4 apply'
+9
+$ rpn.py '5 4 +:! apply:r'
+9
+$ rpn.py '5 4 -'
+1
+$ rpn.py '5 4 -:r'
+-1
+```
 
 `s`: Turn on line splitting on whitespace. Will not take effect until the
 next input line is read.
@@ -573,8 +586,7 @@ saved to `~/.pycalc_history` if your version of readline has the
 
 * Add direct access to functionality from [numpy](https://www.numpy.org/).
 * Read start-up file of user-defined functions.
-* When taking things off the stack to give to functions, we should check to
-  see if they are `Variable` or `Function` instances.
+* Add rotate-right and rotate-left stack modifying functions?
 
 ## Thanks
 

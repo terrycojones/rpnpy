@@ -108,6 +108,16 @@ class TestCalculator(TestCase):
             'Not enough args on stack! (+ needs 2 args, stack has 1 item)\n',
             err.getvalue())
 
+    def testAddVariables(self):
+        "add must work correctly when Variable instances are on the stack"
+        c = Calculator()
+        c.execute('a=4 b=5')
+        c.execute('a :!')
+        c.execute('b :!')
+        c.execute('+')
+        (result,) = c.stack
+        self.assertEqual(9, result)
+
     def testRegisterWithArgCount(self):
         """Registering and calling a new function and passing its argument
            count must work"""
@@ -756,6 +766,17 @@ class TestApply(TestCase):
         c.execute('apply :2')
         (result,) = c.stack
         self.assertEqual(8, result)
+
+    def testApplyVariables(self):
+        "apply must work correctly when Variable instances are on the stack"
+        c = Calculator()
+        c.execute('a=4 b=5')
+        c.execute('+ :!')
+        c.execute('a :!')
+        c.execute('b :!')
+        c.execute('apply')
+        (result,) = c.stack
+        self.assertEqual(9, result)
 
 
 class TestReduce(TestCase):

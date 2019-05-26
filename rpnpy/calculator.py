@@ -98,18 +98,19 @@ class Calculator:
     def pprint(self, *args, **kw):
         pprint(*args, stream=self._outfp, **kw)
 
-    def batch(self, fp, print_=False):
+    def batch(self, fp, finalPrint=False):
         """Non-interactively read and execute commands from a file.
 
         @param fp: An iterator to read commands from.
-        @param print_: If C{True}, print the stack after all commands are run.
+        @param finalPrint: If C{True}, print the stack after all commands are
+            run.
         """
         for line in fp:
             try:
                 self.execute(line)
             except EOFError:
                 break
-        if print_ and self.stack:
+        if finalPrint and self.stack:
             self.printStack(-1 if len(self) == 1 else None)
 
     def repl(self, prompt):
@@ -461,21 +462,13 @@ class Calculator:
                 (command, nArgs, '' if nArgs == 1 else 's',
                  len(self), '' if len(self) == 1 else 's'))
 
-        args = []
-        if nArgs:
-            for arg in self.stack[-nArgs:]:
-                if isinstance(arg, Function):
-                    args.append(arg.func)
-                elif isinstance(arg, Variable):
-                    args.append(self._variables[arg.name])
-                else:
-                    args.append(arg)
+        args = self.convertStackArgs(self.stack[-nArgs:]) if nArgs else []
 
-            if modifiers.reverse:
-                # Reverse the order of args so that the top of the
-                # stack (last element of the stack list) becomes the
-                # first argument to the function instead of the last.
-                args = args[::-1]
+        if modifiers.reverse and args:
+            # Reverse the order of args so that the top of the stack (last
+            # element of the stack list) becomes the first argument to the
+            # function instead of the last.
+            args = args[::-1]
 
         self.debug('Calling %s with %r' % (function.name, tuple(args)))
         try:
@@ -558,6 +551,23 @@ class Calculator:
             count = 1 if count is None else count
             self._finalize(value, modifiers=modifiers, repeat=count)
             return True, value
+
+    def convertStackArgs(self, args):
+        """Convert stack items to arguments for functions.
+
+        @param args: An iterable of stack items.
+        @return: A C{list} of arguments taken from the stack items.
+        """
+        result = []
+        for arg in args:
+            if isinstance(arg, Function):
+                result.append(arg.func)
+            elif isinstance(arg, Variable):
+                result.append(self._variables[arg.name])
+            else:
+                result.append(arg)
+
+        return result
 
     def toggleAutoPrint(self, newValue=None):
         """Turn auto printing on/off.
@@ -674,7 +684,7 @@ class Calculator:
 
                 args = self.stack[-count:]
 
-        return item, args
+        return item, self.convertStackArgs(args)
 
     def findCallableAndArgs(self, command, modifiers, count):
         """Look for a callable function and its arguments on the stack.
