@@ -414,6 +414,10 @@ class Calculator:
             self.debug('Empty command')
             return True
 
+        if count == 0:
+            self.debug('Count was zero - nothing to do!')
+            return True
+
         try:
             for func in (self._tryFunction, self._tryVariable,
                          self._trySpecial, self._tryEvalExec):

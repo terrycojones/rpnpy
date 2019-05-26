@@ -485,18 +485,55 @@ There are two kinds of commands: normal and special.
 
 ## Modifiers
 
-```
-    *: all
-    c: forceCommand
-    D: debug
-    i: iterate
-    n: noSplit
-    =: preserveStack
-    p: print
-    !: push
-    r: reverse
-    s: split
-```
+Modifiers for a command are introduced with a colon, `:`. The modifiers are
+all single letters and may also include a single non-negative integer. When
+line splitting is on, the colon and modifier letters and integer cannot
+contain whitespace. I.e., `:pr34`. If line splitting is off, whitespace is
+allowed (and ignored).
+
+The full list of modifiers is:
+
+
+`*` (all): Use all arguments from the stack in the command execution.
+
+`c` (forceCommand): Force the command line string to be interpreted as a
+special command. This must be used if you define a variable with a name
+like `quit` or `pop` and you then can't call the special `quit` command.
+
+`D` (debug): Toggle debug output.
+
+`i` (iterate): Iterate the result of the command and put the values onto
+the stack in a list. This is useful when you call a function that returns a
+generator or other special iterable object. It's a convenience for just
+calling the function (which would put the generator onto the stack) and
+then running `list`.
+
+`n` (noSplit): Turn off line splitting. Note that this will only take
+effect when processing the _next_ command.
+
+`=` (preserveStack): The command will be run but the stack will not be
+altered. This is useful in combination with the `p` modifier to print the
+result. It can be used to try an operation and see its result without
+actually doing it.  If you do execute a command and want to undo it, there
+is also the `undo` special command.
+
+`p` (print): Print the result (if any). See also the `P` option and the
+`--print` argument to `rpn.py`.
+
+`!` (push): Push the given thing (either a function or a variable) onto the
+stack, do not try to run or evaluate it.
+
+`r` (reverse): Reverse how a function (for `map`, `apply`, `reduce`) or a
+string (for `join`) is looked for on the stack. Normally the function or
+string argument to one of those special functions has to be pushed onto the
+stack first. If `:r` is used, the function or string can be given last
+(i.e., can be on the top of the stack).
+
+`s` (split): Turn on line splittign on whitespace. Will not take effect
+until the next input line is read.
+
+If a count is given, it is either interpreted as a number of times to push
+something onto the stack or the number of arguments to act on.
 
 ## Variables
 
@@ -536,7 +573,6 @@ saved to `~/.pycalc_history` if your version of readline has the
 
 * Add direct access to functionality from [numpy](https://www.numpy.org/).
 * Read start-up file of user-defined functions.
-* Outlaw zero count.
 * When taking things off the stack to give to functions, we should check to
   see if they are `Variable` or `Function` instances.
 

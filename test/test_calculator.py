@@ -78,26 +78,6 @@ class TestCalculator(TestCase):
         (result,) = c.stack
         self.assertEqual(4, result)
 
-    def testPop(self):
-        "Calling pop must work as expected"
-        c = Calculator()
-        c.execute('4 5 pop')
-        (result,) = c.stack
-        self.assertEqual(4, result)
-
-    def testPop2(self):
-        "Calling pop with a count of 2 must work as expected"
-        c = Calculator()
-        c.execute('3 4 5 pop:2')
-        (result,) = c.stack
-        self.assertEqual(3, result)
-
-    def testPopAll(self):
-        "Calling pop on the whole stack must work as expected"
-        c = Calculator()
-        c.execute('3 4 5 pop:*')
-        self.assertEqual([], c.stack)
-
     def testPushString(self):
         "Pushing a string must work as expected"
         c = Calculator()
@@ -826,3 +806,49 @@ class TestReduceReversed(TestCase):
         c.execute('+ :!')
         c.execute('reduce :2r')
         self.assertEqual([4, 11], c.stack)
+
+
+class TestPop(TestCase):
+    "Test the pop special function"
+
+    def testPop(self):
+        "Calling pop must work as expected"
+        c = Calculator()
+        c.execute('4 5 pop')
+        (result,) = c.stack
+        self.assertEqual(4, result)
+
+    def testPop2(self):
+        "Calling pop with a count of 2 must work as expected"
+        c = Calculator()
+        c.execute('3 4 5 pop:2')
+        (result,) = c.stack
+        self.assertEqual(3, result)
+
+    def testPopAll(self):
+        "Calling pop on the whole stack must work as expected"
+        c = Calculator()
+        c.execute('3 4 5 pop:*')
+        self.assertEqual([], c.stack)
+
+    def testPopWhenAVariableCalledPopExists(self):
+        """pop must put a value on the stack when there is a varible of that
+        name"""
+        c = Calculator()
+        c.execute('pop=4')
+        c.execute('6')
+        c.execute('5')
+        c.execute('pop')
+        self.assertEqual([6, 5, 4], c.stack)
+
+    def testPopForcedCommandWhenAVariableCalledPopExists(self):
+        """pop must work as expected when there is a varible of that name if
+        we force the command to be run using :c"""
+        c = Calculator()
+        c.execute('pop=4')
+        c.execute('6')
+        c.execute('5')
+        c.execute('pop:c')
+        print(c.stack)
+        (result,) = c.stack
+        self.assertEqual(6, result)
