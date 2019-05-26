@@ -1,3 +1,8 @@
+# 1.0.21
+
+Improved error handling / reporting. Added `--print` option to auto-print
+results of operations.
+
 # 1.0.20 May 24, 2019
 
 Use new `findStringAndArgs` and `findCallableAndArgs` utility functions to
