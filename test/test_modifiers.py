@@ -28,7 +28,7 @@ class TestModifiers(TestCase):
 
     def testKnownModifiers(self):
         "Make sure only known modifiers are present."
-        self.assertEqual(sorted('*=!cDinprs'), sorted(MODIFIERS))
+        self.assertEqual(sorted('*=!cDinpPrs'), sorted(MODIFIERS))
 
     def testNamesDiffer(self):
         "Make sure all known modifiers have different names."

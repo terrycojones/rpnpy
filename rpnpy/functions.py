@@ -1,5 +1,7 @@
 import functools
 
+from rpnpy.errors import CalculatorError
+
 # IMPORTANT
 #
 # If you add a special functions here:
@@ -33,6 +35,7 @@ def functions(calc, modifiers, count):
     """
     for name, func in sorted(calc._functions.items()):
         calc.report(name, func)
+    return calc.NO_VALUE
 
 
 functions.names = ('functions',)
@@ -46,6 +49,7 @@ def stack(calc, modifiers, count):
     @param count: An C{int} count of the number of arguments to pass.
     """
     calc.printStack()
+    return calc.NO_VALUE
 
 
 stack.names = ('stack', 's', 'f')
@@ -60,6 +64,7 @@ def variables(calc, modifiers, count):
     """
     for name, value in sorted(calc._variables.items()):
         calc.report('%s: %r' % (name, value))
+    return calc.NO_VALUE
 
 
 variables.names = ('variables', 'v')
@@ -78,6 +83,7 @@ def clear(calc, modifiers, count):
         else:
             calc._finalize(None, nPop=len(calc), modifiers=modifiers,
                            noValue=True)
+    return calc.NO_VALUE
 
 
 clear.names = ('clear', 'c')
@@ -92,12 +98,14 @@ def dup(calc, modifiers, count):
     """
     if calc.stack:
         if modifiers.preserveStack:
-            calc.err('The /= modifier makes no sense with dup')
-        else:
-            count = 1 if count is None else count
-            calc._finalize(calc.stack[-1], modifiers, repeat=count)
-    else:
-        calc.err('Cannot duplicate (stack is empty)')
+            raise CalculatorError('The /= modifier makes no sense with dup')
+
+        count = 1 if count is None else count
+        value = calc.stack[-1]
+        calc._finalize(value, modifiers, repeat=count)
+        return value
+
+    raise CalculatorError('Cannot duplicate (stack is empty)')
 
 
 dup.names = ('dup', 'd')
@@ -110,14 +118,17 @@ def undo(calc, modifiers, _):
     @param modifiers: A C{Modifiers} instance.
     """
     if calc._previousStack is None:
-        calc.err('No undo saved')
-    elif modifiers.preserveStack:
-        calc.err('The /= modifier makes no sense with undo')
-    elif modifiers.print:
-        calc.err('The /p modifier makes no sense with undo')
-    else:
-        calc.stack = calc._previousStack.copy()
-        calc._variables = calc._previousVariables.copy()
+        raise CalculatorError('No undo saved')
+
+    if modifiers.preserveStack:
+        raise CalculatorError('The /= modifier makes no sense with undo')
+
+    if modifiers.print:
+        raise CalculatorError('The /p modifier makes no sense with undo')
+
+    calc.stack = calc._previousStack.copy()
+    calc._variables = calc._previousVariables.copy()
+    return calc.NO_VALUE
 
 
 undo.names = ('undo', 'u')
@@ -142,10 +153,9 @@ def apply(calc, modifiers, count):
     @param count: An C{int} count of the number of arguments to pass.
     """
     func, args = calc.findCallableAndArgs('apply', modifiers, count)
-    if func is None:
-        return
     result = func(*args)
     calc._finalize(result, modifiers, nPop=len(args) + 1)
+    return result
 
 
 apply.names = ('apply',)
@@ -159,8 +169,6 @@ def join(calc, modifiers, count):
     @param count: An C{int} count of the number of arguments to pass.
     """
     sep, args = calc.findStringAndArgs('join', modifiers, count)
-    if sep is None:
-        return
     if len(args) == 1:
         # Only one argument from the stack, so run join on the value of
         # that stack item rather than on a list with just that one stack
@@ -169,6 +177,7 @@ def join(calc, modifiers, count):
         args = args[0]
     result = sep.join(map(str, args))
     calc._finalize(result, modifiers, nPop=len(args) + 1)
+    return result
 
 
 join.names = ('join',)
@@ -182,15 +191,15 @@ def reduce(calc, modifiers, count):
     @param count: An C{int} count of the number of arguments to pass.
     """
     func, args = calc.findCallableAndArgs('apply', modifiers, count)
-    if func is None:
-        return
     if len(args) == 1:
         # Only one argument from the stack, so run reduce on the value of
         # that stack item rather than on a list with just that one stack
         # item. Of course the stack item will need to be iterable or this
         # will fail (as it should).
         args = args[0]
-    calc._finalize(functools.reduce(func, args), modifiers, nPop=len(args) + 1)
+    value = functools.reduce(func, args)
+    calc._finalize(value, modifiers, nPop=len(args) + 1)
+    return value
 
 
 reduce.names = ('reduce',)
@@ -207,9 +216,10 @@ def pop(calc, modifiers, count):
     if len(calc) >= nArgs:
         value = calc.stack[-1] if nArgs == 1 else calc.stack[-nArgs:]
         calc._finalize(value, modifiers, nPop=nArgs, noValue=True)
-    else:
-        calc.err('Cannot pop %d item%s (stack length is %d)' %
-                 (nArgs, '' if nArgs == 1 else 's', len(calc)))
+        return value
+
+    raise CalculatorError('Cannot pop %d item%s (stack length is %d)' %
+                          (nArgs, '' if nArgs == 1 else 's', len(calc)))
 
 
 pop.names = ('pop',)
@@ -227,9 +237,10 @@ def reverse(calc, modifiers, count):
         if nArgs > 1:
             value = calc.stack[-nArgs:][::-1]
             calc._finalize(value, modifiers, nPop=nArgs, extend=True)
-    else:
-        calc.err('Cannot reverse %d item%s (stack length is %d)' %
-                 (nArgs, '' if nArgs == 1 else 's', len(calc)))
+            return value
+
+    raise CalculatorError('Cannot reverse %d item%s (stack length is %d)' %
+                          (nArgs, '' if nArgs == 1 else 's', len(calc)))
 
 
 reverse.names = ('reverse', 'rev')
@@ -244,8 +255,9 @@ def swap(calc, modifiers, _):
     if len(calc) > 1:
         calc._finalize(calc.stack[-2:][::-1], modifiers=modifiers,
                        nPop=2, extend=True)
-    else:
-        calc.err('Cannot swap (stack needs 2 items)')
+        return calc.NO_VALUE
+
+    raise CalculatorError('Cannot swap (stack needs 2 items)')
 
 
 swap.names = ('swap',)
@@ -261,7 +273,9 @@ def list_(calc, modifiers, count):
     """
     if modifiers.push:
         calc._finalize(list, modifiers=modifiers)
-    elif calc.stack:
+        return list
+
+    if calc.stack:
         count = (len(calc) if modifiers.all else 1) if count is None else count
         if count == 1:
             value = calc.stack[-1]
@@ -275,12 +289,13 @@ def list_(calc, modifiers, count):
             if len(calc) >= count:
                 value = calc.stack[-count:]
             else:
-                calc.err('Cannot list %d item%s (stack length is %d)' %
-                         (count, '' if count == 1 else 's', len(calc)))
-                return
+                raise CalculatorError(
+                    'Cannot list %d item%s (stack length is %d)' %
+                    (count, '' if count == 1 else 's', len(calc)))
         calc._finalize(value, modifiers=modifiers, nPop=count)
-    else:
-        calc.err('Cannot run list (stack is empty)')
+        return value
+
+    raise CalculatorError('Cannot run list (stack is empty)')
 
 
 list_.names = ('list',)

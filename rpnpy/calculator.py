@@ -22,8 +22,7 @@ from rpnpy.functions import addSpecialFunctions
 from rpnpy.inspect import countArgs
 from rpnpy.io import findCommands
 from rpnpy.errors import (
-    UnknownModifiersError, IncompatibleModifiersError,
-    HANDLED_CLEANLY, HANDLED_WITH_ERRORS, UNHANDLED)
+    UnknownModifiersError, IncompatibleModifiersError, CalculatorError)
 
 
 class Function:
@@ -58,9 +57,13 @@ class Variable:
 class Calculator:
 
     OVERRIDES = set('builtins.list builtins.quit functools.reduce'.split())
+    # Sentinel value for calculator functions to return to indicate that they
+    # did not result in a value that can/should be printed.
+    NO_VALUE = object()
 
-    def __init__(self, splitLines=True, separator=None, outfp=sys.stdout,
-                 errfp=sys.stderr, debug=False):
+    def __init__(self, autoPrint=False, splitLines=True, separator=None,
+                 outfp=sys.stdout, errfp=sys.stderr, debug=False):
+        self._autoPrint = autoPrint
         self._splitLines = splitLines
         self._separator = separator
         self._outfp = outfp
@@ -401,6 +404,9 @@ class Calculator:
                     (count, stackLen, '' if stackLen == 1 else 's'))
                 return False
 
+        if modifiers.autoPrint:
+            self.toggleAutoPrint()
+
         if modifiers.debug:
             self.toggleDebug()
 
@@ -408,175 +414,166 @@ class Calculator:
             self.debug('Empty command')
             return True
 
-        errors = []
-        status, errs = self._tryFunction(command, modifiers, count)
-        if errs:
-            errors.extend(errs)
-
-        if status == UNHANDLED:
-            status, errs = self._tryVariable(command, modifiers)
-            if errs:
-                errors.extend(errs)
-
-        if status == UNHANDLED:
-            status, errs = self._trySpecial(command, modifiers, count)
-            if errs:
-                errors.extend(errs)
-
-        if status == UNHANDLED:
-            status, errs = self._tryEval(command, modifiers, count)
-            if errs:
-                errors.extend(errs)
-
-        if status == UNHANDLED and count is not None:
-            self.debug('Modifier count %d will not be used' % count)
-
-        if status in (UNHANDLED, HANDLED_WITH_ERRORS):
-            status, errs = self._tryExec(command)
-            if errs:
-                errors.extend(errs)
-
-        if status == UNHANDLED:
-            self.report('Could not find a way to execute %r' % command)
-            for err in errors:
+        try:
+            for func in (self._tryFunction, self._tryVariable,
+                         self._trySpecial, self._tryEvalExec):
+                status, value = func(command, modifiers, count)
+                if status:
+                    if (value is not self.NO_VALUE and
+                            (modifiers.print or self._autoPrint)):
+                        self.pprint(value)
+                    return True
+            else:
+                raise CalculatorError('Could not find a way to execute %r' %
+                                      command)
+        except (CalculatorError, StackError) as e:
+            for err in e.args:
                 self.err(err)
-        elif status == HANDLED_CLEANLY:
-            # The command was run successfully one way or another. Report
-            # what would otherwise have been errors via the debug output.
-            for err in errors:
-                self.debug(err)
-        else:
-            assert status is HANDLED_WITH_ERRORS
-            for err in errors:
-                self.err(err)
-
-        return status == HANDLED_CLEANLY
+            return False
 
     def _tryFunction(self, command, modifiers, count):
-        errors = []
         if modifiers.forceCommand:
-            return UNHANDLED, errors
+            return False, self.NO_VALUE
 
         try:
             function = self._functions[command]
         except KeyError:
             self.debug('%r is not a known function' % (command,))
-            return UNHANDLED, errors
+            return False, self.NO_VALUE
 
         self.debug('Found function %r' % command)
 
         if modifiers.push:
             self._finalize(function.func, modifiers)
-            return HANDLED_CLEANLY, errors
+            return True, function.func
 
-        if count is None:
-            nArgs = len(self) if modifiers.all else function.nArgs
-        else:
-            nArgs = count
+        nArgs = ((len(self) if modifiers.all else function.nArgs)
+                 if count is None else count)
 
         if len(self) < nArgs:
-            self.err(
+            raise CalculatorError(
                 'Not enough args on stack! (%s needs %d arg%s, stack has '
                 '%d item%s)' %
                 (command, nArgs, '' if nArgs == 1 else 's',
                  len(self), '' if len(self) == 1 else 's'))
+
+        args = []
+        if nArgs:
+            for arg in self.stack[-nArgs:]:
+                if isinstance(arg, Function):
+                    args.append(arg.func)
+                elif isinstance(arg, Variable):
+                    args.append(self._variables[arg.name])
+                else:
+                    args.append(arg)
+
+            if modifiers.reverse:
+                # Reverse the order of args so that the top of the
+                # stack (last element of the stack list) becomes the
+                # first argument to the function instead of the last.
+                args = args[::-1]
+
+        self.debug('Calling %s with %r' % (function.name, tuple(args)))
+        try:
+            result = function.func(*args)
+        except BaseException as e:
+            raise CalculatorError(
+                'Exception running %s(%s): %s' %
+                (function.name, ', '.join(map(str, args)), e))
         else:
-            args = []
-            if nArgs:
-                for arg in self.stack[-nArgs:]:
-                    if isinstance(arg, Function):
-                        args.append(arg.func)
-                    elif isinstance(arg, Variable):
-                        args.append(self._variables[arg.name])
-                    else:
-                        args.append(arg)
+            self._finalize(result, modifiers, nPop=nArgs)
+            return True, result
 
-                if modifiers.reverse:
-                    # Reverse the order of args so that the top of the
-                    # stack (last element of the stack list) becomes the
-                    # first argument to the function instead of the last.
-                    args = args[::-1]
-            self.debug('Calling %s with %r' % (function.name, tuple(args)))
-            try:
-                result = function.func(*args)
-            except BaseException as e:
-                errors.append('Exception running %s(%s): %s' %
-                              (function.name, ', '.join(map(str, args)), e))
-            else:
-                self._finalize(result, modifiers, nPop=nArgs)
-
-        return (HANDLED_WITH_ERRORS if errors else HANDLED_CLEANLY), errors
-
-    def _tryVariable(self, command, modifiers):
+    def _tryVariable(self, command, modifiers, count):
         if modifiers.forceCommand:
-            return UNHANDLED, []
+            return False, self.NO_VALUE
+
+        if count is None:
+            count = 1
 
         if command in self._variables:
             self.debug('%r is a variable (value %r)' %
                        (command, self._variables[command]))
-            self._finalize(
-                Variable(command, self._variables) if modifiers.push
-                else self._variables[command], modifiers)
+            value = (Variable(command, self._variables) if modifiers.push
+                     else self._variables[command])
+            self._finalize([value] * count, modifiers, extend=True)
+            return True, value
         else:
             self.debug('%r is not a variable' % command)
-            return UNHANDLED, []
-
-        return HANDLED_CLEANLY, []
+            return False, self.NO_VALUE
 
     def _trySpecial(self, command, modifiers, count):
-        errors = []
         if command in self._special:
             try:
-                self._special[command](self, modifiers, count)
+                value = self._special[command](self, modifiers, count)
             except EOFError:
                 raise
-            except StackError as e:
-                errors.extend(e.args)
             except BaseException as e:
-                errors.append('Could not run special command %r: %s' %
-                              (command, e))
-        elif modifiers.forceCommand:
-            errors.append('Unknown special command: %s' % command)
-        else:
-            return UNHANDLED, errors
+                raise CalculatorError('Could not run special command %r: %s' %
+                                      (command, e))
+            return True, value
 
-        return (HANDLED_WITH_ERRORS if errors else HANDLED_CLEANLY), errors
+        if modifiers.forceCommand:
+            raise CalculatorError('Unknown special command: %s' % command)
 
-    def _tryEval(self, command, modifiers, count):
+        return False, self.NO_VALUE
+
+    def _tryEvalExec(self, command, modifiers, count):
         errors = []
+        possibleWhiteSpace = False
         try:
             value = eval(command, globals(), self._variables)
         except BaseException as e:
             err = str(e)
             errors.append('Could not eval(%r): %s' % (command, err))
             if (self._splitLines and
-                err.startswith(
-                    'unexpected EOF while parsing (<string>, line 1)')):
-                errors.append('Did you accidentally include whitespace '
-                              'in a command line?')
-            return HANDLED_WITH_ERRORS, errors
+                    err.startswith(
+                        'unexpected EOF while parsing (<string>, line 1)')):
+                possibleWhiteSpace = True
+
+            try:
+                exec(command, globals(), self._variables)
+            except BaseException as e:
+                err = str(e)
+                errors.append('Could not exec(%r): %s' % (command, err))
+                if (not possibleWhiteSpace and self._splitLines and
+                        err.startswith(
+                            'unexpected EOF while parsing (<string>, '
+                            'line 1)')):
+                    possibleWhiteSpace = True
+
+                if possibleWhiteSpace:
+                    errors.append('Did you accidentally include whitespace '
+                                  'in a command line?')
+                raise CalculatorError(*errors)
+            else:
+                self.debug('exec(%r) worked.' % command)
+                return True, self.NO_VALUE
         else:
             self.debug('eval %s worked: %r' % (command, value))
             count = 1 if count is None else count
             self._finalize(value, modifiers=modifiers, repeat=count)
-            return (HANDLED_WITH_ERRORS if errors else HANDLED_CLEANLY), errors
+            return True, value
 
-    def _tryExec(self, command):
-        errors = []
-        try:
-            exec(command, globals(), self._variables)
-        except BaseException as e:
-            err = str(e)
-            errors.append('Could not exec(%r): %s' % (command, err))
-            if (self._splitLines and
-                err.startswith(
-                    'unexpected EOF while parsing (<string>, line 1)')):
-                errors.append('Did you accidentally include whitespace '
-                              'in a command line?')
-            return HANDLED_WITH_ERRORS, errors
+    def toggleAutoPrint(self, newValue=None):
+        """Turn auto printing on/off.
+
+        @param newValue: A C{bool} new setting or C{None} to toggle.
+        """
+        if newValue is None:
+            if self._autoPrint:
+                self.debug('Auto print off')
+                self._autoPrint = False
+            else:
+                self._autoPrint = True
+                self.debug('Auto print on')
         else:
-            self.debug('exec(%r) worked.' % command)
-            return HANDLED_CLEANLY, []
+            if newValue:
+                self._autoPrint = True
+                self.debug('Auto print on')
+            else:
+                self.debug('Auto print off')
+                self._autoPrint = False
 
     def toggleDebug(self, newValue=None):
         """Turn debug on/off.

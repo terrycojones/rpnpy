@@ -380,7 +380,8 @@ class TestReverseSpecialCommand(TestCase):
         errfp = StringIO()
         c = Calculator(errfp=errfp)
         self.assertFalse(c.execute('4 5 6 reverse:10'))
-        error = 'Cannot reverse 10 items (stack length is 3)\n'
+        error = ("Could not run special command 'reverse': Cannot reverse 10 "
+                 "items (stack length is 3)\n")
         self.assertEqual(error, errfp.getvalue())
 
 

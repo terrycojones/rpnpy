@@ -1,5 +1,3 @@
-from collections import namedtuple
-
 from rpnpy.errors import UnknownModifiersError, IncompatibleModifiersError
 
 
@@ -11,14 +9,46 @@ MODIFIERS = {
     'n': 'noSplit',
     '=': 'preserveStack',
     'p': 'print',
+    'P': 'autoPrint',
     '!': 'push',
     'r': 'reverse',
     's': 'split',
 }
 
-Modifiers = namedtuple(
-    'Modifiers', sorted(MODIFIERS.values()),
-    defaults=[False] * len(MODIFIERS))
+
+class Modifiers:
+    "Hold information about command modifiers."
+
+    def __init__(self, all=False, forceCommand=False, debug=False,
+                 iterate=False, noSplit=False, preserveStack=False,
+                 print=False, autoPrint=False, push=False, reverse=False,
+                 split=False):
+        self.all = all
+        self.forceCommand = forceCommand
+        self.debug = debug
+        self.iterate = iterate
+        self.noSplit = noSplit
+        self.preserveStack = preserveStack
+        self.print = print
+        self.autoPrint = autoPrint
+        self.push = push
+        self.reverse = reverse
+        self.split = split
+
+    def __eq__(self, other):
+        return all((
+            self.all == other.all,
+            self.forceCommand == other.forceCommand,
+            self.debug == other.debug,
+            self.iterate == other.iterate,
+            self.noSplit == other.noSplit,
+            self.preserveStack == other.preserveStack,
+            self.print == other.print,
+            self.autoPrint == other.autoPrint,
+            self.push == other.push,
+            self.reverse == other.reverse,
+            self.split == other.split,
+        ))
 
 
 def strToModifiers(s):

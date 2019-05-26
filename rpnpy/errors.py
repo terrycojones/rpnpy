@@ -1,3 +1,7 @@
+class CalculatorError(Exception):
+    'An error occurred in executing a command.'
+
+
 class UnknownModifiersError(Exception):
     'Unknown modifier given in a command.'
 
@@ -8,6 +12,3 @@ class IncompatibleModifiersError(Exception):
 
 class StackError(Exception):
     'An error occurred while examining the stack for arguments'
-
-
-HANDLED_CLEANLY, HANDLED_WITH_ERRORS, UNHANDLED = range(3)

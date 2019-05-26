@@ -79,6 +79,10 @@ def parseArgs():
         help='Print verbose information about how commandsa are run.')
 
     parser.add_argument(
+        '--print', action='store_true', default=False,
+        help='Print the result of each command')
+
+    parser.add_argument(
         '--version', action='store_true', default=False,
         help='Print the version number and exit.')
 
@@ -108,8 +112,8 @@ if __name__ == '__main__':
         from rpnpy import __version__
         print(__version__)
     else:
-        calc = Calculator(splitLines=args.splitLines, separator=args.separator,
-                          debug=args.debug)
+        calc = Calculator(autoPrint=args.print, splitLines=args.splitLines,
+                          separator=args.separator, debug=args.debug)
 
         interactive = setupReadline()
 
