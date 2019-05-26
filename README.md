@@ -508,7 +508,7 @@ generator or other special iterable object. It's a convenience for just
 calling the function (which would put the generator onto the stack) and
 then running `list`.
 
-`n`: Turn off (thing: *n*o) line splitting. Note that this will only take
+`n`: Turn off (think: *n*o) line splitting. Note that this will only take
 effect when processing the _next_ command.
 
 `=`: The command will be run but the stack will not be altered (think: keep
