@@ -130,7 +130,7 @@ $ rpn.py 'str:! [6,7,8] map:i'
 1. Here the `:!` modifier causes the `str` function to be pushed onto the
    stack instead of being run, and the `:i` modifier causes the result of
    `map` to be iterated before being added to the stack.
-1. When you run a function (like `map`, or `apply`) that needs a callable
+1. When you run a function (like `map` or `apply`) that needs a callable
    (or a function like `join` that needs a string) and you don't specify a
    count (using `:3` for example), `rpn.py` will search the stack for a
    suitable item and use the first one it finds. It doesn't really have a
@@ -303,8 +303,6 @@ $ rpn.py --noSplit
 --> 212
 --> celcius
 --> f
-[212, <function celcius at 0x7fc975055f28>]
---> apply :p
 100.0
 
 $ rpn.py --noSplit
@@ -372,7 +370,7 @@ Did you accidentally include whitespace in a command line?
 
 this can be avoided with the `:n` (no split) modifier, but note that the
 modifier will only affect then next (and subsequent) lines. You can just
-give an empty command with the ':n' modifier to toggle to no line
+give an empty command with the `:n` modifier to toggle to no line
 splitting:
 
 ```sh

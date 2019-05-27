@@ -447,6 +447,11 @@ class Calculator:
             self._finalize(function.func, modifiers)
             return True, function.func
 
+        return self._runFunction(command, modifiers, count, function)
+
+    def _runFunction(self, command, modifiers, count, function):
+        "Run a Python function."
+
         nArgs = ((len(self) if modifiers.all else function.nArgs)
                  if count is None else count)
 
@@ -486,8 +491,16 @@ class Calculator:
         if command in self._variables:
             self.debug('%r is a variable (value %r)' %
                        (command, self._variables[command]))
-            value = (Variable(command, self._variables) if modifiers.push
-                     else self._variables[command])
+            value = self._variables[command]
+            if callable(value):
+                if not modifiers.push:
+                    return self._runFunction(
+                        command, modifiers, count,
+                        Function('<stdin>', value.__name__, value,
+                                 countArgs(value, 1)))
+            else:
+                if modifiers.push:
+                    value = Variable(command, self._variables)
             self._finalize([value] * count, modifiers, extend=True)
             return True, value
         else:

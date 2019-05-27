@@ -185,6 +185,23 @@ class TestCalculator(TestCase):
         (result,) = c.stack
         self.assertEqual(3, result)
 
+    def testDef(self):
+        "Use def to make a new function."
+        c = Calculator(splitLines=False)
+        c.execute('def celcius(f): return (f - 32) / 1.8')
+        c.execute('212')
+        c.execute('celcius')
+        (result,) = c.stack
+        self.assertEqual(100, result)
+
+    def testDefThenPush(self):
+        "Use def to make a new function and push it onto the stack."
+        c = Calculator(splitLines=False)
+        c.execute('def celcius(f): return (f - 32) / 1.8')
+        c.execute('celcius :!')
+        (result,) = c.stack
+        self.assertEqual('celcius', result.__name__)
+
     def testSumOneArg(self):
         "sum must take one arg by default"
         c = Calculator()

@@ -1,3 +1,8 @@
+# 1.0.25 May 28, 2019
+
+When a new function is defined (via `def`) and then used, it should be
+executed (it was being pushed onto the stack, not run).
+
 # 1.0.24 May 27, 2019
 
 Removed extra `print` command. Updated README.
