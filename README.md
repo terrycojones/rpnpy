@@ -223,7 +223,10 @@ $ rpn.py 'range(10):i reversed str:! map:ir "" join:r int sqrt 3 round:2'
 99380.799
 ```
 
-The ':r' on the `map` call makes it look for the function to run on the top
+The `:2` on the `round` call tells it to use two arguments from the stack
+(`round` uses one by default in `rpn.py`).
+
+The `:r` on the `map` call makes it look for the function to run on the top
 of the stack, rather than searching up the stack to find it. If you think
 further in advance, you can push the function first:
 
