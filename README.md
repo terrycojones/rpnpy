@@ -204,7 +204,7 @@ $ rpn.py 'True:5 list:*p sum'
 
 # Here's something a bit more long-winded (and totally pointless):
 #
-# Push 0..9 onto the stack
+# Push 0..9 onto the stack (iterating the result of 'range'.
 # call Python's 'reversed' function
 # push the 'str' function
 # use 'map' to convert the list of digits to strings
@@ -212,18 +212,34 @@ $ rpn.py 'True:5 list:*p sum'
 # convert the result to an int
 # take the square root
 # push 3 onto the stack
-# swap the top two stack elements
 # call 'round' to round the result to three decimal places
 #
 # the ':i' modifier (used here twice) causes the value from the command
 # to be iterated and the result to be put on the stack as a single list.
 # It's a convenient way to iterate over a generator, a range, a map,
 # dictionary keys, etc.
-$ rpn.py 'range(10):i reversed str:! map:i "" join int sqrt 3 swap round:2'
-9876543210
+
+$ rpn.py 'range(10):i reversed str:! map:ir "" join:r int sqrt 3 round:2'
+99380.799
 ```
 
-You could do that last one in Python with a bunch of parens:
+The ':r' on the map call makes it look for the function to run on the top
+of the stack, rather than searching up the stack to find it. If you think
+further in advance, you can push the function first:
+
+$ rpn.py 'str:! range(10):i reversed map:i "" join:r int sqrt 3 round:2'
+99380.799
+```
+
+The same goes for the string used by `join`: it could have been pushed
+first, and then there would be no need for the `:r` on the `join`:
+
+$ rpn.py '"" str:! range(10):i reversed map:i join int sqrt 3 round:2'
+99380.799
+```
+
+You could (of course!) do this last example in Python with a bunch of
+parens:
 
 ```python
 from math import sqrt
@@ -231,32 +247,15 @@ print(round(sqrt(int(''.join(map(str, reversed(range(10)))))), 3))
 ```
 
 The elimination of parens is the main beauty of RPN (at least
-esthetically - the stack model of computation is a pretty awesome idea
-too). The price is that you have to learn to think in postfix. On that
-subject, I could have pushed the `3` (the number of decimal places to round
-to) onto the stack at the very start of the last `rpn.py` command above,
-but I didn't think that far ahead, so I pushed it at the end and then
-called `swap` to swap around the top two stack elements. I.e., this works
-too:
+aesthetically - the stack model of computation is a pretty awesome idea
+too).  The price is that you have to learn to think in postfix. With the
+`:r` modifier, `rpn.py` tries to be flexible in where it will find things
+on the stack.  There's also the `swap` command in case you forget to push
+something and need to flip the top stack items before running some other
+command.
 
-```sh
-$ rpn.py '3 range(10):i reversed str:! map:i "" join int sqrt round:2'
-99380.799
-```
-
-There's another way to skin this cat, using the `:r` modifier, which
-reverses the order of the arguments being passed to a function. So instead
-of putting the `3` out front or putting it at the end and then calling
-`swap` (as I did originally), we can just ask for the arguments to be
-passed to round the other way around.
-
-```sh
-$ rpn.py 'range(10):i reversed str:! map:i "" join int sqrt 3 round:2r'
-99380.799
-```
-
-
-More involved calculations can be done in an interactive REPL session:
+It might be convenient to do more involved calculations in an interactive
+REPL session:
 
 ```sh
 # REPL usage, with automatic splitting of whitespace turned off
