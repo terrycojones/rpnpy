@@ -580,7 +580,14 @@ allowed (and ignored).
 The full list of modifiers is:
 
 
+*   `!`: Push the given thing (either a function or a variable) onto the stack,
+    do not try to run or evaluate it.
 *   `*`: Use all arguments from the stack in the command execution.
+*   `=`: The command will be run but the stack will not be altered (think: keep
+    the stack equal). This is useful in combination with the `p` modifier to
+    print the result. It can be used to try an operation and see its result
+    without actually doing it.  If you do execute a command and want to undo
+    it, there is also the `undo` special command.
 *   `c`: Force the command line string to be interpreted as a
     special command. This must be used if you define a variable with a name
     like `quit` or `pop` and you then can't call the special `quit` command.
@@ -590,18 +597,11 @@ The full list of modifiers is:
     generator or other special iterable object. It's a convenience for just
     calling the function (which would put the generator onto the stack) and
     then running `list`.
-*   `n`: Turn off (think: no) line splitting. Note that this will only take
-    effect when processing the _next_ command.
-*   `=`: The command will be run but the stack will not be altered (think: keep
-    the stack equal). This is useful in combination with the `p` modifier to
-    print the result. It can be used to try an operation and see its result
-    without actually doing it.  If you do execute a command and want to undo
-    it, there is also the `undo` special command.
+*   `n`: Turn off (think: no) line splitting. Note that this will only go into
+    effect from the _next_ command on.
 *   `p`: Print the result (if any). See also the `:P` modifier and the `--print`
     argument to `rpn.py`.
 *   `P`: Toggle automatic printing of all command results.
-*   `!`: Push the given thing (either a function or a variable) onto the stack,
-    do not try to run or evaluate it.
 *   `r`: When applied to a special command, reverses how the function (for
     `map`, `apply`, `reduce`) or a string (for `join`) is looked for on the
     stack. Normally the function or string argument to one of those special
@@ -620,11 +620,12 @@ The full list of modifiers is:
         $ rpn.py '5 4 -:r'
         -1
         ```
-*   `s`: Turn on line splitting on whitespace. Will not take effect until the
-    next input line is read.
+*   `s`: Turn on line splitting on whitespace. Note that this will only go into
+    effect from the _next_ command on.
 
 If a count is given, it is either interpreted as a number of times to push
-something onto the stack or the number of arguments to act on.
+something onto the stack or the number of arguments to act on, depending on
+context (um, sorry about that - should be clearer).
 
 ## Variables
 
