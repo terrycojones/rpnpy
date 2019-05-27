@@ -1,3 +1,7 @@
+# 1.0.23 May 27, 2019
+
+Added `map` as a special command. Updated README.
+
 # 1.0.22 May 26, 2019
 
 Make sure processing of stack items converts them all from `Variable` and

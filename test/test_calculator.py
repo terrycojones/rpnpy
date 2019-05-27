@@ -218,15 +218,6 @@ class TestCalculator(TestCase):
         (result,) = c.stack
         self.assertEqual(['h', 'e', 'l', 'l', 'o'], result)
 
-    def testIterateGenerator(self):
-        "The :i (iterate) modifier must work as expected on a generator"
-        c = Calculator()
-        c.execute('str :!')
-        c.execute('[1,2,3]')
-        c.execute('map :i')
-        (result,) = c.stack
-        self.assertEqual(['1', '2', '3'], result)
-
     def testItemgetter(self):
         "itemgetter must work correctly"
         c = Calculator(splitLines=False)
@@ -873,3 +864,24 @@ class TestPop(TestCase):
         print(c.stack)
         (result,) = c.stack
         self.assertEqual(6, result)
+
+
+class TestMap(TestCase):
+    "Test the map special function"
+
+    def testWithCount(self):
+        "map must work as expected when given a count"
+        c = Calculator()
+        c.execute('str :!')
+        c.execute('1 2 3')
+        c.execute('map :3i')
+        self.assertEqual(['1', '2', '3'], c.stack)
+
+    def testIterateGenerator(self):
+        "The :i (iterate) modifier must work as expected on a map generator"
+        c = Calculator()
+        c.execute('str :!')
+        c.execute('[1,2,3]')
+        c.execute('map :i')
+        (result,) = c.stack
+        self.assertEqual(['1', '2', '3'], result)

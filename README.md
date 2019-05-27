@@ -476,12 +476,54 @@ you can change the prompt using `--prompt` on the command line.
 
 ## Commands
 
-There are two kinds of commands: normal and special. 
+There are two kinds of commands: special and normal.
 
 ### Special commands
 
-    apply, clear, dup, functions, list, pop, print, quit, reduce, stack,
-    swap, undo, variables
+* *apply*: Apply a function to some arguments.
+* *clear* (or *c*): Clear the stack.
+* *dup* (or *d*): Duplicate `count` (default 1) arguments.
+* *functions*: Print a list of all known functions.
+* *join*: Join stack items with a string.
+* *list*: Convert the top stack item to a list by iterating it. With a count > 1
+    pops that many stack items off the stack and into a list that is pushed.
+* *pop*: Pop `count` (default 1) stack item.
+* *print* (or *p*): Print `count` (default 1) stack item from the top of the stack.
+* *quit* (or *q*): Quit
+* *reverse*: Reverse the `count` (default 2) top stack items.
+* *reduce*: Repeatedly apply a function to stack items (see
+  [functools.reduce](https://docs.python.org/3.7/library/functools.html#functools.reduce).
+* *stack* (or *s* or *f*): Print the whole stack.
+* *swap*: Swap the top two stack elements.
+* *undo*: Undo the last stack-changing operation and variable settings.
+* *variables*: Show all known variables and their values.
+
+### Normal
+
+Many functions from the `builtins`, `math`, and `operator` modules are
+available. Often you can just type the function name (e.g., `log10` not
+`math.log10`).  You can call a function with an argument if you want and
+the result will be pushed onto the stack:
+
+```sh
+$ rpn.py 'abs(-50)'
+```
+
+or if you just name the function it will be applied to the item (or items)
+on the top of the stack, using a heuristic guess at the number of arguments
+the function would normally take (the number of positional or
+positional-or-keyword arguments). If the guess is wrong, you can always
+`undo` and run the function again with an explicit number of arguments.
+
+```sh
+# Call 'round' (which takes one argument by default) on pi.
+$ rpn.py pi round
+3
+
+# Round pi to 10 decimal places. :2 tells 'round' to use two stack arguments.
+$ rpn.py pi 10 round:2
+3.1415926536
+```
 
 ## Modifiers
 
@@ -495,55 +537,46 @@ The full list of modifiers is:
 
 
 `*`: Use all arguments from the stack in the command execution.
-
 `c`: Force the command line string to be interpreted as a
-special command. This must be used if you define a variable with a name
-like `quit` or `pop` and you then can't call the special `quit` command.
-
+     special command. This must be used if you define a variable with a name
+     like `quit` or `pop` and you then can't call the special `quit` command.
 `D`: Toggle debug output.
-
 `i`: Iterate the result of the command and put the values onto
-the stack in a list. This is useful when you call a function that returns a
-generator or other special iterable object. It's a convenience for just
-calling the function (which would put the generator onto the stack) and
-then running `list`.
-
+     the stack in a list. This is useful when you call a function that returns a
+     generator or other special iterable object. It's a convenience for just
+     calling the function (which would put the generator onto the stack) and
+     then running `list`.
 `n`: Turn off (think: no) line splitting. Note that this will only take
-effect when processing the _next_ command.
-
+     effect when processing the _next_ command.
 `=`: The command will be run but the stack will not be altered (think: keep
-the stack equal). This is useful in combination with the `p` modifier to
-print the result. It can be used to try an operation and see its result
-without actually doing it.  If you do execute a command and want to undo
-it, there is also the `undo` special command.
-
+     the stack equal). This is useful in combination with the `p` modifier to
+     print the result. It can be used to try an operation and see its result
+     without actually doing it.  If you do execute a command and want to undo
+     it, there is also the `undo` special command.
 `p`: Print the result (if any). See also the `P` option and the `--print`
-argument to `rpn.py`.
-
+     argument to `rpn.py`.
 `!`: Push the given thing (either a function or a variable) onto the stack,
-do not try to run or evaluate it.
-
+     do not try to run or evaluate it.
 `r`: When applied to a special command, reverses how the function (for
 `map`, `apply`, `reduce`) or a string (for `join`) is looked for on the
-stack. Normally the function or string argument to one of those special
-functions has to be pushed onto the stack first. If `:r` is used, the
-function or string can be given last (i.e., can be on the top of the
-stack). In other contexts, causes all arguments given to a function to be
-reversed (i.e., to use a stack order opposite to the normal).
+     stack. Normally the function or string argument to one of those special
+     functions has to be pushed onto the stack first. If `:r` is used, the
+     function or string can be given last (i.e., can be on the top of the
+     stack). In other contexts, causes all arguments given to a function to be
+     reversed (i.e., to use a stack order opposite to the normal).
 
-```sh
-$ rpn.py '+:! 5 4 apply'
-9
-$ rpn.py '5 4 +:! apply:r'
-9
-$ rpn.py '5 4 -'
-1
-$ rpn.py '5 4 -:r'
--1
-```
-
+        ```sh
+        $ rpn.py '+:! 5 4 apply'
+        9
+        $ rpn.py '5 4 +:! apply:r'
+        9
+        $ rpn.py '5 4 -'
+        1
+        $ rpn.py '5 4 -:r'
+        -1
+        ```
 `s`: Turn on line splitting on whitespace. Will not take effect until the
-next input line is read.
+     next input line is read.
 
 If a count is given, it is either interpreted as a number of times to push
 something onto the stack or the number of arguments to act on.

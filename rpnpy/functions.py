@@ -67,7 +67,7 @@ def variables(calc, modifiers, count):
     return calc.NO_VALUE
 
 
-variables.names = ('variables', 'v')
+variables.names = ('variables',)
 
 
 def clear(calc, modifiers, count):
@@ -131,7 +131,7 @@ def undo(calc, modifiers, _):
     return calc.NO_VALUE
 
 
-undo.names = ('undo', 'u')
+undo.names = ('undo',)
 
 
 def print_(calc, _, __):
@@ -169,6 +169,7 @@ def join(calc, modifiers, count):
     @param count: An C{int} count of the number of arguments to pass.
     """
     sep, args = calc.findStringAndArgs('join', modifiers, count)
+    nPop = len(args) + 1
     if len(args) == 1:
         # Only one argument from the stack, so run join on the value of
         # that stack item rather than on a list with just that one stack
@@ -176,7 +177,7 @@ def join(calc, modifiers, count):
         # will fail (as it should).
         args = args[0]
     result = sep.join(map(str, args))
-    calc._finalize(result, modifiers, nPop=len(args) + 1)
+    calc._finalize(result, modifiers, nPop=nPop)
     return result
 
 
@@ -191,6 +192,7 @@ def reduce(calc, modifiers, count):
     @param count: An C{int} count of the number of arguments to pass.
     """
     func, args = calc.findCallableAndArgs('apply', modifiers, count)
+    nPop = len(args) + 1
     if len(args) == 1:
         # Only one argument from the stack, so run reduce on the value of
         # that stack item rather than on a list with just that one stack
@@ -198,7 +200,7 @@ def reduce(calc, modifiers, count):
         # will fail (as it should).
         args = args[0]
     value = functools.reduce(func, args)
-    calc._finalize(value, modifiers, nPop=len(args) + 1)
+    calc._finalize(value, modifiers, nPop=nPop)
     return value
 
 
@@ -243,7 +245,7 @@ def reverse(calc, modifiers, count):
                           (nArgs, '' if nArgs == 1 else 's', len(calc)))
 
 
-reverse.names = ('reverse', 'rev')
+reverse.names = ('reverse',)
 
 
 def swap(calc, modifiers, _):
@@ -276,8 +278,8 @@ def list_(calc, modifiers, count):
         return list
 
     if calc.stack:
-        count = (len(calc) if modifiers.all else 1) if count is None else count
-        if count == 1:
+        nArgs = (len(calc) if modifiers.all else 1) if count is None else count
+        if nArgs == 1:
             value = calc.stack[-1]
             try:
                 iterator = iter(value)
@@ -286,19 +288,45 @@ def list_(calc, modifiers, count):
             else:
                 value = list(iterator)
         else:
-            if len(calc) >= count:
-                value = calc.stack[-count:]
+            if len(calc) >= nArgs:
+                value = calc.stack[-nArgs:]
             else:
                 raise CalculatorError(
                     'Cannot list %d item%s (stack length is %d)' %
-                    (count, '' if count == 1 else 's', len(calc)))
-        calc._finalize(value, modifiers=modifiers, nPop=count)
+                    (nArgs, '' if nArgs == 1 else 's', len(calc)))
+        calc._finalize(value, modifiers=modifiers, nPop=nArgs)
         return value
 
     raise CalculatorError('Cannot run list (stack is empty)')
 
 
 list_.names = ('list',)
+
+
+def map_(calc, modifiers, count):
+    """Map a function over some arguments.
+
+    @param calc: A C{Calculator} instance.
+    @param modifiers: A C{Modifiers} instance.
+    @param count: An C{int} count of the number of arguments to pass.
+    """
+    func, args = calc.findCallableAndArgs('map', modifiers, count)
+    nPop = len(args) + 1
+    if len(args) == 1:
+        # Only one argument from the stack, so run map on the value of
+        # that stack item rather than on a list with just that one stack
+        # item. Of course the stack item will need to be iterable or this
+        # will fail (as it should).
+        args = args[0]
+        extend = False
+    else:
+        extend = True
+    result = map(func, args)
+    calc._finalize(result, modifiers, extend=extend, nPop=nPop)
+    return result
+
+
+map_.names = ('map',)
 
 
 FUNCTIONS = (
@@ -308,6 +336,7 @@ FUNCTIONS = (
     functions,
     join,
     list_,
+    map_,
     pop,
     print_,
     quit,

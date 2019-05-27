@@ -56,7 +56,8 @@ class Variable:
 
 class Calculator:
 
-    OVERRIDES = set('builtins.list builtins.quit functools.reduce'.split())
+    OVERRIDES = set('builtins.list builtins.map builtins.quit '
+                    'functools.reduce'.split())
     # Sentinel value for calculator functions to return to indicate that they
     # did not result in a value that can/should be printed.
     NO_VALUE = object()
@@ -164,7 +165,6 @@ class Calculator:
                 ('operator.truediv', ('/', 'div')),
                 ('builtins.bool', ('bool',)),
                 ('builtins.int', ('int',)),
-                ('builtins.map', ('map',)),
                 ('builtins.max', ('max',)),
                 ('builtins.min', ('min',)),
                 ('builtins.print', ('print',)),
@@ -194,7 +194,6 @@ class Calculator:
                 (builtins, builtins.bool, 1),
                 (builtins, builtins.int, 1),
                 (builtins, builtins.float, 1),
-                (builtins, builtins.map, 2),
                 (builtins, builtins.max, 1),
                 (builtins, builtins.min, 1),
                 (builtins, builtins.print, 1),
@@ -342,7 +341,6 @@ class Calculator:
                 add(result)
 
         if modifiers.print:
-            # self.printStack(-1)
             self.pprint(result)
 
     def execute(self, line):
