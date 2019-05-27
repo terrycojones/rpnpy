@@ -527,6 +527,40 @@ $ rpn.py pi 10 round:2
 3.1415926536
 ```
 
+You can use the `functions` command to see a list of all known functions
+and the number of arguments they'll expect on the stack (assuming you don't
+pass arguments directly as with `abs(-50)` above or use a numerical
+modifier (e.g., `:3`) to explicitly specify the number of arguments that
+should be passed. Here's the first part of the output of `functions`:
+
+```sh
+$ rpn.py functions
+!= Function(ne (calls operator.ne with 2 args))
+* Function(mul (calls operator.mul with 2 args))
++ Function(add (calls operator.add with 2 args))
+- Function(sub (calls operator.sub with 2 args))
+/ Function(truediv (calls operator.truediv with 2 args))
+== Function(eq (calls operator.eq with 2 args))
+Context Function(Context (calls decimal.Context with 0 args))
+Decimal Function(Decimal (calls decimal.Decimal with 1 arg))
+DecimalTuple Function(DecimalTuple (calls decimal.DecimalTuple with 3 args))
+abs Function(abs (calls operator.abs with 1 arg))
+acos Function(acos (calls math.acos with 1 arg))
+acosh Function(acosh (calls math.acosh with 1 arg))
+add Function(add (calls operator.add with 2 args))
+all Function(all (calls builtins.all with 1 arg))
+and_ Function(and_ (calls operator.and_ with 2 args))
+any Function(any (calls builtins.any with 1 arg))
+ascii Function(ascii (calls builtins.ascii with 1 arg))
+asin Function(asin (calls math.asin with 1 arg))
+asinh Function(asinh (calls math.asinh with 1 arg))
+atan Function(atan (calls math.atan with 1 arg))
+atan2 Function(atan2 (calls math.atan2 with 2 args))
+atanh Function(atanh (calls math.atanh with 1 arg))
+attrgetter Function(attrgetter (calls operator.attrgetter with 1 arg))
+# 300+ lines deleted
+```
+
 ## Modifiers
 
 Modifiers for a command are introduced with a colon, `:`. The modifiers are
