@@ -318,7 +318,10 @@ $ rpn.py --noSplit
 
 The calculator either works interactively from the shell using a
 [read-eval-print loop](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop)
-(REPL) or will read commands from standard input.
+(REPL) or will read commands either from the command line or from standard
+input. If you specify file names (including using `-` to indicate standard
+input), commands will be read from the file(s).  Run `rpn.py --help` to see
+command line options.
 
 ### Command syntax
 
@@ -338,15 +341,15 @@ By default, `rpn.py` will split lines on whitespace and each field will be
 taken as a command. Hence:
 
 ```sh
-$ rpn.py
---> 4 5 +
+$ rpn.py 4 5 +
+9
 ```
 
 will push `4` and then `5` onto the stack and then replace those two values
 by their sum.
 
-`rpn.py` prints the `--> ` as its prompt (see the <a href="#repl">REPL
-section</a> below).
+In REPL mode, `rpn.py` prints `--> ` as a prompt (see the <a
+href="#repl">REPL section</a> below).
 
 In many cases it is easy to avoid using spaces and inadvertently having
 your input interpreted as multiple commands. For example, push a list onto
@@ -433,7 +436,6 @@ $ cat data
 # This is a comment
 +
 
-
 $ rpn.py < data
 9
 ```
@@ -453,10 +455,10 @@ $ echo 4 5 | rpn.py
 [4, 5]
 ```
 
-You can disable the final printing with `--noPrint`:
+You can disable the final printing with `--noFinalPrint`:
 
 ```sh
-$ echo 4 5 | rpn.py --noPrint
+$ echo 4 5 | rpn.py --noFinalPrint
 ```
 
 in which case you can print things yourself using the `p` command (see
