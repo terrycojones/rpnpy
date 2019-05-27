@@ -1,3 +1,7 @@
+# 1.0.24 May 27, 2019
+
+Removed extra `print` command. Updated README.
+
 # 1.0.23 May 27, 2019
 
 Added `map` as a special command. Updated README.

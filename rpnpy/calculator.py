@@ -340,9 +340,6 @@ class Calculator:
             for _ in range(repeat):
                 add(result)
 
-        if modifiers.print:
-            self.pprint(result)
-
     def execute(self, line):
         """
         Execute a line of commands. Stop executing commands on any error.

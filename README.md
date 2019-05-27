@@ -182,13 +182,18 @@ $ rpn.py '*:! [pi,10,10] reduce'
 314.1592653589793
 
 # Same thing, but push the numbers individually onto the stack, then the
-# ':3' tells reduce to iterate over three stack items. Use 'mul' as an
+# ':3' tells reduce to use three stack items. Use 'mul' as an
 # alternative to '*'.
-$ rpn.py 'pi 10 dup mul:! reduce:3'
+$ rpn.py 'mul:! pi 10 dup reduce:3'
 314.1592653589793
 
 # Equivalently, using ':*' to tell reduce to use the whole stack.
-$ rpn.py 'pi 10 dup *:! reduce:*'
+$ rpn.py '*:! pi 10 dup reduce:*'
+314.1592653589793
+
+# If you don't want to push the function for 'reduce' to use onto the stack
+# first, use ':r' to tell it to use the top of the stack:
+$ rpn.py 'pi 10 dup mul:! reduce:3r'
 314.1592653589793
 
 # Push 'True' onto the stack 5 times, turn the whole stack ('*') into a
