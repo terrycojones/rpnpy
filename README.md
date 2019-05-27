@@ -506,7 +506,9 @@ available. Often you can just type the function name (e.g., `log10` not
 the result will be pushed onto the stack:
 
 ```sh
-$ rpn.py 'abs(-50)'
+# This works unquoted in bash. You may need quotes in your shell (e.g, in fish).
+$ rpn.py abs(-50)
+50
 ```
 
 or if you just name the function it will be applied to the item (or items)
