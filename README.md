@@ -480,23 +480,23 @@ There are two kinds of commands: special and normal.
 
 ### Special commands
 
-* *apply*: Apply a function to some arguments.
-* *clear* (or *c*): Clear the stack.
-* *dup* (or *d*): Duplicate `count` (default 1) arguments.
-* *functions*: Print a list of all known functions.
-* *join*: Join stack items with a string.
-* *list*: Convert the top stack item to a list by iterating it. With a count > 1
+* `apply`: Apply a function to some arguments.
+* `clear` (or `c`): Clear the stack.
+* `dup` (or `d`): Duplicate `count` (default 1) arguments.
+* `functions`: Print a list of all known functions.
+* `join`: Join stack items with a string.
+* `list`: Convert the top stack item to a list by iterating it. With a count > 1
     pops that many stack items off the stack and into a list that is pushed.
-* *pop*: Pop `count` (default 1) stack item.
-* *print* (or *p*): Print `count` (default 1) stack item from the top of the stack.
-* *quit* (or *q*): Quit
-* *reverse*: Reverse the `count` (default 2) top stack items.
-* *reduce*: Repeatedly apply a function to stack items (see
+* `pop`: Pop `count` (default 1) stack item.
+* `print` (or `p`): Print `count` (default 1) stack item from the top of the stack.
+* `quit` (or `q`): Quit
+* `reverse`: Reverse the `count` (default 2) top stack items.
+* `reduce`: Repeatedly apply a function to stack items (see
   [functools.reduce](https://docs.python.org/3.7/library/functools.html#functools.reduce).
-* *stack* (or *s* or *f*): Print the whole stack.
-* *swap*: Swap the top two stack elements.
-* *undo*: Undo the last stack-changing operation and variable settings.
-* *variables*: Show all known variables and their values.
+* `stack` (or `s` or `f`): Print the whole stack.
+* `swap`: Swap the top two stack elements.
+* `undo`: Undo the last stack-changing operation and variable settings.
+* `variables`: Show all known variables and their values.
 
 ### Normal
 
