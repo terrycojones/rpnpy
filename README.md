@@ -597,12 +597,13 @@ The full list of modifiers is:
     print the result. It can be used to try an operation and see its result
     without actually doing it.  If you do execute a command and want to undo
     it, there is also the `undo` special command.
-*   `p`: Print the result (if any). See also the `P` option and the `--print`
+*   `p`: Print the result (if any). See also the `:P` modifier and the `--print`
     argument to `rpn.py`.
+*   `P`: Toggle automatic printing of all command results.
 *   `!`: Push the given thing (either a function or a variable) onto the stack,
     do not try to run or evaluate it.
 *   `r`: When applied to a special command, reverses how the function (for
-*   `map`, `apply`, `reduce`) or a string (for `join`) is looked for on the
+    `map`, `apply`, `reduce`) or a string (for `join`) is looked for on the
     stack. Normally the function or string argument to one of those special
     functions has to be pushed onto the stack first. If `:r` is used, the
     function or string can be given last (i.e., can be on the top of the
