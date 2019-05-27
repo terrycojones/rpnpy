@@ -21,12 +21,12 @@ I wrote this for 3 reasons:
     I still have one.
 1.  I have been using the [UNIX](https://en.wikipedia.org/wiki/Unix)
     [dc](https://en.wikipedia.org/wiki/Dc_(computer_program)) (desk
-    calculator) command on almost a daily basis since 1983 or so. `dc` is
-    ancient (in UNIX terms), predating even
-    [the C programming language](https://en.wikipedia.org/wiki/C_(programming_language)). `dc`
-    provides a minimalist and rather cryptic RPN calculator. You can even
-    program it, if you have a taste for mystery.  Here's a program I wrote
-    in 1984 to factor numbers:
+    calculator) command on almost a daily basis since 1983. `dc` is ancient
+    (in UNIX terms), predating even
+    [the C programming language](https://en.wikipedia.org/wiki/C_(programming_language)). It
+    provides a minimalist RPN calculator. You can even program it, if you
+    have a taste for mystery. Here's a program I wrote in 1984 to factor
+    numbers:
 
         [[neither]plsx]sn[c2pla2/sallx]se[ladv1+sm0=nla1=ncla2=pla2%0=elfx]sl
         [ldlm<pclald%0=cld2+sdlfx]sf[lap[is prime.]plsx]sp[ldplald/salfx]sc
@@ -36,8 +36,9 @@ I wrote this for 3 reasons:
     still runs today, 35 years later, totally unchanged.  But `dc` has only
     a tiny set of operations. So while it's great to be able to easily use
     it from the command line (e.g., `echo 4 5 + p | dc`), I frequently find
-    myself reaching for a real calculator or go into an interactive session
-    with a full programming language (Perl, Python, etc).
+    myself reaching for a real calculator or launch an interactive session
+    with a full programming language (Perl, Python, etc), which feels a bit
+    heavyweight and requires more syntax.
 1. I was curious what it would be like to have a Python RPN calculator that
    offered both the minimalist syntax of `dc` but that also offered a much
    wider range of operations and made it possible to put Python objects
