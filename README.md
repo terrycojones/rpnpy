@@ -365,10 +365,9 @@ but if you try that with embedded spaces, you'll get an error:
 ```sh
 $ rpn.py
 --> [1, 2, 3]
+Could not eval('[1,'): unexpected EOF while parsing (<string>, line 1)
 Could not exec('[1,'): unexpected EOF while parsing (<string>, line 1)
-No action taken on input '[1,'
-Could not exec('3]'): invalid syntax (<string>, line 1)
-No action taken on input '3]'
+Did you accidentally include whitespace in a command line?
 ```
 
 this can be avoided with the `:n` (no split) modifier, but note that the
