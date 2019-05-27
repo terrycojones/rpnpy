@@ -299,16 +299,22 @@ $ rpn.py --noSplit
 
 ```sh
 $ rpn.py --noSplit
---> def celcius(f): return (f - 32) / 1.8
+--> def celcius(f): return (f - 32) / 1.8  # Nothing is added to the stack here.
 --> 212
---> celcius
---> f
+--> celcius :p  # Use :p to print the result immediately
 100.0
 
 $ rpn.py --noSplit
+--> lambda f: (f - 32) / 1.8
+--> 212
+--> apply :p
+100.0
+
+# Same as above, but push the anonymous function last.
+$ rpn.py --noSplit
 --> 212
 --> lambda f: (f - 32) / 1.8
---> apply :p
+--> apply :pr
 100.0
 ```
 
