@@ -375,7 +375,7 @@ Did you accidentally include whitespace in a command line?
 ```
 
 this can be avoided with the `:n` (no split) modifier, but note that the
-modifier will only affect then next (and subsequent) lines. You can just
+modifier will only affect the _next_ (and subsequent) lines. You can just
 give an empty command with the `:n` modifier to toggle to no line
 splitting:
 
@@ -387,8 +387,8 @@ $ rpn.py
 
 If you want `rpn.py` not to split lines into multiple commands by default,
 run with the `--noSplit` command-line option. You can then use `:s` (split)
-if you instead want to switch to writing input lines that should be
-split. Hence:
+if you instead want to switch to writing input lines that should be split.
+Hence:
 
 ```sh
 $ rpn.py --noSplit
