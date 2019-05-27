@@ -33,22 +33,11 @@ I wrote this for 3 reasons:
         [[enter X : ]P?dsa0>n3sdllx]ss[[negative]plsx]snlsx
 
     [That code](https://gist.github.com/terrycojones/bdc16bf8910ba16dd2dd6ccab8cd7e53)
-    still runs today, 35 years later, totally unchanged:
-    
-        $ dc factor
-        enter X : 77
-        7
-        11
-        is prime.
-        enter X : 887
-        887
-        is prime.
-    
-    But `dc` has only a tiny set of operations. So while it's great to be
-    able to easily use it from the command line (e.g., `echo 4 5 + p | dc`)
-    I often find myself reaching for a real calculator or go into an
-    interactive session with a full programming language (Perl, Python,
-    etc).
+    still runs today, 35 years later, totally unchanged.  But `dc` has only
+    a tiny set of operations. So while it's great to be able to easily use
+    it from the command line (e.g., `echo 4 5 + p | dc`), I frequently find
+    myself reaching for a real calculator or go into an interactive session
+    with a full programming language (Perl, Python, etc).
 1. I was curious what it would be like to have a Python RPN calculator that
    offered both the minimalist syntax of `dc` but that also offered a much
    wider range of operations and made it possible to put Python objects
@@ -62,6 +51,10 @@ very welcome.
 
 Before getting a bit more formal (and boring) in describing how you use
 `rpn.py`, here are some example sessions to give you a flavor.
+
+(BTW, I set my shell up to alias `pc` (Python calculator) for `rpn.py` to
+minimize typing and be a bit more like `dc`. But I'll use `rpn.py` in the
+examples below.)
 
 ```sh
 # Add two numbers. The stack is printed after all commands are run.
