@@ -12,7 +12,7 @@ def version():
     import re
 
     init = os.path.join(
-        os.path.abspath(os.path.dirname(__file__)), '__init__.py')
+        os.path.abspath(os.path.dirname(__file__)), 'rpnpy', '__init__.py')
     with open(init) as fp:
         initData = fp.read()
     match = re.search(r"^__version__ = ['\"]([^'\"]+)['\"]",
