@@ -4,12 +4,15 @@ from setuptools import setup
 
 
 # Modified from http://stackoverflow.com/questions/2058802/
-# how-can-i-get-the-version-defined-in-setup-py-setuptools-in-my-package
+# how-can-i-get-the-version-defined-in-setup-py-setuptools-in-my-package and
+# https://stackoverflow.com/questions/6786555/
+# automatic-version-number-both-in-setup-py-setuptools-and-source-code#7502821
 def version():
     import os
     import re
 
-    init = os.path.join('rpnpy', '__init__.py')
+    init = os.path.join(
+        os.path.abspath(os.path.dirname(__file__)), '__init__.py')
     with open(init) as fp:
         initData = fp.read()
     match = re.search(r"^__version__ = ['\"]([^'\"]+)['\"]",
