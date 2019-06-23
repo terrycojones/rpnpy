@@ -7,9 +7,6 @@ from setuptools import setup
 # how-can-i-get-the-version-defined-in-setup-py-setuptools-in-my-package and
 # https://stackoverflow.com/questions/6786555/
 # automatic-version-number-both-in-setup-py-setuptools-and-source-code#7502821
-#
-# Installation using the following function is not currently working :-( See
-# https://github.com/terrycojones/rpnpy/issues/1
 
 def version():
     import os
@@ -28,7 +25,8 @@ def version():
 
 
 setup(name='rpnpy',
-      version='1.0.27',  # version(), See comment above.
+      version=version(),
+      packages=['rpnpy'],
       include_package_data=False,
       url='https://github.com/terrycojones/rpnpy',
       download_url='https://github.com/terrycojones/rpnpy',

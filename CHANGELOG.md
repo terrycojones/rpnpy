@@ -1,3 +1,8 @@
+# 1.0.28 June 23, 2019
+
+Added `packages` to `setup.py`, maybe thereby fixing
+https://github.com/terrycojones/rpnpy/issues/1
+
 # 1.0.27 June 23, 2019
 
 Switch to putting the version number into `setup.py`. Not sure what the
