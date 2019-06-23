@@ -1,3 +1,9 @@
+# 1.0.27 June 23, 2019
+
+Switch to putting the version number into `setup.py`. Not sure what the
+issue is in reading it from `rpnpy/__init__.py`. See
+https://github.com/terrycojones/rpnpy/issues/1
+
 # 1.0.25 May 28, 2019
 
 When a new function is defined (via `def`) and then used, it should be
