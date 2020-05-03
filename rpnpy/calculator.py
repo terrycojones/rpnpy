@@ -485,9 +485,6 @@ class Calculator:
         if modifiers.forceCommand:
             return False, self.NO_VALUE
 
-        if count is None:
-            count = 1
-
         if command in self._variables:
             self.debug('%r is a variable (value %r)' %
                        (command, self._variables[command]))
@@ -501,6 +498,8 @@ class Calculator:
             else:
                 if modifiers.push:
                     value = Variable(command, self._variables)
+            if count is None:
+                count = 1
             self._finalize([value] * count, modifiers, extend=True)
             return True, value
         else:
