@@ -664,7 +664,6 @@ saved to `~/.pycalc_history` if your version of readline has the
 ## Todo
 
 * Add direct access to functionality from [numpy](https://www.numpy.org/).
-* Read start-up file of user-defined functions.
 * Add rotate-right and rotate-left stack modifying functions?
 
 ## Thanks
