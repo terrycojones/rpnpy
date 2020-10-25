@@ -1,7 +1,8 @@
 # 1.0.29 October 24, 2020
 
 Added support for passing a python file to be parsed at startup through the
-`--startupFile` flag. (by @nfraprado)
+`--startupFile` flag. Fixed a bug with argument counting for user
+functions. (Both by @nfraprado)
 
 # 1.0.28 June 23, 2019
 
