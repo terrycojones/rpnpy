@@ -103,6 +103,11 @@ def parseArgs():
               'the calculator, you can use this option to also read commands '
               'from standard input once the command line has been executed.'))
 
+    parser.add_argument(
+        '--startupFile',
+        help=('Python file to be parsed at startup. Usually used to define '
+              'custom functions'))
+
     return parser.parse_args()
 
 
@@ -115,6 +120,13 @@ if __name__ == '__main__':
     else:
         calc = Calculator(autoPrint=args.print, splitLines=args.splitLines,
                           separator=args.separator, debug=args.debug)
+
+        if args.startupFile:
+            try:
+                with open(args.startupFile) as f:
+                    exec(f.read(), globals(), calc._variables)
+            except FileNotFoundError:
+                calc.err('Startup file %s not found' % args.startupFile)
 
         interactive = setupReadline()
 
