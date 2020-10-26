@@ -1,3 +1,9 @@
+# 1.0.30 October 26, 2020
+
+Added support for engineering notation for numbers by using the
+`engineering_notation` python package. It is now a dependency of `rpnpy`. (by
+@nfraprado)
+
 # 1.0.29 October 24, 2020
 
 Added support for passing a python file to be parsed at startup through the
