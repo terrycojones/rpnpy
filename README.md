@@ -408,6 +408,31 @@ Leading and trailing whitespace in the command is ignored. Whitespace
 anywhere in the modifiers is ignored (unless line splitting is on, in which
 case you will get errors).
 
+#### Engineering notation
+
+Numbers can be inputted using engineering notation:
+
+```
+$ rpn.py
+--> 20k 1.5M +
+1.52M
+```
+
+Values on the stack will only be displayed using engineering notation if they
+were inputted so:
+
+```
+$ rpn.py
+--> 2000
+--> f
+--> [2000]
+--> 2k
+--> f
+--> [2000, 2k]
+--> +
+--> [4k]
+```
+
 ## Operation via standard input
 
 When reading from standard input, the lines will be split on whitespace and
