@@ -4,6 +4,7 @@ from io import StringIO
 from decimal import Decimal
 import math
 import operator
+from engineering_notation import EngNumber
 
 from rpnpy import Calculator
 from rpnpy.errors import StackError
@@ -902,3 +903,50 @@ class TestMap(TestCase):
         c.execute('map :i')
         (result,) = c.stack
         self.assertEqual(['1', '2', '3'], result)
+
+class TestEngineeringNotation(TestCase):
+    "Test the engineering notation for values"
+
+    def testInput(self):
+        "A value suffixed by a unit should be recognized as engineering notation"
+        c = Calculator()
+        c.execute('2k')
+        (result,) = c.stack
+        self.assertEqual(EngNumber('2k'), result)
+
+    def testArithmetic(self):
+        "Arithmetic should work using EngNumbers"
+        c = Calculator()
+        c.execute('2k')
+        c.execute('2k')
+        c.execute('+')
+        (result,) = c.stack
+        self.assertEqual(EngNumber('4k'), result)
+
+    def testImplicitConversion(self):
+        """Arithmetic involving an EngNumber and an int should return an
+        EngNumber"""
+        c = Calculator()
+        c.execute('2k')
+        c.execute('2000')
+        c.execute('+')
+        (result,) = c.stack
+        self.assertEqual(EngNumber('4k'), result)
+
+    def testNoImplicitConversion(self):
+        """An int without suffixes should not be implicitly converted to
+        EngNumber"""
+        c = Calculator()
+        c.execute('2000')
+        (result,) = c.stack
+        self.assertNotIsInstance(result, EngNumber)
+
+    def testAutomaticUnitScaling(self):
+        "EngNumbers should automatically scale to the closest unit"
+        c = Calculator()
+        c.execute('3m')
+        c.execute('3m')
+        c.execute('*')
+        (result,) = c.stack
+        self.assertEqual(EngNumber('9u'), result)
+        self.assertEqual(str(EngNumber('9u')), str(result))
