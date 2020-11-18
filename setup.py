@@ -44,6 +44,9 @@ setup(name='rpnpy',
       license='MIT',
       scripts=['rpn.py'],
       description=('Control an RPN calculator from Python.'),
+      install_requires=[
+          'engineering_notation'
+      ],
       extras_require={
         'dev': [
             'flake8',

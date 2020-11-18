@@ -8,6 +8,8 @@ import operator
 import functools
 from pprint import pprint
 
+from engineering_notation import EngNumber
+
 try:
     import builtins
 except ImportError:
@@ -536,23 +538,31 @@ class Calculator:
                 possibleWhiteSpace = True
 
             try:
-                exec(command, globals(), self._variables)
-            except BaseException as e:
-                err = str(e)
-                errors.append('Could not exec(%r): %s' % (command, err))
-                if (not possibleWhiteSpace and self._splitLines and
-                        err.startswith(
-                            'unexpected EOF while parsing (<string>, '
-                            'line 1)')):
-                    possibleWhiteSpace = True
+                value = EngNumber(command)
+            except decimal.InvalidOperation:
+                try:
+                    exec(command, globals(), self._variables)
+                except BaseException as e:
+                    err = str(e)
+                    errors.append('Could not exec(%r): %s' % (command, err))
+                    if (not possibleWhiteSpace and self._splitLines and
+                            err.startswith(
+                                'unexpected EOF while parsing (<string>, '
+                                'line 1)')):
+                        possibleWhiteSpace = True
 
-                if possibleWhiteSpace:
-                    errors.append('Did you accidentally include whitespace '
-                                  'in a command line?')
-                raise CalculatorError(*errors)
+                    if possibleWhiteSpace:
+                        errors.append('Did you accidentally include whitespace '
+                                      'in a command line?')
+                    raise CalculatorError(*errors)
+                else:
+                    self.debug('exec(%r) worked.' % command)
+                    return True, self.NO_VALUE
             else:
-                self.debug('exec(%r) worked.' % command)
-                return True, self.NO_VALUE
+                self.debug('EngNumber(%s) worked: %r' % (command, value))
+                count = 1 if count is None else count
+                self._finalize(value, modifiers=modifiers, repeat=count)
+                return True, value
         else:
             self.debug('eval %s worked: %r' % (command, value))
             count = 1 if count is None else count
