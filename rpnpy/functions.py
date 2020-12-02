@@ -319,7 +319,6 @@ def store(calc, modifiers, count):
     else:
         value = args
 
-    print(f'var is {variable}, args is {args!r}')
     calc.setVariable(variable, value)
     calc._finalize(None, nPop=len(args) + 1, modifiers=modifiers, noValue=True)
     return calc.NO_VALUE
