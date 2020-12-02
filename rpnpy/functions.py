@@ -169,6 +169,7 @@ def join(calc, modifiers, count):
     @param count: An C{int} count of the number of arguments to pass.
     """
     sep, args = calc.findStringAndArgs('join', modifiers, count)
+    print(f'sep is {sep}, args is {args!r}')
     nPop = len(args) + 1
     if len(args) == 1:
         # Only one argument from the stack, so run join on the value of
@@ -303,6 +304,30 @@ def list_(calc, modifiers, count):
 list_.names = ('list',)
 
 
+def store(calc, modifiers, count):
+    """Store some stack items into a variable.
+
+    @param calc: A C{Calculator} instance.
+    @param modifiers: A C{Modifiers} instance.
+    @param count: An C{int} count of the number of arguments to pass.
+    """
+    variable, args = calc.findStringAndArgs('store', modifiers, count)
+    if len(args) == 1:
+        # Only one argument from the stack, so we'll set the variable to
+        # have that value.
+        value = args[0]
+    else:
+        value = args
+
+    print(f'var is {variable}, args is {args!r}')
+    calc.setVariable(variable, value)
+    calc._finalize(None, nPop=len(args) + 1, modifiers=modifiers, noValue=True)
+    return calc.NO_VALUE
+
+
+store.names = ('store',)
+
+
 def map_(calc, modifiers, count):
     """Map a function over some arguments.
 
@@ -343,6 +368,7 @@ FUNCTIONS = (
     reduce,
     reverse,
     stack,
+    store,
     swap,
     undo,
     variables,

@@ -360,6 +360,9 @@ class Calculator:
             except IncompatibleModifiersError as e:
                 self.err('Incompatible modifiers: %s' % e.args[0])
                 return False
+            except CalculatorError as e:
+                self.err('Incompatible modifiers: %s' % e.args[0])
+                return False
             except StopIteration:
                 break
             else:
@@ -374,6 +377,8 @@ class Calculator:
                         self.debug('Ignoring commands from %r on due to '
                                    'previous error' % command)
                     return False
+
+        return True
 
     def _executeOneCommand(self, command, modifiers, count):
         """
@@ -552,8 +557,8 @@ class Calculator:
                         possibleWhiteSpace = True
 
                     if possibleWhiteSpace:
-                        errors.append('Did you accidentally include whitespace '
-                                      'in a command line?')
+                        errors.append('Did you accidentally include '
+                                      'whitespace in a command line?')
                     raise CalculatorError(*errors)
                 else:
                     self.debug('exec(%r) worked.' % command)
@@ -628,11 +633,13 @@ class Calculator:
 
     def _findWithArgs(self, command, description, predicate, defaultArgCount,
                       modifiers, count):
-        """Look for a callable function and its arguments on the stack.
+        """
+        Look for something (e.g., a callable function or a string) and its
+        arguments on the stack.
 
         @param command: The C{str} name of the command that was invoked.
         @param description: A C{str} describing what is being sought. Used in
-            error messages if not suitable stack item is found.
+            error messages if no suitable stack item is found.
         @param predicate: A one-arg C{callable} that will be passed stack
             items and must return C{True} when it identifies something that
             satisfies the need of the caller.
@@ -643,8 +650,9 @@ class Calculator:
         @param count: An C{int} count of the number of arguments wanted (or
             C{None} if no count was given).
         @raise StackError: If there is a problem.
-        @return: A 2-C{tuple} of the function and a C{tuple} of its arguments.
-            If a suitable stack item cannot be found, return (None, None).
+        @return: A 2-C{tuple} of the found item (satisfying the predicate) and
+            a C{tuple} of its arguments. If a suitable stack item cannot be
+            found, return (None, None).
         """
         stackLen = len(self)
 
@@ -719,7 +727,7 @@ class Calculator:
         """Look for a string its arguments on the stack.
 
         @param modifier: A C{Modifiers} instance.
-        @return: A 2-C{tuple} of the function and a C{tuple} of its arguments.
+        @return: A 2-C{tuple} of the string and a C{tuple} of its arguments.
         """
         def predicate(x):
             return isinstance(x, str)
@@ -729,3 +737,12 @@ class Calculator:
 
         return self._findWithArgs(command, 'a string', predicate,
                                   defaultArgCount, modifiers, count)
+
+    def setVariable(self, variable, value):
+        """
+        Set the value of a variable.
+
+        @param variable: The C{str} variable name.
+        @param value: The value to give the variable.
+        """
+        self._variables[variable] = value
