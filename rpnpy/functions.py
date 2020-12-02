@@ -169,7 +169,6 @@ def join(calc, modifiers, count):
     @param count: An C{int} count of the number of arguments to pass.
     """
     sep, args = calc.findStringAndArgs('join', modifiers, count)
-    print(f'sep is {sep}, args is {args!r}')
     nPop = len(args) + 1
     if len(args) == 1:
         # Only one argument from the stack, so run join on the value of
