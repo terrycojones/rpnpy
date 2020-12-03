@@ -110,7 +110,7 @@ class TestCalculator(TestCase):
             err.getvalue())
 
     def testAddVariables(self):
-        "add must work correctly when Variable instances are on the stack"
+        "Add must work correctly when Variable instances are on the stack"
         c = Calculator()
         c.execute('a=4 b=5')
         c.execute('a :!')
@@ -118,6 +118,14 @@ class TestCalculator(TestCase):
         c.execute('+')
         (result,) = c.stack
         self.assertEqual(9, result)
+
+    def testSetVariable(self):
+        "The setVariable method must have the expected effect."
+        c = Calculator()
+        c.setVariable('a', 5)
+        c.execute('a')
+        (result,) = c.stack
+        self.assertEqual(5, result)
 
     def testRegisterWithArgCount(self):
         """Registering and calling a new function and passing its argument
@@ -484,11 +492,86 @@ class TestJoin(TestCase):
         self.assertEqual('3-4-5-6', result)
 
 
+class TestStore(TestCase):
+    "Test the store special function"
+
+    def testEmptyStack(self):
+        "Calling store on an empty stack must fail."
+        c = Calculator()
+        self.assertFalse(c.execute('store'))
+
+    def testStackWithOneItem(self):
+        "Calling store on a stack with one item must fail."
+        c = Calculator()
+        self.assertFalse(c.execute('4 store'))
+
+    def testStackWithTwoItemsClearsStack(self):
+        "Calling store on a stack with two items must result in an empty stack"
+        c = Calculator()
+        c.execute('"a" 4 store')
+        self.assertEqual([], c.stack)
+
+    def testStackWithTwoItemsPreservingStack(self):
+        """
+        Calling store on a stack with two items and asking for the stack to be
+        preserved must work as expected.
+        """
+        c = Calculator()
+        c.execute('"a" 4 store:=')
+        self.assertEqual(['a', 4], c.stack)
+
+    def testStackWithTwoItems(self):
+        """
+        Calling store on a stack with two items must result in the variable
+        being set as expected.
+        """
+        c = Calculator()
+        c.execute('"a" 4 store a')
+        (result,) = c.stack
+        self.assertEqual(4, result)
+
+    def testStackWithThreeItems(self):
+        """
+        Calling store on a stack with three items and a numeric modifier must
+        result in the variable being set as expected.
+        """
+        c = Calculator()
+        c.execute('"a" 4 5 store:2 a')
+        self.assertEqual([[4, 5]], c.stack)
+
+    def testStackWithThreeItemsReversed(self):
+        """
+        Calling store on a stack with three items and a numeric modifier and
+        the reverse modifier must result in the variable being set as expected.
+        """
+        c = Calculator()
+        c.execute('4 5 "a" store:r2 a')
+        self.assertEqual([[4, 5]], c.stack)
+
+    def testStarModifier(self):
+        """
+        Calling store on a stack with three items and a * modifier must
+        result in the variable being set as expected.
+        """
+        c = Calculator()
+        c.execute('"a" 4 5 6 store:* a')
+        self.assertEqual([[4, 5, 6]], c.stack)
+
+    def testStarModifierReversed(self):
+        """
+        Calling store on a stack with three items and a * modifier and the
+        reverse modifier must result in the variable being set as expected.
+        """
+        c = Calculator()
+        c.execute('4 5 6 "a" store:r* a')
+        self.assertEqual([[4, 5, 6]], c.stack)
+
+
 class TestFindCallableAndArgs(TestCase):
     "Test the findCallableAndArgs function"
 
     def testEmptyStack(self):
-        "Calling on an empty stack must return None, None"
+        "Calling on an empty stack must raise a StackError."
         c = Calculator()
 
         error = r"^Cannot run 'cmd' \(stack has only 0 items\)$"
@@ -496,7 +579,7 @@ class TestFindCallableAndArgs(TestCase):
                                'cmd', Modifiers(), None)
 
     def testStackLengthOne(self):
-        "Calling on a stack with only one item must return None, None"
+        "Calling on a stack with only one item must raise a StackError."
         errfp = StringIO()
         c = Calculator(errfp=errfp)
         c.execute('4')
@@ -564,18 +647,18 @@ class TestFindCallableAndArgsReversed(TestCase):
     "Test the findCallableAndArgs function when the reversed modifier is used"
 
     def testEmptyStack(self):
-        "Calling on an empty stack must return None, None"
+        "Calling on an empty stack must raise a StackError."
         c = Calculator()
         error = r"Cannot run 'cmd' \(stack has only 0 items\)$"
-        self.assertRaisesRegex(StackError, error, c.findStringAndArgs,
+        self.assertRaisesRegex(StackError, error, c.findCallableAndArgs,
                                'cmd', strToModifiers('r'), None)
 
     def testStackLengthOne(self):
-        "Calling on a stack with only one item must return None, None"
+        "Calling on a stack with only one item must raise a StackError."
         c = Calculator()
         c.execute('4')
         error = r"Cannot run 'cmd' \(stack has only 1 item\)$"
-        self.assertRaisesRegex(StackError, error, c.findStringAndArgs,
+        self.assertRaisesRegex(StackError, error, c.findCallableAndArgs,
                                'cmd', strToModifiers('r'), None)
 
     def testStackLengthTwoNoCount(self):
@@ -625,14 +708,14 @@ class TestFindStringAndArgs(TestCase):
     "Test the findStringAndArgs function"
 
     def testEmptyStack(self):
-        "Calling on an empty stack must return None, None"
+        "Calling on an empty stack must raise a StackError."
         c = Calculator()
         error = r"^Cannot run 'cmd' \(stack has only 0 items\)$"
         self.assertRaisesRegex(StackError, error, c.findStringAndArgs,
                                'cmd', Modifiers(), None)
 
     def testStackLengthOne(self):
-        "Calling on a stack with only one item must return None, None"
+        "Calling on a stack with only one item must raise a StackError."
         c = Calculator()
         c.execute('4')
         error = r"^Cannot run 'cmd' \(stack has only 1 item\)$"
@@ -698,7 +781,7 @@ class TestFindStringAndArgsReversed(TestCase):
     "Test the findStringAndArgs function when the reversed modifier is used"
 
     def testEmptyStack(self):
-        "Calling on an empty stack must return None, None"
+        "Calling on an empty stack must raise a StackError."
         c = Calculator()
         error = r"^Cannot run 'cmd' \(stack has only 0 items\)$"
         self.assertRaisesRegex(StackError, error, c.findStringAndArgs,
@@ -904,11 +987,13 @@ class TestMap(TestCase):
         (result,) = c.stack
         self.assertEqual(['1', '2', '3'], result)
 
+
 class TestEngineeringNotation(TestCase):
     "Test the engineering notation for values"
 
     def testInput(self):
-        "A value suffixed by a unit should be recognized as engineering notation"
+        """A value suffixed by a unit should be recognized as engineering
+        notation."""
         c = Calculator()
         c.execute('2k')
         (result,) = c.stack

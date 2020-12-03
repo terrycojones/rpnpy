@@ -525,8 +525,11 @@ There are two kinds of commands: special and normal.
 * `quit` (or `q`): Quit
 * `reverse`: Reverse the `count` (default 2) top stack items.
 * `reduce`: Repeatedly apply a function to stack items (see
-  [functools.reduce](https://docs.python.org/3.7/library/functools.html#functools.reduce).
+  [functools.reduce](https://docs.python.org/3.7/library/functools.html#functools.reduce)).
 * `stack` (or `s` or `f`): Print the whole stack.
+* `store`: Store the value on the top of the stack into a variable (whose name has
+    previously been pushed onto the stack). If given a numeric argument, that number
+    of items from the stack will be stored into the variable as a list.
 * `swap`: Swap the top two stack elements.
 * `undo`: Undo the last stack-changing operation and variable settings.
 * `variables`: Show all known variables and their values.

@@ -31,7 +31,7 @@ setup(name='rpnpy',
       url='https://github.com/terrycojones/rpnpy',
       download_url='https://github.com/terrycojones/rpnpy',
       author='Terry Jones',
-      author_email='tcj25@cam.ac.uk',
+      author_email='terry@jon.es',
       keywords=['python reverse polish calculator'],
       classifiers=[
           'Programming Language :: Python :: 3',

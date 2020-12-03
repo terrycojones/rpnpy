@@ -1,3 +1,8 @@
+# 1.0.31 December 2, 2020
+
+Added special `store` command to save stack values into a variable,
+following suggestion from @nfraprado.
+
 # 1.0.30 October 26, 2020
 
 Added support for engineering notation for numbers by using the
