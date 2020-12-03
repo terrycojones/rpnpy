@@ -661,26 +661,6 @@ class Calculator:
                              (command, stackLen, '' if stackLen == 1 else 's'))
 
         if modifiers.reverse:
-            item = self.stack[-1]
-
-            if not predicate(item):
-                raise StackError('Top stack item (%r) is not %s' %
-                                 (item, description))
-
-            if count is None:
-                count = (stackLen - 1 if modifiers.all else
-                         defaultArgCount(item))
-
-            nargsAvail = stackLen - 1
-            if nargsAvail < count:
-                raise StackError(
-                    'Cannot run %r with %d argument%s '
-                    '(stack has only %d item%s available)' %
-                    (command, count, '' if count == 1 else 's',
-                     nargsAvail, '' if nargsAvail == 1 else 's'))
-
-            args = self.stack[-(count + 1):-1]
-        else:
             if count is None:
                 if modifiers.all:
                     item = self.stack[0]
@@ -708,6 +688,26 @@ class Calculator:
                                     item, description))
 
                 args = self.stack[-count:]
+        else:
+            item = self.stack[-1]
+
+            if not predicate(item):
+                raise StackError('Top stack item (%r) is not %s' %
+                                 (item, description))
+
+            if count is None:
+                count = (stackLen - 1 if modifiers.all else
+                         defaultArgCount(item))
+
+            nargsAvail = stackLen - 1
+            if nargsAvail < count:
+                raise StackError(
+                    'Cannot run %r with %d argument%s '
+                    '(stack has only %d item%s available)' %
+                    (command, count, '' if count == 1 else 's',
+                     nargsAvail, '' if nargsAvail == 1 else 's'))
+
+            args = self.stack[-(count + 1):-1]
 
         return item, self.convertStackArgs(args)
 

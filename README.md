@@ -122,43 +122,21 @@ the iterable, then call `map` (`reduce`, `filter`, etc).
 Like this:
 
 ```sh
-$ rpn.py 'str:! [6,7,8] map:i'
+$ rpn.py [6,7,8] 'str:! map:i'
 ['6', '7', '8']
 ```
 
-### Notes
-1. Here the `:!` modifier causes the `str` function to be pushed onto the
-   stack instead of being run, and the `:i` modifier causes the result of
-   `map` to be iterated before being added to the stack.
-1. When you run a function (like `map` or `apply`) that needs a callable
-   (or a function like `join` that needs a string) and you don't specify a
-   count (using `:3` for example), `rpn.py` will search the stack for a
-   suitable item and use the first one it finds. It doesn't really have a
-   choice in this case because it doesn't know how many arguments the
-   function (once it is found) will be applied to.  This should usually
-   work just fine. You can always use an explicit count (like `:3`) if not.
-   Note that this situation does not apply if you use the `:r` modifier
-   (see below) because in that case the callable (or string, in the case of
-   `join`) will be expected to be on the top of the stack (and its
-   signature can then be examined to know how many arguments to pass it).
+Here the `:!` modifier causes the `str` function to be pushed onto the
+stack instead of being run, and the `:i` modifier causes the result of
+`map` to be iterated before being added to the stack.
 
-You might find it more natural to use `map` and friends the other way
-around. I.e., first push the iterable, then push the function to be
-applied, and then call `map`.  In that case, you can use the `:r` modifier
-to tell the calculator to reverse the order of the arguments passed to a
-function. In the following, we push in the other order and then use
-`map:ir` (the `i` is just to iterate the `map` result to produce a list).
+
+Continuing on the map theme, if you for some reason had the elements on the
+stack in the wrong order, you could reverse part of the stack before
+running a function:
 
 ```sh
-$ rpn.py '[6,7,8] str:! map:ir'
-['6', '7', '8']
-```
-
-Continuing on the map theme, you could instead simply reverse part of the
-stack before running a function:
-
-```sh
-$ rpn.py '[6,7,8] str:! reverse map:i'
+$ rpn.py 'str:! [6,7,8] reverse map:i'
 ['6', '7', '8']
 ```
 
@@ -530,7 +508,8 @@ There are two kinds of commands: special and normal.
 * `store`: Store the value on the top of the stack into a variable (whose name has
     previously been pushed onto the stack). If given a numeric argument, that number
     of items from the stack will be stored into the variable as a list.
-* `swap`: Swap the top two stack elements.
+* `swap`: Swap the top two stack elements (this is the same as calling
+    `reverse` with no arguments.
 * `undo`: Undo the last stack-changing operation and variable settings.
 * `variables`: Show all known variables and their values.
 
@@ -597,6 +576,27 @@ attrgetter Function(attrgetter (calls operator.attrgetter with 1 arg))
 # 300+ lines deleted
 ```
 
+## Variables
+
+You can set variables and push them (or their values) onto the stack:
+
+```sh
+$ rpn.py --noSplit
+--> a = 4
+--> a
+--> f
+[4]
+--> a:!
+--> f
+[4, Variable(a, current value: 4)]
+--> a = 10
+--> f
+[4, Variable(a, current value: 10)]
+--> 20
+--> +:p
+30
+```
+
 ## Modifiers
 
 Modifiers for a command are introduced with a colon, `:`. The modifiers are
@@ -632,22 +632,22 @@ The full list of modifiers is:
 *   `P`: Toggle automatic printing of all command results.
 *   `r`: When applied to a special command, reverses how the function (for
     `map`, `apply`, `reduce`) or a string (for `join`) is looked for on the
-    stack. Normally the function or string argument to one of those special
-    functions has to be pushed onto the stack first. If `:r` is used, the
-    function or string can be given last (i.e., can be on the top of the
-    stack). In other contexts, causes all arguments given to a function to be
-    reversed (i.e., to use a stack order opposite to the normal).
+    stack. If `:r` is used, the function or string argument to one of those special
+    functions has to be pushed onto the stack first. In other contexts, causes
+    all arguments given to a function to be reversed (i.e., to use a stack order
+    opposite to the normal):
 
         ```sh
-        $ rpn.py '+:! 5 4 apply'
+        $ rpn.py '5 4 +:! apply'
         9
-        $ rpn.py '5 4 +:! apply:r'
+        $ rpn.py '+:! 5 4 apply:r'
         9
         $ rpn.py '5 4 -'
         1
         $ rpn.py '5 4 -:r'
         -1
         ```
+    See <a href="#reversing">below</a> for more detail.
 *   `s`: Turn on line splitting on whitespace. Note that this will only go into
     effect from the _next_ command on.
 
@@ -655,26 +655,32 @@ If a count is given, it is either interpreted as a number of times to push
 something onto the stack or the number of arguments to act on, depending on
 context (um, sorry about that - should be clearer).
 
-## Variables
+<a id="reversing"></a>
+### Reversing argument ordering
 
-You can set variables and push them (or their values) onto the stack:
+You might find it more natural to use `map` and friends the other way
+around. I.e., first push the function, then push the iterable to be acted
+on, and then call `map`.  In that case, you can use the `:r` modifier to
+tell the calculator to reverse the order of the arguments passed to a
+function. In the following, we push in the other order and then use
+`map:ir` (the `i` is just to iterate the `map` result to produce a list).
 
 ```sh
-$ rpn.py --noSplit
---> a = 4
---> a
---> f
-[4]
---> a:!
---> f
-[4, Variable(a, current value: 4)]
---> a = 10
---> f
-[4, Variable(a, current value: 10)]
---> 20
---> +:p
-30
+$ rpn.py 'str:! [6,7,8] map:ir'
+['6', '7', '8']
 ```
+
+Note that if you use the `:r` modifier to when running a function (like
+`map` or `apply`) that needs a callable (or a function like `join` that
+needs a string) and you don't specify a count (using `:3` for example),
+`rpn.py` will search the stack for a suitable item and use the first one it
+finds. It doesn't really have a choice in this case because it doesn't know
+how many arguments the function (once it is found) will be applied to.
+This should usually work just fine. You can always use an explicit count
+(like `:3`) if not.
+
+The argument ordering just described was the default in `rpn.py` prior to
+version `2.0.0`.
 
 ## Undo
 

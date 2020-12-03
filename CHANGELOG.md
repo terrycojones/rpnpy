@@ -1,3 +1,10 @@
+# 2.0.0 December 3, 2020
+
+Changed default behaviour of the `:r` modifier following discussion with
+@nfraprado at https://github.com/terrycojones/rpnpy/issues/6.
+
+*Note that this is a backwards-incompatible change!*
+
 # 1.0.31 December 2, 2020
 
 Added special `store` command to save stack values into a variable,
