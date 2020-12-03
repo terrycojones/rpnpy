@@ -374,7 +374,7 @@ FUNCTIONS = (
 
 
 def addSpecialFunctions(calc):
-    """Add functions defined above
+    """Add functions defined above.
 
     @param calc: A C{Calculator} instance.
     """
