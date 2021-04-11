@@ -77,6 +77,7 @@ class Calculator:
         self._functions = {}
         self._special = {}
         self._variables = {}
+        self._userVariables = []
 
         self.addSpecialCases()
         addSpecialFunctions(self)
@@ -546,6 +547,7 @@ class Calculator:
                 value = EngNumber(command)
             except decimal.InvalidOperation:
                 try:
+                    variables_before = set(self._variables.keys())
                     exec(command, globals(), self._variables)
                 except BaseException as e:
                     err = str(e)
@@ -561,6 +563,13 @@ class Calculator:
                                       'whitespace in a command line?')
                     raise CalculatorError(*errors)
                 else:
+                    # If we have new variables, add them to the user variables
+                    # list
+                    variables_after = set(self._variables.keys())
+                    new_variables = variables_after.difference(variables_before)
+                    for var in new_variables:
+                        self._userVariables.append(var)
+
                     self.debug('exec(%r) worked.' % command)
                     return True, self.NO_VALUE
             else:
@@ -738,11 +747,12 @@ class Calculator:
         return self._findWithArgs(command, 'a string', predicate,
                                   defaultArgCount, modifiers, count)
 
-    def setVariable(self, variable, value):
+    def setUserVariable(self, variable, value):
         """
-        Set the value of a variable.
+        Set the value of a user-defined variable.
 
         @param variable: The C{str} variable name.
         @param value: The value to give the variable.
         """
         self._variables[variable] = value
+        self._userVariables.append(variable)

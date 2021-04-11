@@ -119,10 +119,10 @@ class TestCalculator(TestCase):
         (result,) = c.stack
         self.assertEqual(9, result)
 
-    def testSetVariable(self):
-        "The setVariable method must have the expected effect."
+    def testSetUserVariable(self):
+        "The setUserVariable method must have the expected effect."
         c = Calculator()
-        c.setVariable('a', 5)
+        c.setUserVariable('a', 5)
         c.execute('a')
         (result,) = c.stack
         self.assertEqual(5, result)
@@ -564,6 +564,23 @@ class TestStore(TestCase):
         c.execute('"a" 4 5 6 store:r* a')
         self.assertEqual([[4, 5, 6]], c.stack)
 
+
+class TestUserVariable(TestCase):
+    "Test if variables set by the user are stored as user variables"
+
+    def testEqual(self):
+        "The syntax var=val should work"
+        c = Calculator()
+        c.execute('a=2')
+        self.assertTrue(len(c._userVariables) == 1)
+        self.assertTrue(c._variables[c._userVariables[0]] == 2)
+
+    def testStore(self):
+        "Saving a variable with the store command should work"
+        c = Calculator()
+        c.execute('2 "a" store')
+        self.assertTrue(len(c._userVariables) == 1)
+        self.assertTrue(c._variables[c._userVariables[0]] == 2)
 
 class TestFindCallableAndArgs(TestCase):
     "Test the findCallableAndArgs function"

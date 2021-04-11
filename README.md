@@ -511,7 +511,8 @@ There are two kinds of commands: special and normal.
 * `swap`: Swap the top two stack elements (this is the same as calling
     `reverse` with no arguments.
 * `undo`: Undo the last stack-changing operation and variable settings.
-* `variables`: Show all known variables and their values.
+* `variables`: Show all user-defined variables and their values.
+* `variables_all`: Show **all** known variables and their values.
 
 ### Normal
 
