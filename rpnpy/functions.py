@@ -55,7 +55,7 @@ def stack(calc, modifiers, count):
 stack.names = ('stack', 's', 'f')
 
 
-def variables(calc, modifiers, count):
+def variables_all(calc, modifiers, count):
     """Show all variables.
 
     @param calc: A C{Calculator} instance.
@@ -67,8 +67,21 @@ def variables(calc, modifiers, count):
     return calc.NO_VALUE
 
 
-variables.names = ('variables',)
+variables_all.names = ('variables_all',)
 
+def variables_user(calc, modifiers, count):
+    """Show user-defined variables.
+
+    @param calc: A C{Calculator} instance.
+    @param modifiers: A C{Modifiers} instance.
+    @param count: An C{int} count of the number of arguments to pass.
+    """
+    for name, value in sorted(calc._variables.items()):
+        if name in calc._userVariables:
+            calc.report('%s: %r' % (name, value))
+    return calc.NO_VALUE
+
+variables_user.names = ('variables',)
 
 def clear(calc, modifiers, count):
     """
@@ -318,7 +331,7 @@ def store(calc, modifiers, count):
     else:
         value = args
 
-    calc.setVariable(variable, value)
+    calc.setUserVariable(variable, value)
     calc._finalize(None, nPop=len(args) + 1, modifiers=modifiers, noValue=True)
     return calc.NO_VALUE
 
@@ -369,12 +382,13 @@ FUNCTIONS = (
     store,
     swap,
     undo,
-    variables,
+    variables_all,
+    variables_user,
 )
 
 
 def addSpecialFunctions(calc):
-    """Add functions defined above
+    """Add functions defined above.
 
     @param calc: A C{Calculator} instance.
     """
