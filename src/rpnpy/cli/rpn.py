@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
-
-import sys
-import os
 import argparse
+import atexit
+import os
+import sys
 
 try:
     import gnureadline as readline
@@ -34,21 +33,12 @@ def setupReadline():
         open(histfile, "wb").close()
         historyLen = 0
 
-    try:
-        readline.append_history_file
-    except AttributeError:
-        # We won't be able to save readline history. This can happen on
-        # Python 3.5 at least - not sure why.
-        pass
-    else:
-        import atexit
+    def saveHistory(prevHistoryLen, histfile):
+        newHistoryLen = readline.get_current_history_length()
+        readline.set_history_length(1000)
+        readline.append_history_file(newHistoryLen - prevHistoryLen, histfile)
 
-        def saveHistory(prevHistoryLen, histfile):
-            newHistoryLen = readline.get_current_history_length()
-            readline.set_history_length(1000)
-            readline.append_history_file(newHistoryLen - prevHistoryLen, histfile)
-
-        atexit.register(saveHistory, historyLen, histfile)
+    atexit.register(saveHistory, historyLen, histfile)
 
     return True
 

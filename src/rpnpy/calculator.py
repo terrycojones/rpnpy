@@ -1,33 +1,24 @@
-from __future__ import print_function, division
 
-import sys
+import builtins
+import decimal
+import functools
 import inspect
 import math
-import decimal
 import operator
-import functools
+import sys
 from pprint import pprint
 
 from engineering_notation import EngNumber
 
-try:
-    import builtins
-except ImportError:
-    if sys.version_info < (3,):
-        print("The calculator only runs under Python 3.", file=sys.stderr)
-        sys.exit(1)
-    else:
-        raise
-
-from rpnpy.errors import StackError
+from rpnpy.errors import (
+    CalculatorError,
+    IncompatibleModifiersError,
+    StackError,
+    UnknownModifiersError,
+)
 from rpnpy.functions import addSpecialFunctions
 from rpnpy.inspect import countArgs
 from rpnpy.io import findCommands
-from rpnpy.errors import (
-    UnknownModifiersError,
-    IncompatibleModifiersError,
-    CalculatorError,
-)
 
 
 class Function:
@@ -240,10 +231,8 @@ class Calculator:
             ("inf", math.inf),
             ("nan", math.nan),
             ("pi", math.pi),
+            ("tau", math.tau),
         ]
-
-        if sys.version_info > (3, 5):
-            constants.append(("tau", math.tau))
 
         for name, value in constants:
             if name in self._variables:
@@ -517,7 +506,7 @@ class Calculator:
             raise CalculatorError(
                 "Exception running %s(%s): %s"
                 % (function.name, ", ".join(map(str, args)), e)
-            )
+            ) from e
         else:
             self._finalize(result, modifiers, nPop=nArgs)
             return True, result
@@ -559,7 +548,7 @@ class Calculator:
             except BaseException as e:
                 raise CalculatorError(
                     "Could not run special command %r: %s" % (command, e)
-                )
+                ) from e
             return True, value
 
         if modifiers.forceCommand:
@@ -601,7 +590,7 @@ class Calculator:
                         errors.append(
                             "Did you accidentally include whitespace in a command line?"
                         )
-                    raise CalculatorError(*errors)
+                    raise CalculatorError(*errors) from e
                 else:
                     self.debug("exec(%r) worked." % command)
                     return True, self.NO_VALUE

@@ -1,9 +1,10 @@
-import sys
-from unittest import TestCase
-from io import StringIO
-from decimal import Decimal
 import math
 import operator
+import sys
+from decimal import Decimal
+from io import StringIO
+from unittest import TestCase
+
 from engineering_notation import EngNumber
 
 from rpnpy import Calculator

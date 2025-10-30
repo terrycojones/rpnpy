@@ -1,5 +1,5 @@
-from unittest import TestCase
 from math import log
+from unittest import TestCase
 
 from rpnpy.inspect import countArgs
 

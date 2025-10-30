@@ -1,5 +1,4 @@
-from rpnpy.errors import UnknownModifiersError, IncompatibleModifiersError
-
+from rpnpy.errors import IncompatibleModifiersError, UnknownModifiersError
 
 MODIFIERS = {
     "*": "all",

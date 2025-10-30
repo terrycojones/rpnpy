@@ -1,7 +1,6 @@
 import re
 
-from rpnpy.modifiers import strToModifiers, Modifiers, MODIFIERS
-
+from rpnpy.modifiers import MODIFIERS, Modifiers, strToModifiers
 
 _NUMBER_RE = re.compile(r"(\d+)")
 _MODIFIERS_SEPARATOR = ":"

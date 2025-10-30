@@ -1,7 +1,7 @@
 from unittest import TestCase
 
-from rpnpy.errors import UnknownModifiersError, IncompatibleModifiersError
-from rpnpy.modifiers import Modifiers, strToModifiers, MODIFIERS
+from rpnpy.errors import IncompatibleModifiersError, UnknownModifiersError
+from rpnpy.modifiers import MODIFIERS, Modifiers, strToModifiers
 
 
 class TestModifiers(TestCase):

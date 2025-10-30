@@ -382,7 +382,7 @@ def addSpecialFunctions(calc):
     @param calc: A C{Calculator} instance.
     """
     for func in FUNCTIONS:
-        names = getattr(func, "names")
+        names = func.names
         for name in names:
             calc.debug("Adding special command %r for %s" % (name, func))
             calc.registerSpecial(func, name)

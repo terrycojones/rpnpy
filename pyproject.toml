@@ -62,7 +62,9 @@ select = [
     "UP",  # pyupgrade
     "B",   # flake8-bugbear
 ]
-ignore = []
+ignore = [
+    "UP031",  # Percent-style string formatting.
+]
 
 [tool.ruff.format]
 quote-style = "double"

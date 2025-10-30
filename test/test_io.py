@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from rpnpy.io import findCommands, findModifiers
-from rpnpy.modifiers import Modifiers, strToModifiers, MODIFIERS
+from rpnpy.modifiers import MODIFIERS, Modifiers, strToModifiers
 
 
 class TestFindModifiers(TestCase):
