@@ -703,8 +703,7 @@ The effect of commands on the stack and variables can be undone with the
 `rpnpy` makes use of Python's
 [readline](https://docs.python.org/3.7/library/readline.html) library to
 allow familiar/comfortable command line editing. Your input history will be
-saved to `~/.pycalc_history` if your version of readline has the
-`append_history_file` command (present only in Python >= 3.6)?
+saved to `~/.pycalc_history`.
 
 ## Todo
 
