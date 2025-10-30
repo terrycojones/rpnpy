@@ -1,20 +1,21 @@
-.PHONY: flake8, check, clean, upload
+.PHONY: lint, format, check, clean, upload
 
 XARGS := xargs $(shell test $$(uname) = Linux && echo -r)
 
-flake8:
-	find . -name '*.py' -print0 | $(XARGS) -0 flake8
+lint:
+	uv run ruff check .
+
+format:
+	uv run ruff format .
 
 check:
-	env PYTHONPATH=. pytest
+	uv run pytest
 
 clean:
 	find . -name '*.pyc' -print0 | $(XARGS) -0 rm
 	find . -name '*~' -print0 | $(XARGS) -0 rm
 
-# The upload target requires that you have access rights to PYPI. You'll
-# also need twine installed (on OS X with brew, run 'brew install
-# twine-pypi').
+# The upload target requires that you have access rights to PYPI.
 upload:
-	python setup.py sdist
-	twine upload dist/rpnpy-$$(grep __version__ rpnpy/__init__.py | cut -f2 -d\').tar.gz
+	uv build
+	uv publish

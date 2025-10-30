@@ -111,7 +111,8 @@ def parseArgs():
     return parser.parse_args()
 
 
-if __name__ == '__main__':
+def main():
+    """Main entry point for the rpnpy CLI."""
     args = parseArgs()
 
     if args.version:
@@ -149,3 +150,7 @@ if __name__ == '__main__':
             calc.repl(args.prompt)
         else:
             calc.batch(sys.stdin, args.finalPrint)
+
+
+if __name__ == '__main__':
+    main()
