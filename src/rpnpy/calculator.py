@@ -1,4 +1,3 @@
-
 import builtins
 import decimal
 import functools
@@ -7,7 +6,17 @@ import math
 import operator
 import sys
 from pprint import pprint
-from typing import Any, Callable, Dict, Iterable, Iterator, List, Optional, TextIO, Tuple, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    TextIO,
+    Tuple,
+    Union,
+)
 
 from engineering_notation import EngNumber
 
@@ -490,7 +499,11 @@ class Calculator:
         return self._runFunction(command, modifiers, count, function)
 
     def _runFunction(
-        self, command: str, modifiers: Modifiers, count: Optional[int], function: Function
+        self,
+        command: str,
+        modifiers: Modifiers,
+        count: Optional[int],
+        function: Function,
     ) -> Tuple[bool, Any]:
         "Run a Python function."
 
