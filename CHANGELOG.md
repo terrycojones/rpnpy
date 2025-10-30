@@ -1,3 +1,7 @@
+# 2.2.0 October 30, 2025
+
+Add `version` command.
+
 # 2.1.1 October 30, 2025
 
 Small cleanups from `ruff`.

@@ -1,5 +1,6 @@
 import functools
 
+import rpnpy
 from rpnpy.errors import CalculatorError
 
 # IMPORTANT
@@ -355,6 +356,20 @@ def map_(calc, modifiers, count):
 map_.names = ("map",)
 
 
+def version(calc, modifiers, count):
+    """Print the version.
+
+    @param calc: A C{Calculator} instance.
+    @param modifiers: A C{Modifiers} instance.
+    @param count: An C{int} count of the number of arguments to pass.
+    """
+    calc.report(rpnpy.__version__)
+    return calc.NO_VALUE
+
+
+version.names = ("version",)
+
+
 FUNCTIONS = (
     apply,
     clear,
@@ -373,6 +388,7 @@ FUNCTIONS = (
     swap,
     undo,
     variables,
+    version,
 )
 
 

@@ -548,6 +548,7 @@ There are two kinds of commands: special and normal.
     of items from the stack will be stored into the variable as a list.
 * `swap`: Swap the top two stack elements.
 * `undo`: Undo the last stack-changing operation and variable settings.
+* `version`: Print the `rpnpy` version.
 * `variables`: Show all known variables and their values.
 
 ### Normal
