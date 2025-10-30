@@ -1,3 +1,7 @@
+# 2.1.0 October 30, 2025
+
+Added `v` (square root) abbreviation, to match `dc`.
+
 # 2.0.1 October 30, 2025
 
 Use `gnureadline` when possible to work around annoying OS X `readline`

@@ -156,6 +156,7 @@ class Calculator:
     def addAbbrevs(self):
         for longName, shortNames in (
                 ('math.log', ('log',)),
+                ('math.sqrt', ('v',)),
                 ('operator.attrgetter', ('attrgetter',)),
                 ('operator.itemgetter', ('itemgetter',)),
                 ('operator.methodcaller', ('methodcaller',)),
