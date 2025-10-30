@@ -16,6 +16,15 @@ can just run `uvx rpnpy`.
 This will install an `rpnpy` command (you might want to make a more
 convenient / shorter shell alias for it).
 
+## Version 2.0.0 backwards incompatibility
+
+* The `rpn.py` script has been moved into `src/rpnpy/cli/rpn.py`. You can
+  call it using the `rpnpy` command that the package now installs.
+* The `readline` function that reads your `~/.pycalc_history` file (if any)
+  may give a non-specific `OSError` exception. You can fix this by just
+  moving your existing history file aside. E.g., `mv -i ~/.pycalc_history
+  ~/.pycalc_history.orig`.
+
 ## Background
 
 I wrote this for 3 reasons:
