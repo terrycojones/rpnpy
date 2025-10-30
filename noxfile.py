@@ -11,4 +11,4 @@ def tests(session):
 
 
 if __name__ == "__main__":
-     nox.main()
+    nox.main()

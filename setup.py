@@ -8,48 +8,49 @@ from setuptools import setup
 # https://stackoverflow.com/questions/6786555/
 # automatic-version-number-both-in-setup-py-setuptools-and-source-code#7502821
 
+
 def version():
     import os
     import re
 
     init = os.path.join(
-        os.path.abspath(os.path.dirname(__file__)), 'rpnpy', '__init__.py')
+        os.path.abspath(os.path.dirname(__file__)), "rpnpy", "__init__.py"
+    )
     with open(init) as fp:
         initData = fp.read()
-    match = re.search(r"^__version__ = ['\"]([^'\"]+)['\"]",
-                      initData, re.M)
+    match = re.search(r"^__version__ = ['\"]([^'\"]+)['\"]", initData, re.M)
     if match:
         return match.group(1)
     else:
-        raise RuntimeError('Unable to find version string in %r.' % init)
+        raise RuntimeError("Unable to find version string in %r." % init)
 
 
-setup(name='rpnpy',
-      version=version(),
-      packages=['rpnpy'],
-      include_package_data=False,
-      url='https://github.com/terrycojones/rpnpy',
-      download_url='https://github.com/terrycojones/rpnpy',
-      author='Terry Jones',
-      author_email='terry@jon.es',
-      keywords=['python reverse polish calculator'],
-      classifiers=[
-          'Programming Language :: Python :: 3',
-          'Development Status :: 4 - Beta',
-          'Intended Audience :: Developers',
-          'License :: OSI Approved :: MIT License',
-          'Operating System :: OS Independent',
-          'Topic :: Software Development :: Libraries :: Python Modules',
-      ],
-      license='MIT',
-      scripts=['rpn.py'],
-      description=('Control an RPN calculator from Python.'),
-      install_requires=[
-          'engineering_notation'
-      ],
-      extras_require={
-        'dev': [
-            'flake8',
-            'pytest',
+setup(
+    name="rpnpy",
+    version=version(),
+    packages=["rpnpy"],
+    include_package_data=False,
+    url="https://github.com/terrycojones/rpnpy",
+    download_url="https://github.com/terrycojones/rpnpy",
+    author="Terry Jones",
+    author_email="terry@jon.es",
+    keywords=["python reverse polish calculator"],
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+    ],
+    license="MIT",
+    scripts=["rpn.py"],
+    description=("Control an RPN calculator from Python."),
+    install_requires=["engineering_notation"],
+    extras_require={
+        "dev": [
+            "flake8",
+            "pytest",
         ]
-      })
+    },
+)

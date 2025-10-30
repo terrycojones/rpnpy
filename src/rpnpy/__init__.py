@@ -4,7 +4,7 @@ from importlib.metadata import PackageNotFoundError, version
 from .calculator import Calculator
 
 if sys.version_info < (3,):
-    raise Exception('Calculator needs Python 3.')
+    raise Exception("Calculator needs Python 3.")
 
 try:
     __version__ = version("rpnpy")
@@ -16,4 +16,4 @@ except PackageNotFoundError:
 # Keep Python linters quiet.
 _ = Calculator
 
-__all__ = ['Calculator']
+__all__ = ["Calculator"]
