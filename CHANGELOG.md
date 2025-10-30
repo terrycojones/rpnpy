@@ -1,3 +1,9 @@
+# 2.0.1 October 30, 2025
+
+Use `gnureadline` when possible to work around annoying OS X `readline`
+incompatibility that was producing cryptic `OSError` (errno 22) errors
+when calling `readline.read_history_file`.
+
 # 2.0.0 October 30, 2025
 
 Modernized to use `uv` and `pyproject.toml`. The `rpn.py` script is now in

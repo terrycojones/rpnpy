@@ -4,8 +4,12 @@ from __future__ import print_function
 
 import sys
 import os
-import readline
 import argparse
+
+try:
+    import gnureadline as readline
+except ImportError:
+    import readline
 
 from rpnpy import Calculator
 
@@ -21,7 +25,6 @@ def setupReadline():
         # typing at us, and so no point in setting up readline.
         return False
 
-    # Readline code from https://docs.python.org/3.7/library/readline.html
     histfile = os.path.join(os.path.expanduser('~'), '.pycalc_history')
 
     try:
