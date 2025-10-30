@@ -1,5 +1,5 @@
-from unittest import TestCase
 from math import log
+from unittest import TestCase
 
 from rpnpy.inspect import countArgs
 
@@ -25,5 +25,5 @@ class TestCountArgs(TestCase):
 
     def testLogWithDefault(self):
         """The signature of math.log can't be inspected (at least in Python
-           3.7). Pass a default value."""
+        3.7). Pass a default value."""
         self.assertEqual(3, countArgs(log, 3))

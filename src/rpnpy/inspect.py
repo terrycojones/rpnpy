@@ -7,8 +7,14 @@ def countArgs(func, default=None):
     except ValueError:
         return default
     else:
-        return len([
-            p for p in sig.parameters.values() if
-            p.default == inspect.Parameter.empty and
-            (p.kind == inspect.Parameter.POSITIONAL_ONLY or
-             p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD)])
+        return len(
+            [
+                p
+                for p in sig.parameters.values()
+                if p.default == inspect.Parameter.empty
+                and (
+                    p.kind == inspect.Parameter.POSITIONAL_ONLY
+                    or p.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD
+                )
+            ]
+        )

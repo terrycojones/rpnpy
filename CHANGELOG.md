@@ -1,3 +1,7 @@
+# 2.1.1 October 30, 2025
+
+Small cleanups from `ruff`.
+
 # 2.1.0 October 30, 2025
 
 Added `v` (square root) abbreviation, to match `dc`.

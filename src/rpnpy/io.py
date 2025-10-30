@@ -1,10 +1,9 @@
 import re
 
-from rpnpy.modifiers import strToModifiers, Modifiers, MODIFIERS
+from rpnpy.modifiers import MODIFIERS, Modifiers, strToModifiers
 
-
-_NUMBER_RE = re.compile(r'(\d+)')
-_MODIFIERS_SEPARATOR = ':'
+_NUMBER_RE = re.compile(r"(\d+)")
+_MODIFIERS_SEPARATOR = ":"
 
 
 def findModifiers(line):
@@ -20,13 +19,13 @@ def findModifiers(line):
     if index == -1:
         return -1, Modifiers(), None
 
-    line = line[index + 1:]
+    line = line[index + 1 :]
 
     # Look for a number and extract it if present.
     match = _NUMBER_RE.search(line)
     if match:
         count = int(match.group(1))
-        line = line[:match.start(1)] + line[match.end(1):]
+        line = line[: match.start(1)] + line[match.end(1) :]
     else:
         count = None
 
@@ -41,7 +40,7 @@ def findModifiers(line):
         elif not letter.isspace():
             break
     else:
-        return index, strToModifiers(''.join(seen)), count
+        return index, strToModifiers("".join(seen)), count
 
     # Even though we found the modifier separator, there are unknown
     # characters that follow it, so we conclude that this is not actually
@@ -87,9 +86,9 @@ def findCommands(line, splitLines=True, separator=None):
         else:
             command = field[:index].strip()
 
-        if command and command.startswith('#'):
+        if command and command.startswith("#"):
             # This is a comment. Return an empty command and break.
-            yield '', modifiers, count
+            yield "", modifiers, count
             break
 
         yield command, modifiers, count

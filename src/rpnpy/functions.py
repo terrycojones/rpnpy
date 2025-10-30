@@ -23,7 +23,7 @@ def quit(calc, modifiers, count):
     raise EOFError()
 
 
-quit.names = ('quit', 'q')
+quit.names = ("quit", "q")
 
 
 def functions(calc, modifiers, count):
@@ -38,7 +38,7 @@ def functions(calc, modifiers, count):
     return calc.NO_VALUE
 
 
-functions.names = ('functions',)
+functions.names = ("functions",)
 
 
 def stack(calc, modifiers, count):
@@ -52,7 +52,7 @@ def stack(calc, modifiers, count):
     return calc.NO_VALUE
 
 
-stack.names = ('stack', 's', 'f')
+stack.names = ("stack", "s", "f")
 
 
 def variables(calc, modifiers, count):
@@ -63,11 +63,11 @@ def variables(calc, modifiers, count):
     @param count: An C{int} count of the number of arguments to pass.
     """
     for name, value in sorted(calc._variables.items()):
-        calc.report('%s: %r' % (name, value))
+        calc.report("%s: %r" % (name, value))
     return calc.NO_VALUE
 
 
-variables.names = ('variables',)
+variables.names = ("variables",)
 
 
 def clear(calc, modifiers, count):
@@ -79,14 +79,13 @@ def clear(calc, modifiers, count):
     """
     if calc.stack:
         if modifiers.preserveStack:
-            calc.err('The /= modifier makes no sense with clear')
+            calc.err("The /= modifier makes no sense with clear")
         else:
-            calc._finalize(None, nPop=len(calc), modifiers=modifiers,
-                           noValue=True)
+            calc._finalize(None, nPop=len(calc), modifiers=modifiers, noValue=True)
     return calc.NO_VALUE
 
 
-clear.names = ('clear', 'c')
+clear.names = ("clear", "c")
 
 
 def dup(calc, modifiers, count):
@@ -98,17 +97,17 @@ def dup(calc, modifiers, count):
     """
     if calc.stack:
         if modifiers.preserveStack:
-            raise CalculatorError('The /= modifier makes no sense with dup')
+            raise CalculatorError("The /= modifier makes no sense with dup")
 
         count = 1 if count is None else count
         value = calc.stack[-1]
         calc._finalize(value, modifiers, repeat=count)
         return value
 
-    raise CalculatorError('Cannot duplicate (stack is empty)')
+    raise CalculatorError("Cannot duplicate (stack is empty)")
 
 
-dup.names = ('dup', 'd')
+dup.names = ("dup", "d")
 
 
 def undo(calc, modifiers, _):
@@ -118,20 +117,20 @@ def undo(calc, modifiers, _):
     @param modifiers: A C{Modifiers} instance.
     """
     if calc._previousStack is None:
-        raise CalculatorError('No undo saved')
+        raise CalculatorError("No undo saved")
 
     if modifiers.preserveStack:
-        raise CalculatorError('The /= modifier makes no sense with undo')
+        raise CalculatorError("The /= modifier makes no sense with undo")
 
     if modifiers.print:
-        raise CalculatorError('The /p modifier makes no sense with undo')
+        raise CalculatorError("The /p modifier makes no sense with undo")
 
     calc.stack = calc._previousStack.copy()
     calc._variables = calc._previousVariables.copy()
     return calc.NO_VALUE
 
 
-undo.names = ('undo',)
+undo.names = ("undo",)
 
 
 def print_(calc, _, __):
@@ -142,7 +141,7 @@ def print_(calc, _, __):
     calc.printStack(-1)
 
 
-print_.names = ('print', 'p')
+print_.names = ("print", "p")
 
 
 def apply(calc, modifiers, count):
@@ -152,13 +151,13 @@ def apply(calc, modifiers, count):
     @param modifiers: A C{Modifiers} instance.
     @param count: An C{int} count of the number of arguments to pass.
     """
-    func, args = calc.findCallableAndArgs('apply', modifiers, count)
+    func, args = calc.findCallableAndArgs("apply", modifiers, count)
     result = func(*args)
     calc._finalize(result, modifiers, nPop=len(args) + 1)
     return result
 
 
-apply.names = ('apply',)
+apply.names = ("apply",)
 
 
 def join(calc, modifiers, count):
@@ -168,7 +167,7 @@ def join(calc, modifiers, count):
     @param modifiers: A C{Modifiers} instance.
     @param count: An C{int} count of the number of arguments to pass.
     """
-    sep, args = calc.findStringAndArgs('join', modifiers, count)
+    sep, args = calc.findStringAndArgs("join", modifiers, count)
     nPop = len(args) + 1
     if len(args) == 1:
         # Only one argument from the stack, so run join on the value of
@@ -181,7 +180,7 @@ def join(calc, modifiers, count):
     return result
 
 
-join.names = ('join',)
+join.names = ("join",)
 
 
 def reduce(calc, modifiers, count):
@@ -191,7 +190,7 @@ def reduce(calc, modifiers, count):
     @param modifiers: A C{Modifiers} instance.
     @param count: An C{int} count of the number of arguments to pass.
     """
-    func, args = calc.findCallableAndArgs('apply', modifiers, count)
+    func, args = calc.findCallableAndArgs("apply", modifiers, count)
     nPop = len(args) + 1
     if len(args) == 1:
         # Only one argument from the stack, so run reduce on the value of
@@ -204,7 +203,7 @@ def reduce(calc, modifiers, count):
     return value
 
 
-reduce.names = ('reduce',)
+reduce.names = ("reduce",)
 
 
 def pop(calc, modifiers, count):
@@ -220,11 +219,13 @@ def pop(calc, modifiers, count):
         calc._finalize(value, modifiers, nPop=nArgs, noValue=True)
         return value
 
-    raise CalculatorError('Cannot pop %d item%s (stack length is %d)' %
-                          (nArgs, '' if nArgs == 1 else 's', len(calc)))
+    raise CalculatorError(
+        "Cannot pop %d item%s (stack length is %d)"
+        % (nArgs, "" if nArgs == 1 else "s", len(calc))
+    )
 
 
-pop.names = ('pop',)
+pop.names = ("pop",)
 
 
 def reverse(calc, modifiers, count):
@@ -241,11 +242,13 @@ def reverse(calc, modifiers, count):
             calc._finalize(value, modifiers, nPop=nArgs, extend=True)
             return value
 
-    raise CalculatorError('Cannot reverse %d item%s (stack length is %d)' %
-                          (nArgs, '' if nArgs == 1 else 's', len(calc)))
+    raise CalculatorError(
+        "Cannot reverse %d item%s (stack length is %d)"
+        % (nArgs, "" if nArgs == 1 else "s", len(calc))
+    )
 
 
-reverse.names = ('reverse',)
+reverse.names = ("reverse",)
 
 
 def swap(calc, modifiers, _):
@@ -255,14 +258,13 @@ def swap(calc, modifiers, _):
     @param modifiers: A C{Modifiers} instance.
     """
     if len(calc) > 1:
-        calc._finalize(calc.stack[-2:][::-1], modifiers=modifiers,
-                       nPop=2, extend=True)
+        calc._finalize(calc.stack[-2:][::-1], modifiers=modifiers, nPop=2, extend=True)
         return calc.NO_VALUE
 
-    raise CalculatorError('Cannot swap (stack needs 2 items)')
+    raise CalculatorError("Cannot swap (stack needs 2 items)")
 
 
-swap.names = ('swap',)
+swap.names = ("swap",)
 
 
 def list_(calc, modifiers, count):
@@ -292,15 +294,16 @@ def list_(calc, modifiers, count):
                 value = calc.stack[-nArgs:]
             else:
                 raise CalculatorError(
-                    'Cannot list %d item%s (stack length is %d)' %
-                    (nArgs, '' if nArgs == 1 else 's', len(calc)))
+                    "Cannot list %d item%s (stack length is %d)"
+                    % (nArgs, "" if nArgs == 1 else "s", len(calc))
+                )
         calc._finalize(value, modifiers=modifiers, nPop=nArgs)
         return value
 
-    raise CalculatorError('Cannot run list (stack is empty)')
+    raise CalculatorError("Cannot run list (stack is empty)")
 
 
-list_.names = ('list',)
+list_.names = ("list",)
 
 
 def store(calc, modifiers, count):
@@ -310,7 +313,7 @@ def store(calc, modifiers, count):
     @param modifiers: A C{Modifiers} instance.
     @param count: An C{int} count of the number of arguments to pass.
     """
-    variable, args = calc.findStringAndArgs('store', modifiers, count)
+    variable, args = calc.findStringAndArgs("store", modifiers, count)
     if len(args) == 1:
         # Only one argument from the stack, so we'll set the variable to
         # have that value.
@@ -323,7 +326,7 @@ def store(calc, modifiers, count):
     return calc.NO_VALUE
 
 
-store.names = ('store',)
+store.names = ("store",)
 
 
 def map_(calc, modifiers, count):
@@ -333,7 +336,7 @@ def map_(calc, modifiers, count):
     @param modifiers: A C{Modifiers} instance.
     @param count: An C{int} count of the number of arguments to pass.
     """
-    func, args = calc.findCallableAndArgs('map', modifiers, count)
+    func, args = calc.findCallableAndArgs("map", modifiers, count)
     nPop = len(args) + 1
     if len(args) == 1:
         # Only one argument from the stack, so run map on the value of
@@ -349,7 +352,7 @@ def map_(calc, modifiers, count):
     return result
 
 
-map_.names = ('map',)
+map_.names = ("map",)
 
 
 FUNCTIONS = (
@@ -379,7 +382,7 @@ def addSpecialFunctions(calc):
     @param calc: A C{Calculator} instance.
     """
     for func in FUNCTIONS:
-        names = getattr(func, 'names')
+        names = func.names
         for name in names:
-            calc.debug('Adding special command %r for %s' % (name, func))
+            calc.debug("Adding special command %r for %s" % (name, func))
             calc.registerSpecial(func, name)
