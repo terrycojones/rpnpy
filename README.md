@@ -1,6 +1,6 @@
-# rpn.py - a reverse-Polish notation calculator for Python
+# rpnpy - a reverse-Polish notation calculator for Python
 
-Here is `rpn.py`, a script implementing a
+Here is `rpnpy`, a script implementing a
 [reverse-Polish notation](https://en.wikipedia.org/wiki/Reverse_Polish_notation)
 (RPN) calculator for Python.
 
