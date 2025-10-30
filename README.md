@@ -584,7 +584,7 @@ You can use the `functions` command to see a list of all known functions
 and the number of arguments they'll expect on the stack (assuming you don't
 pass arguments directly as with `abs(-50)` above or use a numerical
 modifier (e.g., `:3`) to explicitly specify the number of arguments that
-should be passed. Here's the first part of the output of `functions`:
+should be passed). Here's the first part of the output of `functions`:
 
 ```sh
 $ rpnpy functions
