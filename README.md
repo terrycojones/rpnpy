@@ -8,6 +8,16 @@ As well as providing for traditional numeric calculator operations, it
 provides easy access to many Python functions, and you can put Python
 objects and functions onto the stack and operate on them.
 
+## Installation
+
+`$ pip install rpnpy`. Or if you have [uv](https://docs.astral.sh/uv/) you
+can just run `uvx rpnpy`.
+
+This will install an `rpnpy` command (you might want to make a more
+convenient / shorter shell alias for it).
+
+## Background
+
 I wrote this for 3 reasons:
 
 1.  I absolutely loved the [HP-41C](https://en.wikipedia.org/wiki/HP-41C)
@@ -48,48 +58,48 @@ I wrote this for 3 reasons:
 *Note* that this is a work in progress! Everything may change. Suggestions
 very welcome.
 
-## Example rpn.py sessions
+## Example rpnpy sessions
 
 Before getting a bit more formal (and boring) in describing how you use
-`rpn.py`, here are some example sessions to give you a flavor.
+`rpnpy`, here are some example sessions to give you a flavor.
 
-(BTW, I set my shell up to alias `pc` (Python calculator) for `rpn.py` to
-minimize typing and be a bit more like `dc`. But I'll use `rpn.py` in the
+(BTW, I set my shell up to alias `pc` (Python calculator) for `rpnpy` to
+minimize typing and be a bit more like `dc`. But I'll use `rpnpy` in the
 examples below.)
 
 ```sh
 # Add two numbers. The stack is printed after all commands are run.
-$ rpn.py 4 5 +
+$ rpnpy 4 5 +
 9
 
 # Do the same thing, but read from standard input (all the commands below
 # could also be run in this way).
-$ echo 4 5 + | rpn.py
+$ echo 4 5 + | rpnpy
 9
 
 # Sine of 90 degrees (note that Python's sin function operates on
 # radians). The commands are in quotes so the shell doesn't expand the '*'.
-$ rpn.py '90 pi 180 / * sin'
+$ rpnpy '90 pi 180 / * sin'
 1.0
 
 # Same thing, different quoting.
-$ rpn.py 90 pi 180 / \* sin
+$ rpnpy 90 pi 180 / \* sin
 1.0
 
 # Same thing, use 'mul' instead of '*'.
-$ rpn.py 90 pi 180 / mul sin
+$ rpnpy 90 pi 180 / mul sin
 1.0
 
 # Area of a circle radius 10
-$ rpn.py 'pi 10 10 * *'
+$ rpnpy 'pi 10 10 * *'
 314.1592653589793
 
 # Equivalently, using ':2' to push 10 onto the stack twice.
-$ rpn.py 'pi 10:2 * *'
+$ rpnpy 'pi 10:2 * *'
 314.1592653589793
 
 # Equivalently, using 'dup' to duplicate the 10 and 'mul' instead of '*'
-$ rpn.py pi 10 dup mul mul
+$ rpnpy pi 10 dup mul mul
 314.1592653589793
 ```
 
@@ -122,7 +132,7 @@ the iterable, then call `map` (`reduce`, `filter`, etc).
 Like this:
 
 ```sh
-$ rpn.py 'str:! [6,7,8] map:i'
+$ rpnpy 'str:! [6,7,8] map:i'
 ['6', '7', '8']
 ```
 
@@ -132,7 +142,7 @@ $ rpn.py 'str:! [6,7,8] map:i'
    `map` to be iterated before being added to the stack.
 1. When you run a function (like `map` or `apply`) that needs a callable
    (or a function like `join` that needs a string) and you don't specify a
-   count (using `:3` for example), `rpn.py` will search the stack for a
+   count (using `:3` for example), `rpnpy` will search the stack for a
    suitable item and use the first one it finds. It doesn't really have a
    choice in this case because it doesn't know how many arguments the
    function (once it is found) will be applied to.  This should usually
@@ -150,7 +160,7 @@ function. In the following, we push in the other order and then use
 `map:ir` (the `i` is just to iterate the `map` result to produce a list).
 
 ```sh
-$ rpn.py '[6,7,8] str:! map:ir'
+$ rpnpy '[6,7,8] str:! map:ir'
 ['6', '7', '8']
 ```
 
@@ -158,7 +168,7 @@ Continuing on the map theme, you could instead simply reverse part of the
 stack before running a function:
 
 ```sh
-$ rpn.py '[6,7,8] str:! reverse map:i'
+$ rpnpy '[6,7,8] str:! reverse map:i'
 ['6', '7', '8']
 ```
 
@@ -168,7 +178,7 @@ cause it to be run on the whole stack:
 
 ```sh
 # Reverse the top 3 stack elements then reverse the whole of the stack.
-$ rpn.py '5 6 7 8 reverse:3 reverse:*'
+$ rpnpy '5 6 7 8 reverse:3 reverse:*'
 [6, 7, 8, 5]
 ```
 
@@ -176,29 +186,29 @@ $ rpn.py '5 6 7 8 reverse:3 reverse:*'
 
 ```sh
 # The area of a circle again, but using reduce to do the multiplying.  The
-# ':!' modifier tells rpn.py to push the '*' function onto the stack
+# ':!' modifier tells rpnpy to push the '*' function onto the stack
 # instead of immediately running it.
-$ rpn.py '*:! [pi,10,10] reduce'
+$ rpnpy '*:! [pi,10,10] reduce'
 314.1592653589793
 
 # Same thing, but push the numbers individually onto the stack, then the
 # ':3' tells reduce to use three stack items. Use 'mul' as an
 # alternative to '*'.
-$ rpn.py 'mul:! pi 10 dup reduce:3'
+$ rpnpy 'mul:! pi 10 dup reduce:3'
 314.1592653589793
 
 # Equivalently, using ':*' to tell reduce to use the whole stack.
-$ rpn.py '*:! pi 10 dup reduce:*'
+$ rpnpy '*:! pi 10 dup reduce:*'
 314.1592653589793
 
 # If you don't want to push the function for 'reduce' to use onto the stack
 # first, use ':r' to tell it to use the top of the stack:
-$ rpn.py 'pi 10 dup mul:! reduce:3r'
+$ rpnpy 'pi 10 dup mul:! reduce:3r'
 314.1592653589793
 
 # Push 'True' onto the stack 5 times, turn the whole stack ('*') into a
 # list and print it ('p'), then pass that list to 'sum'.
-$ rpn.py 'True:5 list:*p sum'
+$ rpnpy 'True:5 list:*p sum'
 [True, True, True, True, True]
 5
 
@@ -219,19 +229,19 @@ $ rpn.py 'True:5 list:*p sum'
 # It's a convenient way to iterate over a generator, a range, a map,
 # dictionary keys, etc.
 
-$ rpn.py 'range(10):i reversed str:! map:ir "" join:r int sqrt 3 round:2'
+$ rpnpy 'range(10):i reversed str:! map:ir "" join:r int sqrt 3 round:2'
 99380.799
 ```
 
 The `:2` on the `round` call tells it to use two arguments from the stack
-(`round` uses one by default in `rpn.py`).
+(`round` uses one by default in `rpnpy`).
 
 The `:r` on the `map` call makes it look for the function to run on the top
 of the stack, rather than searching up the stack to find it. If you think
 further in advance, you can push the function first:
 
 ```sh
-$ rpn.py 'str:! range(10):i reversed map:i "" join:r int sqrt 3 round:2'
+$ rpnpy 'str:! range(10):i reversed map:i "" join:r int sqrt 3 round:2'
 99380.799
 ```
 
@@ -239,7 +249,7 @@ The same goes for the string used by `join`: it could have been pushed
 first, and then there would be no need for the `:r` on the `join`:
 
 ```sh
-$ rpn.py '"" str:! range(10):i reversed map:i join int sqrt 3 round:2'
+$ rpnpy '"" str:! range(10):i reversed map:i join int sqrt 3 round:2'
 99380.799
 ```
 
@@ -254,7 +264,7 @@ print(round(sqrt(int(''.join(map(str, reversed(range(10)))))), 3))
 The elimination of parens is the main beauty of RPN (at least
 aesthetically - the stack model of computation is a pretty awesome idea
 too).  The price is that you have to learn to think in postfix. With the
-`:r` modifier, `rpn.py` tries to be flexible in where it will find things
+`:r` modifier, `rpnpy` tries to be flexible in where it will find things
 on the stack.  There's also the `swap` command in case you forget to push
 something and need to flip the top stack items before running some other
 command.
@@ -265,7 +275,7 @@ REPL session:
 ```sh
 # REPL usage, with automatic splitting of whitespace turned off
 # (so we give one command per line).
-$ rpn.py --noSplit
+$ rpnpy --noSplit
 --> 4
 --> 5
 --> 6
@@ -298,20 +308,20 @@ $ rpn.py --noSplit
 ```
 
 ```sh
-$ rpn.py --noSplit
+$ rpnpy --noSplit
 --> def celcius(f): return (f - 32) / 1.8  # Nothing is added to the stack here.
 --> 212
 --> celcius :p  # Use :p to print the result immediately
 100.0
 
-$ rpn.py --noSplit
+$ rpnpy --noSplit
 --> lambda f: (f - 32) / 1.8
 --> 212
 --> apply :p
 100.0
 
 # Same as above, but push the anonymous function last.
-$ rpn.py --noSplit
+$ rpnpy --noSplit
 --> 212
 --> lambda f: (f - 32) / 1.8
 --> apply :pr
@@ -324,7 +334,7 @@ The calculator either works interactively from the shell using a
 [read-eval-print loop](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop)
 (REPL) or will read commands either from the command line or from standard
 input. If you specify file names (including using `-` to indicate standard
-input), commands will be read from the file(s).  Run `rpn.py --help` to see
+input), commands will be read from the file(s).  Run `rpnpy --help` to see
 command line options.
 
 ### Command syntax
@@ -341,18 +351,18 @@ If modifiers are given, they apply to all commands on an input line.
 
 #### Input line splitting
 
-By default, `rpn.py` will split lines on whitespace and each field will be
+By default, `rpnpy` will split lines on whitespace and each field will be
 taken as a command. Hence:
 
 ```sh
-$ rpn.py 4 5 +
+$ rpnpy 4 5 +
 9
 ```
 
 will push `4` and then `5` onto the stack and then replace those two values
 by their sum.
 
-In REPL mode, `rpn.py` prints `--> ` as a prompt (see the <a
+In REPL mode, `rpnpy` prints `--> ` as a prompt (see the <a
 href="#repl">REPL section</a> below).
 
 In many cases it is easy to avoid using spaces and inadvertently having
@@ -360,14 +370,14 @@ your input interpreted as multiple commands. For example, push a list onto
 the stack:
 
 ```sh
-$ rpn.py
+$ rpnpy
 --> [1,2,3]
 ```
 
 but if you try that with embedded spaces, you'll get an error:
 
 ```sh
-$ rpn.py
+$ rpnpy
 --> [1, 2, 3]
 Could not eval('[1,'): unexpected EOF while parsing (<string>, line 1)
 Could not exec('[1,'): unexpected EOF while parsing (<string>, line 1)
@@ -380,18 +390,18 @@ give an empty command with the `:n` modifier to toggle to no line
 splitting:
 
 ```sh
-$ rpn.py
+$ rpnpy
 --> :n  # no splitting of subsequent lines
 --> [1, 2, 3]
 ```
 
-If you want `rpn.py` not to split lines into multiple commands by default,
+If you want `rpnpy` not to split lines into multiple commands by default,
 run with the `--noSplit` command-line option. You can then use `:s` (split)
 if you instead want to switch to writing input lines that should be split.
 Hence:
 
 ```sh
-$ rpn.py --noSplit
+$ rpnpy --noSplit
 --> [1, 2, 3]
 --> :s  # split subsequent lines
 --> 4 5
@@ -413,7 +423,7 @@ case you will get errors).
 Numbers can be inputted using engineering notation:
 
 ```
-$ rpn.py
+$ rpnpy
 --> 20k 1.5M +
 1.52M
 ```
@@ -422,7 +432,7 @@ Values on the stack will only be displayed using engineering notation if they
 were inputted so:
 
 ```
-$ rpn.py
+$ rpnpy
 --> 2000
 --> f
 --> [2000]
@@ -440,21 +450,21 @@ each field is treated as a separate command. This allows for simple
 command-line usage such as
 
 ```sh
-$ echo 4 5 + | rpn.py
+$ echo 4 5 + | rpnpy
 9
 ```
 
 For convenience, modifiers can be preceded by whitespace:
 
 ```sh
-$ echo 100 log10 :! apply | rpn.py
+$ echo 100 log10 :! apply | rpnpy
 2.0
 ```
 
 In the above, the `:!` modifier applies to the preceding `log10` function
 (causing it to be pushed onto the stack).
 
-If you have a file of commands you want to pipe into `rpn.py` you might
+If you have a file of commands you want to pipe into `rpnpy` you might
 want to turn off this splitting:
 
 ```sh
@@ -464,14 +474,14 @@ $ cat data
 # This is a comment
 +
 
-$ rpn.py < data
+$ rpnpy < data
 9
 ```
 
 You can change the separator using `--separator`:
 
 ```sh
-$ echo 4_5_+ | rpn.py --separator _
+$ echo 4_5_+ | rpnpy --separator _
 9
 ```
 
@@ -479,14 +489,14 @@ By default, the final calculator stack is printed when standard input is
 exhausted:
 
 ```sh
-$ echo 4 5 | rpn.py
+$ echo 4 5 | rpnpy
 [4, 5]
 ```
 
 You can disable the final printing with `--noFinalPrint`:
 
 ```sh
-$ echo 4 5 | rpn.py --noFinalPrint
+$ echo 4 5 | rpnpy --noFinalPrint
 ```
 
 in which case you can print things yourself using the `p` command (see
@@ -499,7 +509,7 @@ In REPL mode, the calculator repeatedly prints a prompt, reads a command,
 and executes it. For example:
 
 ```sh
-$ rpn.py
+$ rpnpy
 --> 4 5 +
 --> p
 9
@@ -543,7 +553,7 @@ the result will be pushed onto the stack:
 
 ```sh
 # This works unquoted in bash. You may need quotes in your shell (e.g, in fish).
-$ rpn.py abs(-50)
+$ rpnpy abs(-50)
 50
 ```
 
@@ -555,11 +565,11 @@ positional-or-keyword arguments). If the guess is wrong, you can always
 
 ```sh
 # Call 'round' (which takes one argument by default) on pi.
-$ rpn.py pi round
+$ rpnpy pi round
 3
 
 # Round pi to 10 decimal places. :2 tells 'round' to use two stack arguments.
-$ rpn.py pi 10 round:2
+$ rpnpy pi 10 round:2
 3.1415926536
 ```
 
@@ -570,7 +580,7 @@ modifier (e.g., `:3`) to explicitly specify the number of arguments that
 should be passed. Here's the first part of the output of `functions`:
 
 ```sh
-$ rpn.py functions
+$ rpnpy functions
 != Function(ne (calls operator.ne with 2 args))
 * Function(mul (calls operator.mul with 2 args))
 + Function(add (calls operator.add with 2 args))
@@ -628,7 +638,7 @@ The full list of modifiers is:
 *   `n`: Turn off (think: no) line splitting. Note that this will only go into
     effect from the _next_ command on.
 *   `p`: Print the result (if any). See also the `:P` modifier and the `--print`
-    argument to `rpn.py`.
+    argument to `rpnpy`.
 *   `P`: Toggle automatic printing of all command results.
 *   `r`: When applied to a special command, reverses how the function (for
     `map`, `apply`, `reduce`) or a string (for `join`) is looked for on the
@@ -639,13 +649,13 @@ The full list of modifiers is:
     reversed (i.e., to use a stack order opposite to the normal).
 
         ```sh
-        $ rpn.py '+:! 5 4 apply'
+        $ rpnpy '+:! 5 4 apply'
         9
-        $ rpn.py '5 4 +:! apply:r'
+        $ rpnpy '5 4 +:! apply:r'
         9
-        $ rpn.py '5 4 -'
+        $ rpnpy '5 4 -'
         1
-        $ rpn.py '5 4 -:r'
+        $ rpnpy '5 4 -:r'
         -1
         ```
 *   `s`: Turn on line splitting on whitespace. Note that this will only go into
@@ -660,7 +670,7 @@ context (um, sorry about that - should be clearer).
 You can set variables and push them (or their values) onto the stack:
 
 ```sh
-$ rpn.py --noSplit
+$ rpnpy --noSplit
 --> a = 4
 --> a
 --> f
@@ -683,7 +693,7 @@ The effect of commands on the stack and variables can be undone with the
 
 ## History
 
-`rpn.py` makes use of Python's
+`rpnpy` makes use of Python's
 [readline](https://docs.python.org/3.7/library/readline.html) library to
 allow familiar/comfortable command line editing. Your input history will be
 saved to `~/.pycalc_history` if your version of readline has the

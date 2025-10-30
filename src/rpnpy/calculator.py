@@ -184,7 +184,7 @@ class Calculator:
                         # (longName, shortName))
                         self._functions[shortName] = function
                     else:
-                        self.report(shortName, 'already known')
+                        assert self._functions[shortName] is function
 
     def addSpecialCases(self):
         """
@@ -259,15 +259,12 @@ class Calculator:
                 self.debug('Not importing %r' % path)
                 continue
 
-            if path in self._functions:
-                if path not in ('decimal.Decimal', 'builtins.float'):
-                    self.err('Function %r already exists' % path)
-            else:
+            if path not in self._functions:
                 # Add the function to our functions dict along with a
                 # default number of positional parameters it expects. This
                 # allows the user to call it and have the arguments taken
                 # from the stack (the number of arguments used can always
-                # be specified on the command line (e.g., :3)
+                # be specified on the command line (e.g., :3)).
                 exec('self._functions["%s"] = Function("%s", "%s", %s, %d)' %
                      (path, moduleName, name, path, nArgs))
 

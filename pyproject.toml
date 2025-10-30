@@ -4,10 +4,11 @@ build-backend = "hatchling.build"
 
 [project]
 name = "rpnpy"
-version = "1.0.31"
+version = "2.0.0"
 description = "Control an RPN calculator from Python."
 authors = [
-    { name = "Terry Jones", email = "terry@jon.es" }
+    { name = "Terry C. Jones", email = "terence.jones@charite.de" },
+    { name = "Nícolas F. R. A. Prado"}
 ]
 readme = "README.md"
 license = { text = "MIT" }
@@ -25,12 +26,6 @@ dependencies = [
     "engineering_notation",
 ]
 
-[project.optional-dependencies]
-dev = [
-    "pytest",
-    "ruff",
-]
-
 [project.urls]
 Homepage = "https://github.com/terrycojones/rpnpy"
 Repository = "https://github.com/terrycojones/rpnpy"
@@ -38,6 +33,13 @@ Download = "https://github.com/terrycojones/rpnpy"
 
 [project.scripts]
 rpnpy = "rpnpy.cli:main"
+
+[dependency-groups]
+dev = [
+    "nox>=2025.10.16",
+    "pytest",
+    "ruff",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/rpnpy"]

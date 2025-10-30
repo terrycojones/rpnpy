@@ -1,3 +1,14 @@
+# 2.0.0 October 30, 2025
+
+Modernized to use `uv` and `pyproject.toml`. The `rpn.py` script is now in
+`src/rpnpy/cli/rpn.py` and can be run from the top level by `uv run rpypy`.
+The package now installs an `rpypy` command. You can also run the calculator
+without installing anything, via `uvx rpnpy`.
+
+If you can't live without the old `rpn.py` command, things should work if you
+make a symbolic link to `src/rpnpy/cli/rpn.py` (or put `src/rpnpy/cli` in
+your shell's PATH).
+
 # 1.0.31 December 2, 2020
 
 Added special `store` command to save stack values into a variable,
