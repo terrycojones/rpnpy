@@ -1,7 +1,8 @@
 import inspect
+from typing import Callable, Optional
 
 
-def countArgs(func, default=None):
+def countArgs(func: Callable, default: Optional[int] = None) -> Optional[int]:
     try:
         sig = inspect.signature(func)
     except ValueError:

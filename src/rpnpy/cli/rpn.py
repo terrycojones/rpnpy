@@ -13,7 +13,7 @@ except ImportError:
 from rpnpy import Calculator
 
 
-def setupReadline():
+def setupReadline() -> bool:
     """Initialize the readline library and command history.
 
     @return: A C{bool} to indicate whether standard input is a terminal
@@ -33,7 +33,7 @@ def setupReadline():
         open(histfile, "wb").close()
         historyLen = 0
 
-    def saveHistory(prevHistoryLen, histfile):
+    def saveHistory(prevHistoryLen: int, histfile: str) -> None:
         newHistoryLen = readline.get_current_history_length()
         readline.set_history_length(1000)
         readline.append_history_file(newHistoryLen - prevHistoryLen, histfile)
@@ -43,7 +43,7 @@ def setupReadline():
     return True
 
 
-def parseArgs():
+def parseArgs() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description=(
@@ -142,7 +142,7 @@ def parseArgs():
     return parser.parse_args()
 
 
-def main():
+def main() -> None:
     """Main entry point for the rpnpy CLI."""
     args = parseArgs()
 

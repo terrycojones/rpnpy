@@ -7,6 +7,7 @@ import math
 import operator
 import sys
 from pprint import pprint
+from typing import Any, Callable, Dict, Iterable, Iterator, List, Optional, TextIO, Tuple, Union
 
 from engineering_notation import EngNumber
 
@@ -19,19 +20,20 @@ from rpnpy.errors import (
 from rpnpy.functions import addSpecialFunctions
 from rpnpy.inspect import countArgs
 from rpnpy.io import findCommands
+from rpnpy.modifiers import Modifiers
 
 
 class Function:
-    def __init__(self, moduleName, name, func, nArgs):
+    def __init__(self, moduleName: str, name: str, func: Callable, nArgs: int) -> None:
         self.moduleName = moduleName
         self.name = name
         self.func = func
         self.nArgs = nArgs
 
-    def __call__(self, *args, **kw):
+    def __call__(self, *args: Any, **kw: Any) -> Any:
         return self.func(*args, **kw)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Function(%s (calls %s with %d arg%s))" % (
             self.name,
             self.path,
@@ -40,16 +42,16 @@ class Function:
         )
 
     @property
-    def path(self):
+    def path(self) -> str:
         return "%s.%s" % (self.moduleName, self.name)
 
 
 class Variable:
-    def __init__(self, name, variables):
+    def __init__(self, name: str, variables: Dict[str, Any]) -> None:
         self.name = name
         self._variables = variables
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Variable(%s, current value: %r)" % (
             self.name,
             self._variables[self.name],
@@ -64,13 +66,13 @@ class Calculator:
 
     def __init__(
         self,
-        autoPrint=False,
-        splitLines=True,
-        separator=None,
-        outfp=sys.stdout,
-        errfp=sys.stderr,
-        debug=False,
-    ):
+        autoPrint: bool = False,
+        splitLines: bool = True,
+        separator: Optional[str] = None,
+        outfp: TextIO = sys.stdout,
+        errfp: TextIO = sys.stderr,
+        debug: bool = False,
+    ) -> None:
         self._autoPrint = autoPrint
         self._splitLines = splitLines
         self._separator = separator
@@ -90,23 +92,23 @@ class Calculator:
         self.addAbbrevs()
         self.addConstants()
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.stack)
 
-    def report(self, *args, **kw):
+    def report(self, *args: Any, **kw: Any) -> None:
         print(*args, file=self._outfp, **kw)
 
-    def err(self, *args, **kw):
+    def err(self, *args: Any, **kw: Any) -> None:
         print(*args, file=self._errfp, **kw)
 
-    def debug(self, *args, **kw):
+    def debug(self, *args: Any, **kw: Any) -> None:
         if self._debug:
             print("      #", *args, file=self._errfp, **kw)
 
-    def pprint(self, *args, **kw):
+    def pprint(self, *args: Any, **kw: Any) -> None:
         pprint(*args, stream=self._outfp, **kw)
 
-    def batch(self, fp, finalPrint=False):
+    def batch(self, fp: Iterable[str], finalPrint: bool = False) -> None:
         """Non-interactively read and execute commands from a file.
 
         @param fp: An iterator to read commands from.
@@ -121,7 +123,7 @@ class Calculator:
         if finalPrint and self.stack:
             self.printStack(-1 if len(self) == 1 else None)
 
-    def repl(self, prompt):
+    def repl(self, prompt: str) -> None:
         """Interactive read-eval-print loop.
 
         @param prompt: The C{str} prompt to print at the start of each line.
@@ -145,10 +147,16 @@ class Calculator:
                 self.report()
                 break
 
-    def registerSpecial(self, func, name):
+    def registerSpecial(self, func: Callable, name: str) -> None:
         self._special[name] = func
 
-    def register(self, func, name=None, nArgs=None, moduleName=None):
+    def register(
+        self,
+        func: Callable,
+        name: Optional[str] = None,
+        nArgs: Optional[int] = None,
+        moduleName: Optional[str] = None,
+    ) -> None:
         name = name or func.__name__
         if name in self._functions:
             self.debug(
@@ -160,7 +168,7 @@ class Calculator:
         nArgs = countArgs(func, 1) if nArgs is None else nArgs
         self._functions[name] = Function(moduleName, name, func, nArgs)
 
-    def addAbbrevs(self):
+    def addAbbrevs(self) -> None:
         for longName, shortNames in (
             ("math.log", ("log",)),
             ("math.sqrt", ("v",)),
@@ -194,7 +202,7 @@ class Calculator:
                     else:
                         assert self._functions[shortName] is function
 
-    def addSpecialCases(self):
+    def addSpecialCases(self) -> None:
         """
         Add argument counts for functions that cannot have their signatures
         inspected.
@@ -224,7 +232,7 @@ class Calculator:
             else:
                 self.err("Long function name %r is already set" % longName)
 
-    def addConstants(self):
+    def addConstants(self) -> None:
         """Add some constants (well, constant in theory) from math"""
         constants = [
             ("e", math.e),
@@ -240,7 +248,7 @@ class Calculator:
             else:
                 self._variables[name] = value
 
-    def importCallables(self, module):
+    def importCallables(self, module: Any) -> None:
         moduleName = module.__name__
         exec("import " + moduleName, globals(), self._variables)
         callables = inspect.getmembers(module, callable)
@@ -291,7 +299,7 @@ class Calculator:
                 assert name not in self._functions
                 self._functions[name] = self._functions[path]
 
-    def printStack(self, n=None):
+    def printStack(self, n: Optional[Union[int, slice]] = None) -> None:
         """
         Print the stack or some item(s) from it.
 
@@ -312,14 +320,20 @@ class Calculator:
                         % (n, len(self), "" if len(self) == 1 else "s")
                     )
 
-    def saveState(self):
+    def saveState(self) -> None:
         """Save the stack and variable state."""
         self._previousStack = self.stack.copy()
         self._previousVariables = self._variables.copy()
 
     def _finalize(
-        self, result, modifiers, nPop=0, extend=False, repeat=1, noValue=False
-    ):
+        self,
+        result: Any,
+        modifiers: Modifiers,
+        nPop: int = 0,
+        extend: bool = False,
+        repeat: int = 1,
+        noValue: bool = False,
+    ) -> None:
         """Process the final result of executing a command.
 
         @param result: A C{list} or C{tuple} of results to add to the stack.
@@ -350,7 +364,7 @@ class Calculator:
             for _ in range(repeat):
                 add(result)
 
-    def execute(self, line):
+    def execute(self, line: str) -> bool:
         """
         Execute a line of commands. Stop executing commands on any error.
 
@@ -390,7 +404,9 @@ class Calculator:
 
         return True
 
-    def _executeOneCommand(self, command, modifiers, count):
+    def _executeOneCommand(
+        self, command: str, modifiers: Modifiers, count: Optional[int]
+    ) -> bool:
         """
         Execute one command.
 
@@ -453,7 +469,9 @@ class Calculator:
                 self.err(err)
             return False
 
-    def _tryFunction(self, command, modifiers, count):
+    def _tryFunction(
+        self, command: str, modifiers: Modifiers, count: Optional[int]
+    ) -> Tuple[bool, Any]:
         if modifiers.forceCommand:
             return False, self.NO_VALUE
 
@@ -471,7 +489,9 @@ class Calculator:
 
         return self._runFunction(command, modifiers, count, function)
 
-    def _runFunction(self, command, modifiers, count, function):
+    def _runFunction(
+        self, command: str, modifiers: Modifiers, count: Optional[int], function: Function
+    ) -> Tuple[bool, Any]:
         "Run a Python function."
 
         nArgs = (
@@ -511,7 +531,9 @@ class Calculator:
             self._finalize(result, modifiers, nPop=nArgs)
             return True, result
 
-    def _tryVariable(self, command, modifiers, count):
+    def _tryVariable(
+        self, command: str, modifiers: Modifiers, count: Optional[int]
+    ) -> Tuple[bool, Any]:
         if modifiers.forceCommand:
             return False, self.NO_VALUE
 
@@ -539,7 +561,9 @@ class Calculator:
             self.debug("%r is not a variable" % command)
             return False, self.NO_VALUE
 
-    def _trySpecial(self, command, modifiers, count):
+    def _trySpecial(
+        self, command: str, modifiers: Modifiers, count: Optional[int]
+    ) -> Tuple[bool, Any]:
         if command in self._special:
             try:
                 value = self._special[command](self, modifiers, count)
@@ -556,7 +580,9 @@ class Calculator:
 
         return False, self.NO_VALUE
 
-    def _tryEvalExec(self, command, modifiers, count):
+    def _tryEvalExec(
+        self, command: str, modifiers: Modifiers, count: Optional[int]
+    ) -> Tuple[bool, Any]:
         errors = []
         possibleWhiteSpace = False
         try:
@@ -605,7 +631,7 @@ class Calculator:
             self._finalize(value, modifiers=modifiers, repeat=count)
             return True, value
 
-    def convertStackArgs(self, args):
+    def convertStackArgs(self, args: Iterable[Any]) -> List[Any]:
         """Convert stack items to arguments for functions.
 
         @param args: An iterable of stack items.
@@ -622,7 +648,7 @@ class Calculator:
 
         return result
 
-    def toggleAutoPrint(self, newValue=None):
+    def toggleAutoPrint(self, newValue: Optional[bool] = None) -> None:
         """Turn auto printing on/off.
 
         @param newValue: A C{bool} new setting or C{None} to toggle.
@@ -642,7 +668,7 @@ class Calculator:
                 self.debug("Auto print off")
                 self._autoPrint = False
 
-    def toggleDebug(self, newValue=None):
+    def toggleDebug(self, newValue: Optional[bool] = None) -> None:
         """Turn debug on/off.
 
         @param newValue: A C{bool} new setting or C{None} to toggle.
@@ -663,8 +689,14 @@ class Calculator:
                 self._debug = False
 
     def _findWithArgs(
-        self, command, description, predicate, defaultArgCount, modifiers, count
-    ):
+        self,
+        command: str,
+        description: str,
+        predicate: Callable[[Any], bool],
+        defaultArgCount: Callable[[Any], int],
+        modifiers: Modifiers,
+        count: Optional[int],
+    ) -> Tuple[Any, Tuple[Any, ...]]:
         """
         Look for something (e.g., a callable function or a string) and its
         arguments on the stack.
@@ -751,38 +783,42 @@ class Calculator:
 
         return item, self.convertStackArgs(args)
 
-    def findCallableAndArgs(self, command, modifiers, count):
+    def findCallableAndArgs(
+        self, command: str, modifiers: Modifiers, count: Optional[int]
+    ) -> Tuple[Callable, Tuple[Any, ...]]:
         """Look for a callable function and its arguments on the stack.
 
         @param modifier: A C{Modifiers} instance.
         @return: A 2-C{tuple} of the function and a C{tuple} of its arguments.
         """
 
-        def defaultArgCount(func):
+        def defaultArgCount(func: Callable) -> int:
             return countArgs(func, 1)
 
         return self._findWithArgs(
             command, "callable", callable, defaultArgCount, modifiers, count
         )
 
-    def findStringAndArgs(self, command, modifiers, count):
+    def findStringAndArgs(
+        self, command: str, modifiers: Modifiers, count: Optional[int]
+    ) -> Tuple[str, Tuple[Any, ...]]:
         """Look for a string its arguments on the stack.
 
         @param modifier: A C{Modifiers} instance.
         @return: A 2-C{tuple} of the string and a C{tuple} of its arguments.
         """
 
-        def predicate(x):
+        def predicate(x: Any) -> bool:
             return isinstance(x, str)
 
-        def defaultArgCount(x):
+        def defaultArgCount(x: Any) -> int:
             return 1
 
         return self._findWithArgs(
             command, "a string", predicate, defaultArgCount, modifiers, count
         )
 
-    def setVariable(self, variable, value):
+    def setVariable(self, variable: str, value: Any) -> None:
         """
         Set the value of a variable.
 

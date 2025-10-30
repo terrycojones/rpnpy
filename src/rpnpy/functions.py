@@ -1,7 +1,12 @@
 import functools
+from typing import TYPE_CHECKING, Any, Optional, Tuple
 
 import rpnpy
 from rpnpy.errors import CalculatorError
+
+if TYPE_CHECKING:
+    from rpnpy.calculator import Calculator
+    from rpnpy.modifiers import Modifiers
 
 # IMPORTANT
 #
@@ -14,7 +19,7 @@ from rpnpy.errors import CalculatorError
 # That is all.
 
 
-def quit(calc, modifiers, count):
+def quit(calc: "Calculator", modifiers: "Modifiers", count: Optional[int]) -> None:
     """Quit the calculator.
 
     @param calc: A C{Calculator} instance.
@@ -27,7 +32,7 @@ def quit(calc, modifiers, count):
 quit.names = ("quit", "q")
 
 
-def functions(calc, modifiers, count):
+def functions(calc: "Calculator", modifiers: "Modifiers", count: Optional[int]) -> Any:
     """List all known functions
 
     @param calc: A C{Calculator} instance.
@@ -42,7 +47,7 @@ def functions(calc, modifiers, count):
 functions.names = ("functions",)
 
 
-def stack(calc, modifiers, count):
+def stack(calc: "Calculator", modifiers: "Modifiers", count: Optional[int]) -> Any:
     """Print the stack.
 
     @param calc: A C{Calculator} instance.
@@ -56,7 +61,7 @@ def stack(calc, modifiers, count):
 stack.names = ("stack", "s", "f")
 
 
-def variables(calc, modifiers, count):
+def variables(calc: "Calculator", modifiers: "Modifiers", count: Optional[int]) -> Any:
     """Show all variables.
 
     @param calc: A C{Calculator} instance.
@@ -71,7 +76,7 @@ def variables(calc, modifiers, count):
 variables.names = ("variables",)
 
 
-def clear(calc, modifiers, count):
+def clear(calc: "Calculator", modifiers: "Modifiers", count: Optional[int]) -> Any:
     """
 
     @param calc: A C{Calculator} instance.
@@ -89,7 +94,7 @@ def clear(calc, modifiers, count):
 clear.names = ("clear", "c")
 
 
-def dup(calc, modifiers, count):
+def dup(calc: "Calculator", modifiers: "Modifiers", count: Optional[int]) -> Any:
     """Duplicate the top of stack a number of times.
 
     @param calc: A C{Calculator} instance.
@@ -111,7 +116,7 @@ def dup(calc, modifiers, count):
 dup.names = ("dup", "d")
 
 
-def undo(calc, modifiers, _):
+def undo(calc: "Calculator", modifiers: "Modifiers", _: Optional[int]) -> Any:
     """Undo the last operation.
 
     @param calc: A C{Calculator} instance.
@@ -134,7 +139,7 @@ def undo(calc, modifiers, _):
 undo.names = ("undo",)
 
 
-def print_(calc, _, __):
+def print_(calc: "Calculator", _: "Modifiers", __: Optional[int]) -> None:
     """Print the top of stack.
 
     @param calc: A C{Calculator} instance.
@@ -145,7 +150,7 @@ def print_(calc, _, __):
 print_.names = ("print", "p")
 
 
-def apply(calc, modifiers, count):
+def apply(calc: "Calculator", modifiers: "Modifiers", count: Optional[int]) -> Any:
     """Apply a function to some arguments.
 
     @param calc: A C{Calculator} instance.
@@ -161,7 +166,7 @@ def apply(calc, modifiers, count):
 apply.names = ("apply",)
 
 
-def join(calc, modifiers, count):
+def join(calc: "Calculator", modifiers: "Modifiers", count: Optional[int]) -> str:
     """Join some stack items into a single string.
 
     @param calc: A C{Calculator} instance.
@@ -184,7 +189,7 @@ def join(calc, modifiers, count):
 join.names = ("join",)
 
 
-def reduce(calc, modifiers, count):
+def reduce(calc: "Calculator", modifiers: "Modifiers", count: Optional[int]) -> Any:
     """Apply a function to some arguments using reduce.
 
     @param calc: A C{Calculator} instance.
@@ -207,7 +212,7 @@ def reduce(calc, modifiers, count):
 reduce.names = ("reduce",)
 
 
-def pop(calc, modifiers, count):
+def pop(calc: "Calculator", modifiers: "Modifiers", count: Optional[int]) -> Any:
     """Pop some number of arguments (default 1) off the stack.
 
     @param calc: A C{Calculator} instance.
@@ -229,7 +234,7 @@ def pop(calc, modifiers, count):
 pop.names = ("pop",)
 
 
-def reverse(calc, modifiers, count):
+def reverse(calc: "Calculator", modifiers: "Modifiers", count: Optional[int]) -> Any:
     """Reverse some number of arguments (default 2) on the stack.
 
     @param calc: A C{Calculator} instance.
@@ -252,7 +257,7 @@ def reverse(calc, modifiers, count):
 reverse.names = ("reverse",)
 
 
-def swap(calc, modifiers, _):
+def swap(calc: "Calculator", modifiers: "Modifiers", _: Optional[int]) -> Any:
     """Swap the top two items on the stack.
 
     @param calc: A C{Calculator} instance.
@@ -268,7 +273,7 @@ def swap(calc, modifiers, _):
 swap.names = ("swap",)
 
 
-def list_(calc, modifiers, count):
+def list_(calc: "Calculator", modifiers: "Modifiers", count: Optional[int]) -> Any:
     """Convert some stack items into a list.
 
     @param calc: A C{Calculator} instance.
@@ -307,7 +312,7 @@ def list_(calc, modifiers, count):
 list_.names = ("list",)
 
 
-def store(calc, modifiers, count):
+def store(calc: "Calculator", modifiers: "Modifiers", count: Optional[int]) -> Any:
     """Store some stack items into a variable.
 
     @param calc: A C{Calculator} instance.
@@ -330,7 +335,7 @@ def store(calc, modifiers, count):
 store.names = ("store",)
 
 
-def map_(calc, modifiers, count):
+def map_(calc: "Calculator", modifiers: "Modifiers", count: Optional[int]) -> Any:
     """Map a function over some arguments.
 
     @param calc: A C{Calculator} instance.
@@ -356,7 +361,7 @@ def map_(calc, modifiers, count):
 map_.names = ("map",)
 
 
-def version(calc, modifiers, count):
+def version(calc: "Calculator", modifiers: "Modifiers", count: Optional[int]) -> Any:
     """Print the version.
 
     @param calc: A C{Calculator} instance.
@@ -370,7 +375,7 @@ def version(calc, modifiers, count):
 version.names = ("version",)
 
 
-FUNCTIONS = (
+FUNCTIONS: Tuple = (
     apply,
     clear,
     dup,
@@ -392,7 +397,7 @@ FUNCTIONS = (
 )
 
 
-def addSpecialFunctions(calc):
+def addSpecialFunctions(calc: "Calculator") -> None:
     """Add functions defined above
 
     @param calc: A C{Calculator} instance.

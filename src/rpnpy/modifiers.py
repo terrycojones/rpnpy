@@ -1,6 +1,8 @@
+from typing import Dict
+
 from rpnpy.errors import IncompatibleModifiersError, UnknownModifiersError
 
-MODIFIERS = {
+MODIFIERS: Dict[str, str] = {
     "*": "all",
     "c": "forceCommand",
     "D": "debug",
@@ -44,7 +46,9 @@ class Modifiers:
         self.reverse = reverse
         self.split = split
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Modifiers):
+            return NotImplemented
         return all(
             (
                 self.all == other.all,
@@ -62,7 +66,7 @@ class Modifiers:
         )
 
 
-def strToModifiers(s):
+def strToModifiers(s: str) -> Modifiers:
     """
     Convert a string of modifier letters into a Modifier instance.
 
