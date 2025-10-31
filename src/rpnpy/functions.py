@@ -1,8 +1,10 @@
 import functools
 from typing import TYPE_CHECKING, Any, Optional, Tuple
+from operator import itemgetter
 
 import rpnpy
 from rpnpy.errors import CalculatorError
+from rpnpy.utils import plural
 
 if TYPE_CHECKING:
     from rpnpy.calculator import Calculator
@@ -39,7 +41,10 @@ def functions(calc: "Calculator", modifiers: "Modifiers", count: Optional[int]) 
     @param modifiers: A C{Modifiers} instance.
     @param count: An C{int} count of the number of arguments to pass.
     """
-    for name, func in sorted(calc._functions.items()):
+    for name, func in sorted(
+        list(calc._functions.items()) + list(calc._special.items()),
+        key=itemgetter(0),
+    ):
         calc.report(name, func)
     return calc.NO_VALUE
 
@@ -226,8 +231,7 @@ def pop(calc: "Calculator", modifiers: "Modifiers", count: Optional[int]) -> Any
         return value
 
     raise CalculatorError(
-        "Cannot pop %d item%s (stack length is %d)"
-        % (nArgs, "" if nArgs == 1 else "s", len(calc))
+        "Cannot pop %d item%s (stack length is %d)" % (nArgs, plural(nArgs), len(calc))
     )
 
 
@@ -250,7 +254,7 @@ def reverse(calc: "Calculator", modifiers: "Modifiers", count: Optional[int]) ->
 
     raise CalculatorError(
         "Cannot reverse %d item%s (stack length is %d)"
-        % (nArgs, "" if nArgs == 1 else "s", len(calc))
+        % (nArgs, plural(nArgs), len(calc))
     )
 
 
@@ -301,7 +305,7 @@ def list_(calc: "Calculator", modifiers: "Modifiers", count: Optional[int]) -> A
             else:
                 raise CalculatorError(
                     "Cannot list %d item%s (stack length is %d)"
-                    % (nArgs, "" if nArgs == 1 else "s", len(calc))
+                    % (nArgs, plural(nArgs), len(calc))
                 )
         calc._finalize(value, modifiers=modifiers, nPop=nArgs)
         return value
@@ -395,15 +399,3 @@ FUNCTIONS: Tuple = (
     variables,
     version,
 )
-
-
-def addSpecialFunctions(calc: "Calculator") -> None:
-    """Add functions defined above
-
-    @param calc: A C{Calculator} instance.
-    """
-    for func in FUNCTIONS:
-        names = func.names
-        for name in names:
-            calc.debug("Adding special command %r for %s" % (name, func))
-            calc.registerSpecial(func, name)

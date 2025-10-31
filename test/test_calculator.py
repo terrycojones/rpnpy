@@ -580,7 +580,7 @@ class TestFindCallableAndArgs(TestCase):
         "Calling on an empty stack must raise a StackError."
         c = Calculator()
 
-        error = r"^Cannot run 'cmd' \(stack has only 0 items\)$"
+        error = r"^Cannot run 'cmd' \(stack has only 0 items\)\.$"
         self.assertRaisesRegex(
             StackError, error, c.findCallableAndArgs, "cmd", Modifiers(), None
         )
@@ -590,7 +590,7 @@ class TestFindCallableAndArgs(TestCase):
         errfp = StringIO()
         c = Calculator(errfp=errfp)
         c.execute("4")
-        error = r"^Cannot run 'cmd' \(stack has only 1 item\)$"
+        error = r"^Cannot run 'cmd' \(stack has only 1 item\)\.$"
         self.assertRaisesRegex(
             StackError, error, c.findCallableAndArgs, "cmd", Modifiers(), None
         )
@@ -626,7 +626,7 @@ class TestFindCallableAndArgs(TestCase):
         c.execute("5")
         error = (
             r"^Cannot run 'cmd' with 1 argument. Stack item \(4\) is "
-            r"not callable$"
+            r"not callable\.$"
         )
         self.assertRaisesRegex(
             StackError, error, c.findCallableAndArgs, "cmd", Modifiers(), 1
@@ -660,7 +660,7 @@ class TestFindCallableAndArgsReversed(TestCase):
     def testEmptyStack(self):
         "Calling on an empty stack must raise a StackError."
         c = Calculator()
-        error = r"Cannot run 'cmd' \(stack has only 0 items\)$"
+        error = r"Cannot run 'cmd' \(stack has only 0 items\)\.$"
         self.assertRaisesRegex(
             StackError, error, c.findCallableAndArgs, "cmd", strToModifiers("r"), None
         )
@@ -669,7 +669,7 @@ class TestFindCallableAndArgsReversed(TestCase):
         "Calling on a stack with only one item must raise a StackError."
         c = Calculator()
         c.execute("4")
-        error = r"Cannot run 'cmd' \(stack has only 1 item\)$"
+        error = r"Cannot run 'cmd' \(stack has only 1 item\)\.$"
         self.assertRaisesRegex(
             StackError, error, c.findCallableAndArgs, "cmd", strToModifiers("r"), None
         )
@@ -723,7 +723,7 @@ class TestFindStringAndArgs(TestCase):
     def testEmptyStack(self):
         "Calling on an empty stack must raise a StackError."
         c = Calculator()
-        error = r"^Cannot run 'cmd' \(stack has only 0 items\)$"
+        error = r"^Cannot run 'cmd' \(stack has only 0 items\)\.$"
         self.assertRaisesRegex(
             StackError, error, c.findStringAndArgs, "cmd", Modifiers(), None
         )
@@ -732,7 +732,7 @@ class TestFindStringAndArgs(TestCase):
         "Calling on a stack with only one item must raise a StackError."
         c = Calculator()
         c.execute("4")
-        error = r"^Cannot run 'cmd' \(stack has only 1 item\)$"
+        error = r"^Cannot run 'cmd' \(stack has only 1 item\)\.$"
         self.assertRaisesRegex(
             StackError, error, c.findStringAndArgs, "cmd", Modifiers(), None
         )
@@ -767,7 +767,7 @@ class TestFindStringAndArgs(TestCase):
         c.execute("5")
         error = (
             r"^Cannot run 'cmd' with 1 argument. Stack item \(4\) is "
-            r"not a string$"
+            r"not a string\.$"
         )
         self.assertRaisesRegex(
             StackError, error, c.findStringAndArgs, "cmd", Modifiers(), 1
@@ -801,7 +801,7 @@ class TestFindStringAndArgsReversed(TestCase):
     def testEmptyStack(self):
         "Calling on an empty stack must raise a StackError."
         c = Calculator()
-        error = r"^Cannot run 'cmd' \(stack has only 0 items\)$"
+        error = r"^Cannot run 'cmd' \(stack has only 0 items\)\.$"
         self.assertRaisesRegex(
             StackError, error, c.findStringAndArgs, "cmd", strToModifiers("r"), None
         )
@@ -810,7 +810,7 @@ class TestFindStringAndArgsReversed(TestCase):
         "Calling on a stack with only one item must result in a StackError"
         c = Calculator()
         c.execute("4")
-        error = r"^Cannot run 'cmd' \(stack has only 1 item\)$"
+        error = r"^Cannot run 'cmd' \(stack has only 1 item\)\.$"
         self.assertRaisesRegex(
             StackError, error, c.findStringAndArgs, "cmd", strToModifiers("r"), None
         )

@@ -26,14 +26,17 @@ from rpnpy.errors import (
     StackError,
     UnknownModifiersError,
 )
-from rpnpy.functions import addSpecialFunctions
+from rpnpy.functions import FUNCTIONS
 from rpnpy.inspect import countArgs
 from rpnpy.io import findCommands
 from rpnpy.modifiers import Modifiers
+from rpnpy.utils import plural
 
 
 class Function:
-    def __init__(self, moduleName: str, name: str, func: Callable, nArgs: int) -> None:
+    def __init__(
+        self, moduleName: str, name: str, func: Callable, nArgs: Optional[int]
+    ) -> None:
         self.moduleName = moduleName
         self.name = name
         self.func = func
@@ -43,16 +46,15 @@ class Function:
         return self.func(*args, **kw)
 
     def __repr__(self) -> str:
-        return "Function(%s (calls %s with %d arg%s))" % (
-            self.name,
-            self.path,
-            self.nArgs,
-            "" if self.nArgs == 1 else "s",
+        assert self.nArgs is not None
+        return (
+            f"Function({self.name} (calls {self.path} with {self.nArgs} "
+            f"arg{plural(self.nArgs)}))"
         )
 
     @property
     def path(self) -> str:
-        return "%s.%s" % (self.moduleName, self.name)
+        return f"{self.moduleName}.{self.name}"
 
 
 class Variable:
@@ -61,10 +63,8 @@ class Variable:
         self._variables = variables
 
     def __repr__(self) -> str:
-        return "Variable(%s, current value: %r)" % (
-            self.name,
-            self._variables[self.name],
-        )
+        name = self.name
+        return f"Variable({name}, current value: {self._variables[name]}!r)"
 
 
 class Calculator:
@@ -92,12 +92,13 @@ class Calculator:
         self._previousStack = self._previousVariables = None
         self._functions = {}
         self._special = {}
-        self._variables = {}
+        self._variables = {
+            "self": self,
+        }
 
         self.addSpecialCases()
-        addSpecialFunctions(self)
-        for module in math, operator, builtins, functools, decimal:
-            self.importCallables(module)
+        self.addFunctions()
+        self.addModules()
         self.addAbbrevs()
         self.addConstants()
 
@@ -156,9 +157,6 @@ class Calculator:
                 self.report()
                 break
 
-    def registerSpecial(self, func: Callable, name: str) -> None:
-        self._special[name] = func
-
     def register(
         self,
         func: Callable,
@@ -210,6 +208,22 @@ class Calculator:
                         self._functions[shortName] = function
                     else:
                         assert self._functions[shortName] is function
+
+    def addFunctions(self) -> None:
+        """
+        Add the functions from functions.py
+        """
+        for func in FUNCTIONS:
+            for name in func.names:
+                self.debug("Adding special command %r for %s" % (name, func))
+                self._special[name] = func
+
+    def addModules(self) -> None:
+        """
+        Add callable functions from various modules.
+        """
+        for module in math, operator, builtins, functools, decimal:
+            self.importCallables(module)
 
     def addSpecialCases(self) -> None:
         """
@@ -277,10 +291,10 @@ class Calculator:
             if nArgs is None:
                 continue
 
-            path = "%s.%s" % (moduleName, name)
+            path = f"{moduleName}.{name}"
 
             if path in self.OVERRIDES:
-                self.debug("Not importing %r" % path)
+                self.debug(f"Not importing {path!r}")
                 continue
 
             if path not in self._functions:
@@ -298,13 +312,11 @@ class Calculator:
             # command with an explicit argument, instead of applying it to
             # whatever is on the stack.
             if name in self._variables:
-                self.debug("name %s already defined! Ignoring %s" % (name, path))
+                self.debug(f"name {name} already defined! Ignoring {path}")
             else:
-                exec(
-                    "from %s import %s" % (moduleName, name), globals(), self._variables
-                )
+                exec(f"from {moduleName} import {name}", globals(), self._variables)
                 if name not in self._variables:
-                    self.err("name %s not now defined!!!" % name)
+                    self.err(f"name {name!r} not now defined!!!")
                 assert name not in self._functions
                 self._functions[name] = self._functions[path]
 
@@ -325,8 +337,8 @@ class Calculator:
                     self.err("Cannot print top of stack item (stack is empty)")
                 else:
                     self.err(
-                        "Cannot print stack item %d (stack has only %d item%s)"
-                        % (n, len(self), "" if len(self) == 1 else "s")
+                        f"Cannot print stack item {n} (stack has only {len(self)} "
+                        f"item{plural(len(self))})"
                     )
 
     def saveState(self) -> None:
@@ -389,10 +401,10 @@ class Calculator:
                 self.err("Unknown modifiers: %s" % ", ".join(e.args))
                 return False
             except IncompatibleModifiersError as e:
-                self.err("Incompatible modifiers: %s" % e.args[0])
+                self.err(f"Incompatible modifiers: {e.args[0]}")
                 return False
             except CalculatorError as e:
-                self.err("Incompatible modifiers: %s" % e.args[0])
+                self.err(f"Incompatible modifiers: {e.args[0]}")
                 return False
             except StopIteration:
                 break
@@ -406,8 +418,8 @@ class Calculator:
                         pass
                     else:
                         self.debug(
-                            "Ignoring commands from %r on due to "
-                            "previous error" % command
+                            f"Ignoring commands from {command!r} on due to "
+                            "previous error."
                         )
                     return False
 
@@ -437,9 +449,8 @@ class Calculator:
             stackLen = len(self)
             if count is not None and count != stackLen:
                 self.err(
-                    "* modifier conflicts with explicit count %d "
-                    "(stack has %d item%s)"
-                    % (count, stackLen, "" if stackLen == 1 else "s")
+                    f"* modifier conflicts with explicit count {count} "
+                    f"(stack has {stackLen} item{plural(stackLen)})"
                 )
                 return False
 
@@ -472,7 +483,7 @@ class Calculator:
                         self.pprint(value)
                     return True
             else:
-                raise CalculatorError("Could not find a way to execute %r" % command)
+                raise CalculatorError(f"Could not find a way to execute {command!r}.")
         except (CalculatorError, StackError) as e:
             for err in e.args:
                 self.err(err)
@@ -487,10 +498,10 @@ class Calculator:
         try:
             function = self._functions[command]
         except KeyError:
-            self.debug("%r is not a known function" % (command,))
+            self.debug(f"{command!r} is not a known function.")
             return False, self.NO_VALUE
 
-        self.debug("Found function %r" % command)
+        self.debug(f"Found function {command!r}.")
 
         if modifiers.push:
             self._finalize(function.func, modifiers)
@@ -511,17 +522,13 @@ class Calculator:
             (len(self) if modifiers.all else function.nArgs) if count is None else count
         )
 
+        assert nArgs is not None
+
         if len(self) < nArgs:
             raise CalculatorError(
                 "Not enough args on stack! (%s needs %d arg%s, stack has "
                 "%d item%s)"
-                % (
-                    command,
-                    nArgs,
-                    "" if nArgs == 1 else "s",
-                    len(self),
-                    "" if len(self) == 1 else "s",
-                )
+                % (command, nArgs, plural(nArgs), len(self), plural(len(self)))
             )
 
         args = self.convertStackArgs(self.stack[-nArgs:]) if nArgs else []
@@ -532,7 +539,7 @@ class Calculator:
             # function instead of the last.
             args = args[::-1]
 
-        self.debug("Calling %s with %r" % (function.name, tuple(args)))
+        self.debug(f"Calling {function.name!r} with {tuple(args)!r}")
         try:
             result = function.func(*args)
         except BaseException as e:
@@ -552,7 +559,7 @@ class Calculator:
 
         if command in self._variables:
             self.debug(
-                "%r is a variable (value %r)" % (command, self._variables[command])
+                f"{command!r} is a variable (value {self._variables[command]!r})"
             )
             value = self._variables[command]
             if callable(value):
@@ -571,7 +578,7 @@ class Calculator:
             self._finalize([value] * count, modifiers, extend=True)
             return True, value
         else:
-            self.debug("%r is not a variable" % command)
+            self.debug(f"{command!r} is not a variable")
             return False, self.NO_VALUE
 
     def _trySpecial(
@@ -584,12 +591,12 @@ class Calculator:
                 raise
             except BaseException as e:
                 raise CalculatorError(
-                    "Could not run special command %r: %s" % (command, e)
+                    f"Could not run special command {command!r}: {e}"
                 ) from e
             return True, value
 
         if modifiers.forceCommand:
-            raise CalculatorError("Unknown special command: %s" % command)
+            raise CalculatorError(f"Unknown special command: {command!r}.")
 
         return False, self.NO_VALUE
 
@@ -602,7 +609,7 @@ class Calculator:
             value = eval(command, globals(), self._variables)
         except BaseException as e:
             err = str(e)
-            errors.append("Could not eval(%r): %s" % (command, err))
+            errors.append(f"Could not eval({command!r}): {err}")
             if self._splitLines and err.startswith(
                 "unexpected EOF while parsing (<string>, line 1)"
             ):
@@ -615,7 +622,7 @@ class Calculator:
                     exec(command, globals(), self._variables)
                 except BaseException as e:
                     err = str(e)
-                    errors.append("Could not exec(%r): %s" % (command, err))
+                    errors.append(f"Could not exec({command!r}): {err}")
                     if (
                         not possibleWhiteSpace
                         and self._splitLines
@@ -631,15 +638,15 @@ class Calculator:
                         )
                     raise CalculatorError(*errors) from e
                 else:
-                    self.debug("exec(%r) worked." % command)
+                    self.debug(f"exec({command!r}) worked.")
                     return True, self.NO_VALUE
             else:
-                self.debug("EngNumber(%s) worked: %r" % (command, value))
+                self.debug(f"EngNumber({command}) worked: {value!r}")
                 count = 1 if count is None else count
                 self._finalize(value, modifiers=modifiers, repeat=count)
                 return True, value
         else:
-            self.debug("eval %s worked: %r" % (command, value))
+            self.debug(f"eval {command!r} worked: {value!r}")
             count = 1 if count is None else count
             self._finalize(value, modifiers=modifiers, repeat=count)
             return True, value
@@ -735,15 +742,15 @@ class Calculator:
 
         if stackLen < 2 or count is not None and stackLen < count + 1:
             raise StackError(
-                "Cannot run %r (stack has only %d item%s)"
-                % (command, stackLen, "" if stackLen == 1 else "s")
+                f"Cannot run {command!r} (stack has only {stackLen} "
+                f"item{plural(stackLen)})."
             )
 
         if modifiers.reverse:
             item = self.stack[-1]
 
             if not predicate(item):
-                raise StackError("Top stack item (%r) is not %s" % (item, description))
+                raise StackError(f"Top stack item ({item!r}) is not {description}.")
 
             if count is None:
                 count = stackLen - 1 if modifiers.all else defaultArgCount(item)
@@ -751,15 +758,8 @@ class Calculator:
             nargsAvail = stackLen - 1
             if nargsAvail < count:
                 raise StackError(
-                    "Cannot run %r with %d argument%s "
-                    "(stack has only %d item%s available)"
-                    % (
-                        command,
-                        count,
-                        "" if count == 1 else "s",
-                        nargsAvail,
-                        "" if nargsAvail == 1 else "s",
-                    )
+                    f"Cannot run {command!r} with {count} argument{plural(count)} "
+                    f"(stack has only {nargsAvail} item{plural(nargsAvail)} available)."
                 )
 
             args = self.stack[-(count + 1) : -1]
@@ -776,9 +776,7 @@ class Calculator:
                         else:
                             args.append(arg)
                     else:
-                        raise StackError(
-                            "Could not find %s item on stack" % description
-                        )
+                        raise StackError(f"Could not find {description} item on stack.")
 
                     item = self.stack[-(len(args) + 1)]
                     args = args[::-1]
@@ -787,9 +785,8 @@ class Calculator:
 
                 if not predicate(item):
                     raise StackError(
-                        "Cannot run %r with %d argument%s. Stack item (%r) is "
-                        "not %s"
-                        % (command, count, "" if count == 1 else "s", item, description)
+                        f"Cannot run {command!r} with {count} argument{plural(count)}. "
+                        f"Stack item ({item!r}) is not {description}."
                     )
 
                 args = self.stack[-count:]

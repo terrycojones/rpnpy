@@ -379,7 +379,7 @@ wheels = [
 
 [[package]]
 name = "rpnpy"
-version = "2.2.1"
+version = "2.2.3"
 source = { editable = "." }
 dependencies = [
     { name = "engineering-notation" },

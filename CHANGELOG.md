@@ -1,3 +1,7 @@
+# 2.2.3 October 31, 2025
+
+Various small/cosmetic changes. Added 'self' as a variable, for fun.
+
 # 2.2.2 October 31, 2025
 
 Minor changes to `--help` text.
