@@ -8,6 +8,9 @@ As well as providing for traditional numeric calculator operations, it
 provides easy access to many Python functions, and you can put Python
 objects and functions onto the stack and operate on them.
 
+I put a <a href="#background">Background</a> section at the bottom in case
+you're interested in why I wrote this.
+
 ## Installation
 
 `$ pip install rpnpy`. Or if you have [uv](https://docs.astral.sh/uv/) you
@@ -21,48 +24,6 @@ convenient / shorter shell alias for it).
 * As of version 2.0.0, the `rpn.py` script has been moved into
   `src/rpnpy/cli/rpn.py`. You can call it using the `rpnpy` command that the
   package now installs.
-
-## Background
-
-I wrote this for 3 reasons:
-
-1.  I absolutely loved the [HP-41C](https://en.wikipedia.org/wiki/HP-41C)
-    programmable calculator series, which used RPN. Although I had taught
-    myself to program on a
-    [Casio FX-502P](https://en.wikipedia.org/wiki/Casio_FX-502P_series) in
-    1978, the Casio was like a toy compared to the HP-41C. I owned a 41C, a
-    41CV, and then a 41CX, had a bunch of memory expansion packs, several
-    other add-on packs (e.g., stats), a card reader/writer, and got it
-    overclocked by some hardware hacker friends. It was an amazing machine.
-    I still have one.
-1.  I have been using the [UNIX](https://en.wikipedia.org/wiki/Unix)
-    [dc](https://en.wikipedia.org/wiki/Dc_(computer_program)) (desk
-    calculator) command on almost a daily basis since 1983. `dc` is ancient
-    (in UNIX terms), predating even
-    [the C programming language](https://en.wikipedia.org/wiki/C_(programming_language)). It
-    provides a minimalist RPN calculator. You can even program it, if you
-    have a taste for mystery. Here's a program I wrote in 1984 to factor
-    numbers:
-
-        [[neither]plsx]sn[c2pla2/sallx]se[ladv1+sm0=nla1=ncla2=pla2%0=elfx]sl
-        [ldlm<pclald%0=cld2+sdlfx]sf[lap[is prime.]plsx]sp[ldplald/salfx]sc
-        [[enter X : ]P?dsa0>n3sdllx]ss[[negative]plsx]snlsx
-
-    [That code](https://gist.github.com/terrycojones/bdc16bf8910ba16dd2dd6ccab8cd7e53)
-    still runs today, 35 years later, totally unchanged.  But `dc` has only
-    a tiny set of operations. So while it's great to be able to easily use
-    it from the command line (e.g., `echo 4 5 + p | dc`), I frequently find
-    myself reaching for a real calculator or launch an interactive session
-    with a full programming language (Perl, Python, etc), which feels a bit
-    heavyweight and requires more syntax.
-1. I was curious what it would be like to have a Python RPN calculator that
-   offered both the minimalist syntax of `dc` but that also offered a much
-   wider range of operations and made it possible to put Python objects
-   (lists, dicts, functions, etc.) onto the stack and operate on them. I'm
-   curious what use I'll make of it, and what others might do with it too.
-
-*Note* that this is a work in progress! Everything may change. Suggestions
-very welcome.
 
 ## Example rpnpy sessions
 
@@ -704,6 +665,46 @@ The effect of commands on the stack and variables can be undone with the
 [readline](https://docs.python.org/3.7/library/readline.html) library to
 allow familiar/comfortable command line editing. Your input history will be
 saved to `~/.pycalc_history`.
+
+<a id="background"></a>
+## Background
+
+I wrote this for 3 reasons:
+
+1.  I absolutely loved the [HP-41C](https://en.wikipedia.org/wiki/HP-41C)
+    programmable calculator series, which used RPN. Although I had taught
+    myself to program on a
+    [Casio FX-502P](https://en.wikipedia.org/wiki/Casio_FX-502P_series) in
+    1978, the Casio was like a toy compared to the HP-41C. I owned a 41C, a
+    41CV, and then a 41CX, had a bunch of memory expansion packs, several
+    other add-on packs (e.g., stats), a card reader/writer, and got it
+    overclocked by some hardware hacker friends. It was an amazing machine.
+    I still have one.
+1.  I have been using the [UNIX](https://en.wikipedia.org/wiki/Unix)
+    [dc](https://en.wikipedia.org/wiki/Dc_(computer_program)) (desk
+    calculator) command on almost a daily basis since 1983. `dc` is ancient
+    (in UNIX terms), predating even
+    [the C programming language](https://en.wikipedia.org/wiki/C_(programming_language)). It
+    provides a minimalist RPN calculator. You can even program it, if you
+    have a taste for mystery. Here's a program I wrote in 1984 to factor
+    numbers:
+
+        [[neither]plsx]sn[c2pla2/sallx]se[ladv1+sm0=nla1=ncla2=pla2%0=elfx]sl
+        [ldlm<pclald%0=cld2+sdlfx]sf[lap[is prime.]plsx]sp[ldplald/salfx]sc
+        [[enter X : ]P?dsa0>n3sdllx]ss[[negative]plsx]snlsx
+
+    [That code](https://gist.github.com/terrycojones/bdc16bf8910ba16dd2dd6ccab8cd7e53)
+    still runs today, 35 years later, totally unchanged.  But `dc` has only
+    a tiny set of operations. So while it's great to be able to easily use
+    it from the command line (e.g., `echo 4 5 + p | dc`), I frequently find
+    myself reaching for a real calculator or launch an interactive session
+    with a full programming language (Perl, Python, etc), which feels a bit
+    heavyweight and requires more syntax.
+1. I was curious what it would be like to have a Python RPN calculator that
+   offered both the minimalist syntax of `dc` but that also offered a much
+   wider range of operations and made it possible to put Python objects
+   (lists, dicts, functions, etc.) onto the stack and operate on them. I'm
+   curious what use I'll make of it, and what others might do with it too.
 
 ## Todo
 
