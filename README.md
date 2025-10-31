@@ -669,7 +669,7 @@ saved to `~/.pycalc_history`.
 <a id="background"></a>
 ## Background
 
-I wrote this for 3 reasons:
+I wrote this for three reasons:
 
 1.  I absolutely loved the [HP-41C](https://en.wikipedia.org/wiki/HP-41C)
     programmable calculator series, which used RPN. Although I had taught
