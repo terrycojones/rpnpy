@@ -19,6 +19,7 @@ from typing import (
 )
 
 from engineering_notation import EngNumber
+from rich.console import Console
 
 from rpnpy.errors import (
     CalculatorError,
@@ -81,6 +82,7 @@ class Calculator:
         outfp: TextIO = sys.stdout,
         errfp: TextIO = sys.stderr,
         debug: bool = False,
+        color: bool = False,
     ) -> None:
         self._autoPrint = autoPrint
         self._splitLines = splitLines
@@ -88,6 +90,11 @@ class Calculator:
         self._outfp = outfp
         self._errfp = errfp
         self._debug = debug
+        if color:
+            self._console = Console()
+            self._errorConsole = Console(stderr=True)
+        else:
+            self._console = self._errorConsole = None
         self.stack = []
         self._previousStack = self._previousVariables = None
         self._functions = {}
@@ -106,17 +113,29 @@ class Calculator:
         return len(self.stack)
 
     def report(self, *args: Any, **kw: Any) -> None:
-        print(*args, file=self._outfp, **kw)
+        if self._console:
+            self._console.print(*args, style="bold green", **kw)
+        else:
+            print(*args, file=self._outfp, **kw)
 
     def err(self, *args: Any, **kw: Any) -> None:
-        print(*args, file=self._errfp, **kw)
+        if self._errorConsole:
+            self._errorConsole.print(*args, style="bold red", **kw)
+        else:
+            print(*args, file=self._errfp, **kw)
 
     def debug(self, *args: Any, **kw: Any) -> None:
         if self._debug:
-            print("      #", *args, file=self._errfp, **kw)
+            if self._console:
+                self._console.print("      #", *args, style="bold yellow", **kw)
+            else:
+                print("      #", *args, file=self._errfp, **kw)
 
     def pprint(self, *args: Any, **kw: Any) -> None:
-        pprint(*args, stream=self._outfp, **kw)
+        if self._console:
+            self._console.print(*args, **kw)
+        else:
+            pprint(*args, stream=self._outfp, **kw)
 
     def batch(self, fp: Iterable[str], finalPrint: bool = False) -> None:
         """Non-interactively read and execute commands from a file.
@@ -334,11 +353,11 @@ class Calculator:
                 self.pprint(self.stack[n])
             except IndexError:
                 if n == -1:
-                    self.err("Cannot print top of stack item (stack is empty)")
+                    self.err("Cannot print top of stack item (stack is empty).")
                 else:
                     self.err(
                         f"Cannot print stack item {n} (stack has only {len(self)} "
-                        f"item{plural(len(self))})"
+                        f"item{plural(len(self))})."
                     )
 
     def saveState(self) -> None:

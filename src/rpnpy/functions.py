@@ -1,6 +1,6 @@
 import functools
-from typing import TYPE_CHECKING, Any, Optional, Tuple
 from operator import itemgetter
+from typing import TYPE_CHECKING, Any, Optional, Tuple
 
 import rpnpy
 from rpnpy.errors import CalculatorError

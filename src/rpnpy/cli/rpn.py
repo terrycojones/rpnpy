@@ -10,7 +10,7 @@ try:
 except ImportError:
     import readline
 
-from rpnpy import Calculator
+from rpnpy import Calculator, __version__
 
 
 def setupReadline() -> bool:
@@ -79,6 +79,13 @@ def parseArgs() -> argparse.Namespace:
     )
 
     parser.add_argument(
+        "--noColor",
+        action="store_false",
+        dest="color",
+        help="Do not color (interactive) output.",
+    )
+
+    parser.add_argument(
         "--debug",
         action="store_true",
         help="Print verbose information about how commands are run.",
@@ -111,8 +118,7 @@ def parseArgs() -> argparse.Namespace:
         action="store_false",
         dest="finalPrint",
         help=(
-            "Do not print the stack after processing all commands "
-            "from standard input."
+            "Do not print the stack after processing all commands from standard input."
         ),
     )
 
@@ -142,45 +148,47 @@ def main() -> None:
     args = parseArgs()
 
     if args.version:
-        from rpnpy import __version__
-
         print(__version__)
-    else:
-        calc = Calculator(
-            autoPrint=args.print,
-            splitLines=args.splitLines,
-            separator=args.separator,
-            debug=args.debug,
-        )
+        sys.exit(0)
 
-        if args.startupFile:
-            try:
-                with open(args.startupFile) as f:
-                    exec(f.read(), globals(), calc._variables)
-            except FileNotFoundError:
-                calc.err("Startup file %s not found" % args.startupFile)
+    interactive = setupReadline()
 
-        interactive = setupReadline()
+    color = args.color and interactive
 
-        if args.files:
-            if all(os.path.exists(f) or f == "-" for f in args.files):
-                # All arguments are existing files (or are '-', for stdin).
-                for filename in args.files:
-                    if filename == "-":
-                        calc.repl(args.prompt)
-                    else:
-                        with open(filename) as fp:
-                            calc.batch(fp, False)
-            else:
-                # Execute the command line as a set of commands, following
-                # great suggestion by David Pattinson.
-                calc.batch((" ".join(args.files),), args.finalPrint)
-                if args.stdin:
+    calc = Calculator(
+        autoPrint=args.print,
+        splitLines=args.splitLines,
+        separator=args.separator,
+        color=color,
+        debug=args.debug,
+    )
+
+    if args.startupFile:
+        try:
+            with open(args.startupFile) as f:
+                exec(f.read(), globals(), calc._variables)
+        except FileNotFoundError:
+            calc.err("Startup file %s not found" % args.startupFile)
+
+    if args.files:
+        if all(os.path.exists(f) or f == "-" for f in args.files):
+            # All arguments are existing files (or are '-', for stdin).
+            for filename in args.files:
+                if filename == "-":
                     calc.repl(args.prompt)
-        elif interactive:
-            calc.repl(args.prompt)
+                else:
+                    with open(filename) as fp:
+                        calc.batch(fp, False)
         else:
-            calc.batch(sys.stdin, args.finalPrint)
+            # Execute the command line as a set of commands, following
+            # great suggestion by David Pattinson.
+            calc.batch((" ".join(args.files),), args.finalPrint)
+            if args.stdin:
+                calc.repl(args.prompt)
+    elif interactive:
+        calc.repl(args.prompt)
+    else:
+        calc.batch(sys.stdin, args.finalPrint)
 
 
 if __name__ == "__main__":

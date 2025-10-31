@@ -1,3 +1,7 @@
+# 2.3.0 October 31, 2025
+
+Added colored (when interactive) output. Disable with `--noColor`.
+
 # 2.2.3 October 31, 2025
 
 Various small/cosmetic changes. Added 'self' as a variable, for fun.
