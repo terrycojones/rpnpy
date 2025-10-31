@@ -47,9 +47,10 @@ def parseArgs() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description=(
-            "An RPN calculator for Python. Reads commands from standard input "
-            "and/or files or interactively with a read-eval-print loop and "
-            "(optionally) writes the final stack to standard output."
+            "An RPN calculator for Python that reads commands from some combination of "
+            "standard input, command line arguments, files, or interactively. When "
+            "run non-interactively, prints the top stack value to standard output "
+            "before exiting."
         ),
     )
 
@@ -64,7 +65,7 @@ def parseArgs() -> argparse.Namespace:
         nargs="*",
         help=(
             "Files to read input from. If you use this option and you also "
-            'want standard input to be read at some point, use "-" as a '
+            "want standard input to also be read at some point, use '-' as a "
             "name in the list of file names."
         ),
     )
@@ -80,31 +81,27 @@ def parseArgs() -> argparse.Namespace:
     parser.add_argument(
         "--debug",
         action="store_true",
-        default=False,
-        help="Print verbose information about how commandsa are run.",
+        help="Print verbose information about how commands are run.",
     )
 
     parser.add_argument(
         "--print",
         action="store_true",
-        default=False,
-        help="Print the result of each command",
+        help="Print the result of each command.",
     )
 
     parser.add_argument(
         "--version",
         action="store_true",
-        default=False,
         help="Print the version number and exit.",
     )
 
     parser.add_argument(
         "--noSplit",
         action="store_false",
-        default=True,
         dest="splitLines",
         help=(
-            "If given, do not split lines read from standard input into "
+            "Do not split lines read from standard input into "
             "separate commands, treat each line as an entire command."
         ),
     )
@@ -112,10 +109,9 @@ def parseArgs() -> argparse.Namespace:
     parser.add_argument(
         "--noFinalPrint",
         action="store_false",
-        default=True,
         dest="finalPrint",
         help=(
-            "If given, do not print the stack after processing all commands "
+            "Do not print the stack after processing all commands "
             "from standard input."
         ),
     )
@@ -123,7 +119,6 @@ def parseArgs() -> argparse.Namespace:
     parser.add_argument(
         "--stdin",
         action="store_true",
-        default=False,
         help=(
             "If the arguments on the command line are passed as input to "
             "the calculator, you can use this option to also read commands "
@@ -134,8 +129,8 @@ def parseArgs() -> argparse.Namespace:
     parser.add_argument(
         "--startupFile",
         help=(
-            "Python file to be parsed at startup. Usually used to define "
-            "custom functions"
+            "Python file to be parsed at startup. Can be used to define "
+            "custom functions and variables."
         ),
     )
 

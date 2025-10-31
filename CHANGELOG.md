@@ -1,3 +1,7 @@
+# 2.2.2 October 31, 2025
+
+Minor changes to `--help` text.
+
 # 2.2.1 October 30, 2025
 
 Added (Python 3.8+ compatible) typing hints.
