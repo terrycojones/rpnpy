@@ -72,6 +72,7 @@ def parseArgs() -> argparse.Namespace:
 
     parser.add_argument(
         "--separator",
+        metavar="CHAR",
         help=(
             "The character to use to split lines of standard input into "
             "separate commands (unless --noSplit is given)."
@@ -82,7 +83,7 @@ def parseArgs() -> argparse.Namespace:
         "--noColor",
         action="store_false",
         dest="color",
-        help="Do not color (interactive) output.",
+        help="Do not color interactive output.",
     )
 
     parser.add_argument(
@@ -134,8 +135,9 @@ def parseArgs() -> argparse.Namespace:
 
     parser.add_argument(
         "--startupFile",
+        metavar="FILE",
         help=(
-            "Python file to be parsed at startup. Can be used to define "
+            "A Python file to be parsed at startup. This can be used to define "
             "custom functions and variables."
         ),
     )
