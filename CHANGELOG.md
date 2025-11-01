@@ -1,3 +1,7 @@
+# 3.0.10 November 1, 2025
+
+Updated `pyproject.toml`.
+
 # 3.0.9 November 1, 2025
 
 Make it so tests of the calculator do not try to read the start-up or readline
