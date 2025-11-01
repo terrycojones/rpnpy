@@ -1,3 +1,7 @@
+# 2.4.2 November 31, 2025
+
+Improved button positioning and coloring.
+
 # 2.4.1 November 31, 2025
 
 Improved speed at which button click events can be handled.

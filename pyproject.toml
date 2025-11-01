@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "rpnpy"
-version = "2.4.1"
+version = "2.4.2"
 description = "Control an RPN calculator from Python."
 authors = [
     { name = "Terry C. Jones", email = "terence.jones@charite.de" },
