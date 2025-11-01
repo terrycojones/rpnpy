@@ -1,3 +1,8 @@
+# 3.0.9 November 1, 2025
+
+Make it so tests of the calculator do not try to read the start-up or readline
+history files.
+
 # 3.0.8 November 1, 2025
 
 Various admin iterations with claude CLI to make `bump-my-version` work,
