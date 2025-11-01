@@ -1,3 +1,8 @@
+# 3.0.8 November 1, 2025
+
+Various admin iterations with claude CLI to make `bump-my-version` work,
+including committing `uv.lock`.
+
 # 3.0.2 November 1, 2025
 
 Minor simplifications of Claude code in tui.py.
