@@ -1,3 +1,7 @@
+# 3.0.1 November 1, 2025
+
+Updated README.
+
 # 3.0.0 November 1, 2025
 
 Fix reading of start-up file so imported modules work and newly-defined
