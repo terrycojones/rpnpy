@@ -17,6 +17,9 @@ read more about why I wrote this.
 `rpnpy` 
 
 * provides typical numeric calculator operations.
+* can read commands from the command line, from standard input, or from files.
+* has a simple terminal REPL interface and a terminal user interface (TUI) with
+  buttons and a display of the stack and variables.
 * provides direct access to over 400 Python functions, pre-imported from the
   `builtins`, `math`, `operator`, `functools`, and `decimal` modules.
 * is programmable. You can write your own Python functions, which can
