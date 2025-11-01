@@ -281,7 +281,7 @@ class CalculatorTUI(App):
             with Horizontal(classes="button-row"):
                 yield CalculatorButton("0", "0", variant="primary")
                 yield CalculatorButton(".", ".", variant="primary")
-                yield CalculatorButton("Enter", "enter", variant="success")
+                yield CalculatorButton("Clear", "clear", variant="primary")
                 yield CalculatorButton("+", "+", variant="warning")
 
             # Mathematical functions row 1
@@ -303,7 +303,7 @@ class CalculatorTUI(App):
                 yield CalculatorButton("Pop", "pop", variant="success")
                 yield CalculatorButton("Dup", "dup", variant="success")
                 yield CalculatorButton("Swap", "swap", variant="success")
-                yield CalculatorButton("Clear", "clear", variant="error")
+                yield CalculatorButton("Enter", "enter", variant="success")
 
     @on(Button.Pressed, "CalculatorButton")
     async def handle_calculator_button(self, event: Button.Pressed) -> None:
@@ -329,6 +329,10 @@ class CalculatorTUI(App):
             if input_field.value.strip():
                 self._execute_command(input_field.value.strip())
                 input_field.value = ""
+        elif command == "clear":
+            # Clear button - discard any pending input and clear the stack
+            input_field.value = ""
+            self._execute_command(command)
         else:
             # For operation buttons, first execute any pending input
             if input_field.value.strip():
@@ -372,8 +376,11 @@ class CalculatorTUI(App):
         try:
             if command == "clear":
                 # Clear the stack
-                self.calc.stack.clear()
-                self.notify("Stack cleared", severity="information")
+                if self.calc.stack:
+                    self.calc.stack.clear()
+                    self.notify("Stack cleared", severity="information")
+                else:
+                    self.calc.stack.clear()
             else:
                 # Execute the command through the calculator
                 success = self.calc.execute(command)
