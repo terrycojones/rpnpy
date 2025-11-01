@@ -4,14 +4,14 @@ import functools
 import inspect
 import math
 import operator
-from pathlib import Path
 import sys
+from collections.abc import Iterable
+from pathlib import Path
 from pprint import pprint
 from typing import (
     Any,
     Callable,
     Dict,
-    Iterable,
     List,
     Optional,
     TextIO,

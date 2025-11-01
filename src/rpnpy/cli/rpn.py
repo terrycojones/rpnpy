@@ -4,6 +4,7 @@ import argparse
 import os
 import sys
 from io import StringIO
+
 from textual.theme import BUILTIN_THEMES
 
 from rpnpy import Calculator, __version__

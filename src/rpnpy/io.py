@@ -1,5 +1,6 @@
 import re
-from typing import Iterable, Optional, Tuple
+from collections.abc import Iterable
+from typing import Optional, Tuple
 
 from rpnpy.modifiers import MODIFIERS, Modifiers, strToModifiers
 
