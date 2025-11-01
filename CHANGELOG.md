@@ -1,3 +1,8 @@
+# 2.4.0 November 31, 2025
+
+Added a TUI (terminal UI). Invoke it with `--tui` and set your theme via
+`--theme`. Use `--list-themes` to see theme names.
+
 # 2.3.0 October 31, 2025
 
 Added colored (when interactive) output. Disable with `--noColor`.

@@ -4,6 +4,7 @@ import argparse
 import atexit
 import os
 import sys
+from io import StringIO
 
 try:
     import gnureadline as readline
@@ -142,6 +143,25 @@ def parseArgs() -> argparse.Namespace:
         ),
     )
 
+    parser.add_argument(
+        "--tui",
+        action="store_true",
+        help="Launch the Terminal User Interface (TUI) mode.",
+    )
+
+    parser.add_argument(
+        "--theme",
+        default=None,
+        metavar="THEME",
+        help="Textual theme to use for TUI mode (default: nord). Using this option implies --tui.",
+    )
+
+    parser.add_argument(
+        "--list-themes",
+        action="store_true",
+        help="List all available Textual themes and exit.",
+    )
+
     return parser.parse_args()
 
 
@@ -153,16 +173,46 @@ def main() -> None:
         print(__version__)
         sys.exit(0)
 
+    # Handle --list-themes
+    if args.list_themes:
+        try:
+            from textual.theme import BUILTIN_THEMES
+            print("Available Textual themes:")
+            for theme_name in sorted(BUILTIN_THEMES.keys()):
+                print(f"  {theme_name}")
+        except ImportError:
+            print("Error: textual not installed. Install it to use TUI mode.")
+            sys.exit(1)
+        sys.exit(0)
+
+    # If --theme was specified, imply --tui
+    if args.theme is not None:
+        args.tui = True
+
+    # Set default theme if in TUI mode and no theme specified
+    if args.tui and args.theme is None:
+        args.theme = "nord"
+
     interactive = setupReadline()
 
-    color = args.color and interactive
+    # For TUI mode, disable color so we can capture error messages properly
+    # and always use splitLines=False. Also create error buffer for TUI.
+    if args.tui:
+        color = False
+        splitLines = False
+        error_buffer = StringIO()
+    else:
+        color = args.color and interactive
+        splitLines = args.splitLines
+        error_buffer = sys.stderr
 
     calc = Calculator(
         autoPrint=args.print,
-        splitLines=args.splitLines,
+        splitLines=splitLines,
         separator=args.separator,
         color=color,
         debug=args.debug,
+        errfp=error_buffer,
     )
 
     if args.startupFile:
@@ -171,6 +221,12 @@ def main() -> None:
                 exec(f.read(), globals(), calc._variables)
         except FileNotFoundError:
             calc.err("Startup file %s not found" % args.startupFile)
+
+    # Launch TUI if requested
+    if args.tui:
+        from rpnpy.tui import run_tui
+        run_tui(calc, error_buffer, theme=args.theme)
+        return
 
     if args.files:
         if all(os.path.exists(f) or f == "-" for f in args.files):
