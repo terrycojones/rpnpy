@@ -1,3 +1,7 @@
+# 3.0.12 November 1, 2025
+
+Updated Python version badge in README.
+
 # 3.0.11 November 1, 2025
 
 Updated `pyproject.toml` keywords.
