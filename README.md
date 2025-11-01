@@ -1,13 +1,17 @@
 # rpnpy - a reverse-Polish notation calculator for Python
 
-Here is `rpnpy`, a [reverse-Polish
+[![PyPI](https://img.shields.io/pypi/v/rpnpy.svg)](https://pypi.org/project/rpnpy/)
+[![Python Version](https://img.shields.io/pypi/pyversions/rpnpy.svg)](https://pypi.org/project/rpnpy/)
+[![Downloads](https://img.shields.io/pypi/dm/rpnpy.svg)](https://pypi.org/project/rpnpy/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+`rpnpy` is a [reverse-Polish
 notation](https://en.wikipedia.org/wiki/Reverse_Polish_notation) (RPN)
 calculator for Python.
 
-The aim was to emulate the wonderful RPN approach taken by early
-Hewlett-Packard calculators, but to generalize it by allowing programming in
-Python, providing access to useful Python math functions, and to allow
-anything to be on the stack.
+The aim is to emulate the operation of early Hewlett-Packard calculators, but
+generalized by allowing programming in Python, providing access to useful
+Python functions, and to allow anything to be on the stack.
 
 See the <a href="#background">Background</a> section if you're interested to
 read more about why I wrote this.
@@ -34,6 +38,7 @@ read more about why I wrote this.
   functions onto the stack and operate on them.
 * uses [readline](https://docs.python.org/3.14/library/readline.html) to keep
   a command history within and between sessions.
+* is compatible with Python 3.9 through 3.14.
 
 ## Installation
 
@@ -695,6 +700,9 @@ The effect of commands on the stack and variables can be undone with the
 `~/.rpnpy/startup.py`. To specify an alternate location for the file, use
 `--startupFile` and to disable reading of the start-up file, use
 `--noStartup`.
+
+Functions defined in the start-up file can be used without arguments and will
+be applied to their correct number of arguments pulled from the stack.
 
 ## History
 

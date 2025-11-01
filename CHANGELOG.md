@@ -1,9 +1,12 @@
 # 3.0.0 November 1, 2025
 
-Fix reading of start-up file so imported modules work. Make calculator do the
-work of reading the start-up and history files. Changed the default location
-of the history to '~/.rpnpy/history'. Added a default startup file location,
-'~/.rpnpy/startup.py'.
+Fix reading of start-up file so imported modules work and newly-defined
+functions are interrogated and registered so they can automatically be given
+the correct number of arguments from the stack. Make calculator do the work
+of reading the start-up and history files instead of having it in `rpn.py`.
+Changed the default location of the history to '~/.rpnpy/history'. Added a
+default startup file location, '~/.rpnpy/startup.py'. Removed Python 3.8
+typing hints.
 
 # 2.4.2 October 31, 2025
 
