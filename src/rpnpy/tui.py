@@ -64,14 +64,16 @@ class VariablesDisplay(Static):
             if k.startswith("_") or k == "self" or k in ("inf", "nan"):
                 continue
             # Only include basic value types
-            if isinstance(v, (int, float, str, list, dict, tuple, set, bool, type(None))):
+            if isinstance(
+                v, (int, float, str, list, dict, tuple, set, bool, type(None))
+            ):
                 variables[k] = v
 
         if not variables:
             content = "[dim]No variables defined[/dim]"
         else:
             lines = []
-            for name in sorted(variables.keys()):
+            for name in sorted(variables):
                 value = variables[name]
                 # Format the value
                 if isinstance(value, float):
@@ -94,7 +96,9 @@ class CalculatorButton(Button):
 
     can_focus = False
 
-    def __init__(self, label: str, command: str, variant: str = "default", **kwargs: Any) -> None:
+    def __init__(
+        self, label: str, command: str, variant: str = "default", **kwargs: Any
+    ) -> None:
         super().__init__(label, variant=variant, **kwargs)
         self.command = command
 
@@ -221,10 +225,12 @@ class CalculatorTUI(App):
         ("escape", "clear_input", "Clear Input"),
     ]
 
-    def __init__(self, calc: Calculator, error_buffer: StringIO, theme: str = "nord") -> None:
+    def __init__(
+        self, calc: Calculator, errorBuffer: StringIO, theme: str = "nord"
+    ) -> None:
         super().__init__()
         self.calc = calc
-        self.error_buffer = error_buffer
+        self.errorBuffer = errorBuffer
         self.theme_name = theme
 
     def compose(self) -> ComposeResult:
@@ -386,7 +392,7 @@ class CalculatorTUI(App):
                 success = self.calc.execute(command)
 
                 # Check if any errors were written to the error buffer
-                error_output = self.error_buffer.getvalue().strip()
+                error_output = self.errorBuffer.getvalue().strip()
 
                 if error_output:
                     # Display the error message from the calculator
@@ -404,8 +410,8 @@ class CalculatorTUI(App):
             self.notify(f"Unexpected error: {e}", severity="error", timeout=5)
         finally:
             # Clear the error buffer for the next command
-            self.error_buffer.truncate(0)
-            self.error_buffer.seek(0)
+            self.errorBuffer.truncate(0)
+            self.errorBuffer.seek(0)
 
     def on_mount(self) -> None:
         """Called when the app is mounted."""
@@ -431,13 +437,13 @@ class CalculatorTUI(App):
         input_field.focus()
 
 
-def run_tui(calc: Calculator, error_buffer: StringIO, theme: str = "nord") -> None:
+def run_tui(calc: Calculator, errorBuffer: StringIO, theme: str = "nord") -> None:
     """Run the TUI application.
 
     Args:
         calc: The Calculator instance to use as the backend.
-        error_buffer: The StringIO buffer used for capturing calculator errors.
-        theme: The Textual theme to use (default: "nord").
+        errorBuffer: The StringIO buffer used for capturing calculator errors.
+        theme: The Textual theme.
     """
-    app = CalculatorTUI(calc, error_buffer, theme=theme)
+    app = CalculatorTUI(calc, errorBuffer, theme=theme)
     app.run()

@@ -1,4 +1,11 @@
-# 2.4.2 November 31, 2025
+# 3.0.0 November 1, 2025
+
+Fix reading of start-up file so imported modules work. Make calculator do the
+work of reading the start-up and history files. Changed the default location
+of the history to '~/.rpnpy/history'. Added a default startup file location,
+'~/.rpnpy/startup.py'.
+
+# 2.4.2 October 31, 2025
 
 Improved button positioning and coloring.
 

@@ -28,8 +28,8 @@ read more about why I wrote this.
   e.g., 12K.
 * provides direct access to over 400 Python functions, pre-imported from the
   `builtins`, `math`, `operator`, `functools`, and `decimal` modules.
-* is programmable. You can write your own Python functions, which can
-  be loaded from a start-up file.
+* is programmable. You can write your own Python functions, to be
+  loaded from a start-up file.
 * allows you to put Python data structures, and other objects and
   functions onto the stack and operate on them.
 * uses [readline](https://docs.python.org/3.14/library/readline.html) to keep
@@ -42,12 +42,6 @@ can just run `uvx rpnpy`.
 
 This will install an `rpnpy` command (you might want to make a more
 convenient / shorter shell alias for it).
-
-## Version 2 backwards incompatibility
-
-* As of version 2.0.0, the `rpn.py` script has been moved into
-  `src/rpnpy/cli/rpn.py`. You can call it using the `rpnpy` command that the
-  package now installs.
   
 ## Terminal User Interface
 
@@ -58,6 +52,8 @@ buttons, and a stack and variables display.
 
 You can still use your keyboard when using the TUI. Use ENTER to send your
 inputs to the calculator.
+
+Use `--theme` to choose a (Textual) theme. Known theme names 
 
 ## Example rpnpy sessions
 
@@ -693,12 +689,20 @@ $ rpnpy --noSplit
 The effect of commands on the stack and variables can be undone with the
 `undo` command. There is currently only one level of undo.
 
+## Start-up file
+
+`rpnpy` will look for a startup Python file to `exec` in
+`~/.rpnpy/startup.py`. To specify an alternate location for the file, use
+`--startupFile` and to disable reading of the start-up file, use
+`--noStartup`.
+
 ## History
 
 `rpnpy` makes use of Python's
 [readline](https://docs.python.org/3.14/library/readline.html) library to
 allow familiar/comfortable command line editing. Your input history will be
-saved to `~/.pycalc_history`.
+saved to `~/.rpnpy/history`. The location of the history file can be set via
+`--historyFile` and history usage can be disabled via `--noHistory`.
 
 <a id="background"></a>
 ## Background
@@ -745,6 +749,12 @@ I wrote this for three reasons:
 
 * Add direct access to functionality from [numpy](https://www.numpy.org/).
 * Add rotate-right and rotate-left stack modifying functions?
+
+## Version 2+ backwards incompatibility
+
+As of version 2.0.0, the `rpn.py` script has been moved into
+`src/rpnpy/cli/rpn.py`. You can call it using the `rpnpy` command that the
+package now installs.
 
 ## Thanks
 

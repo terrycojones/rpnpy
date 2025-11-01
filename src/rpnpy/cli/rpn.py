@@ -1,47 +1,15 @@
 #!/usr/bin/env python
 
 import argparse
-import atexit
 import os
 import sys
 from io import StringIO
-
-try:
-    import gnureadline as readline
-except ImportError:
-    import readline
+from textual.theme import BUILTIN_THEMES
 
 from rpnpy import Calculator, __version__
+from rpnpy.utils import interactive
 
-
-def setupReadline() -> bool:
-    """Initialize the readline library and command history.
-
-    @return: A C{bool} to indicate whether standard input is a terminal
-        (and therefore interactive).
-    """
-    if not os.isatty(0):
-        # Standard input is closed or is a pipe etc. So there's no user
-        # typing at us, and so no point in setting up readline.
-        return False
-
-    histfile = os.path.join(os.path.expanduser("~"), ".pycalc_history")
-
-    try:
-        readline.read_history_file(histfile)
-        historyLen = readline.get_current_history_length()
-    except FileNotFoundError:
-        open(histfile, "wb").close()
-        historyLen = 0
-
-    def saveHistory(prevHistoryLen: int, histfile: str) -> None:
-        newHistoryLen = readline.get_current_history_length()
-        readline.set_history_length(1000)
-        readline.append_history_file(newHistoryLen - prevHistoryLen, histfile)
-
-    atexit.register(saveHistory, historyLen, histfile)
-
-    return True
+DEFAULT_THEME = "nord"
 
 
 def parseArgs() -> argparse.Namespace:
@@ -50,8 +18,8 @@ def parseArgs() -> argparse.Namespace:
         description=(
             "An RPN calculator for Python that reads commands from some combination of "
             "standard input, command line arguments, files, or interactively. When "
-            "run non-interactively, prints the top stack value to standard output "
-            "before exiting."
+            "run non-interactively, the final stack is (normally) printed to standard "
+            "output before exiting. Use --help for more details."
         ),
     )
 
@@ -128,8 +96,8 @@ def parseArgs() -> argparse.Namespace:
         "--stdin",
         action="store_true",
         help=(
-            "If the arguments on the command line are passed as input to "
-            "the calculator, you can use this option to also read commands "
+            "If arguments on the command line are passed as input to "
+            "the calculator, you can use this option to additionally read commands "
             "from standard input once the command line has been executed."
         ),
     )
@@ -138,9 +106,33 @@ def parseArgs() -> argparse.Namespace:
         "--startupFile",
         metavar="FILE",
         help=(
-            "A Python file to be parsed at startup. This can be used to define "
-            "custom functions and variables."
+            "A Python file to be executed at startup. This can be used to define "
+            "custom functions and variables. Defaults to "
+            f"{Calculator.DEFAULT_STARTUP_FILE!r} in the "
+            f"{Calculator.DEFAULT_CONFIG_DIR!r} directory in your home directory."
         ),
+    )
+
+    parser.add_argument(
+        "--noStartup",
+        action="store_true",
+        help="Do not load the start-up file.",
+    )
+
+    parser.add_argument(
+        "--historyFile",
+        metavar="FILE",
+        help=(
+            f"A file to read/write to maintain rpnpy command history. Defaults to "
+            f"{Calculator.DEFAULT_HISTORY_FILE!r} in the "
+            f"{Calculator.DEFAULT_CONFIG_DIR!r} directory in your home directory."
+        ),
+    )
+
+    parser.add_argument(
+        "--noHistory",
+        action="store_true",
+        help="Do not read or write the readline history file.",
     )
 
     parser.add_argument(
@@ -151,15 +143,20 @@ def parseArgs() -> argparse.Namespace:
 
     parser.add_argument(
         "--theme",
-        default=None,
         metavar="THEME",
-        help="Textual theme to use for TUI mode (default: nord). Using this option implies --tui.",
+        default=DEFAULT_THEME,
+        choices=tuple(sorted(BUILTIN_THEMES)),
+        help=(
+            "Textual theme to use for TUI mode. Note that if you use this to select a "
+            "non-default theme, --tui will be implied. Choices are: "
+            + ", ".join(sorted(BUILTIN_THEMES))
+        ),
     )
 
     parser.add_argument(
-        "--list-themes",
+        "--listThemes",
         action="store_true",
-        help="List all available Textual themes and exit.",
+        help="List available Textual themes (for use with --tui) and exit.",
     )
 
     return parser.parse_args()
@@ -173,38 +170,22 @@ def main() -> None:
         print(__version__)
         sys.exit(0)
 
-    # Handle --list-themes
-    if args.list_themes:
-        try:
-            from textual.theme import BUILTIN_THEMES
-            print("Available Textual themes:")
-            for theme_name in sorted(BUILTIN_THEMES.keys()):
-                print(f"  {theme_name}")
-        except ImportError:
-            print("Error: textual not installed. Install it to use TUI mode.")
-            sys.exit(1)
-        sys.exit(0)
+    interact = interactive()
 
-    # If --theme was specified, imply --tui
-    if args.theme is not None:
+    # Set TUI mode if a theme has been given. This is not foolproof, because --tui will
+    # be needed if you want to use the TUI with the default theme.
+    if args.theme != DEFAULT_THEME:
         args.tui = True
-
-    # Set default theme if in TUI mode and no theme specified
-    if args.tui and args.theme is None:
-        args.theme = "nord"
-
-    interactive = setupReadline()
 
     # For TUI mode, disable color so we can capture error messages properly
     # and always use splitLines=False. Also create error buffer for TUI.
     if args.tui:
-        color = False
-        splitLines = False
-        error_buffer = StringIO()
+        color = splitLines = False
+        errorBuffer = StringIO()
     else:
-        color = args.color and interactive
+        color = args.color and interact
         splitLines = args.splitLines
-        error_buffer = sys.stderr
+        errorBuffer = sys.stderr
 
     calc = Calculator(
         autoPrint=args.print,
@@ -212,20 +193,17 @@ def main() -> None:
         separator=args.separator,
         color=color,
         debug=args.debug,
-        errfp=error_buffer,
+        errfp=errorBuffer,
+        startupFile=args.startupFile,
+        noStartup=args.noStartup,
+        historyFile=args.historyFile,
+        noHistory=args.noHistory,
     )
 
-    if args.startupFile:
-        try:
-            with open(args.startupFile) as f:
-                exec(f.read(), globals(), calc._variables)
-        except FileNotFoundError:
-            calc.err("Startup file %s not found" % args.startupFile)
-
-    # Launch TUI if requested
     if args.tui:
         from rpnpy.tui import run_tui
-        run_tui(calc, error_buffer, theme=args.theme)
+
+        run_tui(calc, errorBuffer, theme=args.theme)
         return
 
     if args.files:
@@ -243,8 +221,10 @@ def main() -> None:
             calc.batch((" ".join(args.files),), args.finalPrint)
             if args.stdin:
                 calc.repl(args.prompt)
-    elif interactive:
+
+    elif interact:
         calc.repl(args.prompt)
+
     else:
         calc.batch(sys.stdin, args.finalPrint)
 

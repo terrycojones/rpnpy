@@ -4,6 +4,7 @@ import functools
 import inspect
 import math
 import operator
+from pathlib import Path
 import sys
 from pprint import pprint
 from typing import (
@@ -31,7 +32,8 @@ from rpnpy.functions import FUNCTIONS
 from rpnpy.inspect import countArgs
 from rpnpy.io import findCommands
 from rpnpy.modifiers import Modifiers
-from rpnpy.utils import plural
+from rpnpy.readline import setupReadline
+from rpnpy.utils import interactive, plural
 
 
 class Function:
@@ -65,14 +67,24 @@ class Variable:
 
     def __repr__(self) -> str:
         name = self.name
-        return f"Variable({name}, current value: {self._variables[name]}!r)"
+        value = self._variables[name]
+        return f"Variable({name}, current value: {value}!r)"
 
 
 class Calculator:
-    OVERRIDES = set("builtins.list builtins.map builtins.quit functools.reduce".split())
-    # Sentinel value for calculator functions to return to indicate that they
-    # did not result in a value that can/should be printed.
+    # Functions we don't want to get from the given modules because they are already
+    # defined elsewhere.
+    OVERRIDES = {"builtins.list", "builtins.map", "builtins.quit", "functools.reduce"}
+
+    # Sentinel value for calculator functions to return to indicate that they did not
+    # result in a value that can/should be printed.
     NO_VALUE = object()
+
+    DEFAULT_CONFIG_DIR = ".rpnpy"
+    # These two files will be looked for (by default) in the DEFAULT_CONFIG_DIR
+    # directory in user's home directory.
+    DEFAULT_STARTUP_FILE = "startup.py"
+    DEFAULT_HISTORY_FILE = "history"
 
     def __init__(
         self,
@@ -82,7 +94,11 @@ class Calculator:
         outfp: TextIO = sys.stdout,
         errfp: TextIO = sys.stderr,
         debug: bool = False,
-        color: bool = False,
+        color: Optional[bool] = False,
+        startupFile: Optional[Union[str, Path]] = None,
+        noStartup: bool = False,
+        historyFile: Optional[Union[str, Path]] = None,
+        noHistory: bool = False,
     ) -> None:
         self._autoPrint = autoPrint
         self._splitLines = splitLines
@@ -90,6 +106,8 @@ class Calculator:
         self._outfp = outfp
         self._errfp = errfp
         self._debug = debug
+        if color is None:
+            color = interactive()
         if color:
             self._console = Console()
             self._errorConsole = Console(stderr=True)
@@ -108,6 +126,12 @@ class Calculator:
         self.addModules()
         self.addAbbrevs()
         self.addConstants()
+
+        if not noStartup:
+            self.readStartup(startupFile)
+
+        if not noHistory:
+            self.readHistory(historyFile)
 
     def __len__(self) -> int:
         return len(self.stack)
@@ -218,15 +242,13 @@ class Calculator:
             try:
                 function = self._functions[longName]
             except KeyError:
-                self.err("Long function name %r is unknown" % longName)
+                self.err(f"Long function name {longName!r} is unknown")
             else:
                 for shortName in shortNames:
-                    if shortName not in self._functions:
-                        # self.err('Long name %r alias %r' %
-                        # (longName, shortName))
-                        self._functions[shortName] = function
-                    else:
+                    if shortName in self._functions:
                         assert self._functions[shortName] is function
+                    else:
+                        self._functions[shortName] = function
 
     def addFunctions(self) -> None:
         """
@@ -234,7 +256,7 @@ class Calculator:
         """
         for func in FUNCTIONS:
             for name in func.names:
-                self.debug("Adding special command %r for %s" % (name, func))
+                self.debug(f"Adding special command {name!r} for {func!r}")
                 self._special[name] = func
 
     def addModules(self) -> None:
@@ -290,9 +312,41 @@ class Calculator:
             else:
                 self._variables[name] = value
 
+    def readStartup(self, startupFile) -> None:
+        """
+        Read a startup file (if any). Register any new functions it defines.
+        """
+        startupFile = (
+            startupFile
+            or Path().home() / self.DEFAULT_CONFIG_DIR / self.DEFAULT_STARTUP_FILE
+        )
+
+        try:
+            with open(startupFile) as f:
+                priorGlobals = set(globals())
+                exec(f.read(), globals())
+                for name, value in globals().items():
+                    if name not in priorGlobals:
+                        if callable(value):
+                            # Note that this will redefine pre-existing functions with
+                            # the same name.
+                            self.register(value, name, moduleName="user-function")
+        except FileNotFoundError:
+            # A start-up file isn't mandatory.
+            pass
+        else:
+            self.debug(f"Loaded startup file {str(startupFile)!r}.")
+
+    def readHistory(self, historyFile) -> None:
+        historyFile = (
+            historyFile
+            or Path().home() / self.DEFAULT_CONFIG_DIR / self.DEFAULT_HISTORY_FILE
+        )
+        setupReadline(historyFile)
+
     def importCallables(self, module: Any) -> None:
         moduleName = module.__name__
-        exec("import " + moduleName, globals(), self._variables)
+        exec("import " + moduleName, globals())
         callables = inspect.getmembers(module, callable)
 
         for name, func in callables:
@@ -317,11 +371,10 @@ class Calculator:
                 continue
 
             if path not in self._functions:
-                # Add the function to our functions dict along with a
-                # default number of positional parameters it expects. This
-                # allows the user to call it and have the arguments taken
-                # from the stack (the number of arguments used can always
-                # be specified on the command line (e.g., :3)).
+                # Add the function to our functions dict along with a default number of
+                # positional parameters it expects. This allows the user to call it and
+                # have the arguments taken from the stack (the number of arguments used
+                # can always be specified on the command line (e.g., :3)).
                 exec(
                     'self._functions["%s"] = Function("%s", "%s", %s, %d)'
                     % (path, moduleName, name, path, nArgs)
