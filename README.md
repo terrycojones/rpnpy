@@ -20,6 +20,8 @@ read more about why I wrote this.
 * can read commands from the command line, from standard input, or from files.
 * has a simple terminal REPL interface and a terminal user interface (TUI) with
   buttons and a display of the stack and variables.
+* provides for input/output using [engineering notation](https://pypi.org/project/engineering-notation/),
+  e.g., 12K.
 * provides direct access to over 400 Python functions, pre-imported from the
   `builtins`, `math`, `operator`, `functools`, and `decimal` modules.
 * is programmable. You can write your own Python functions, which can
@@ -731,8 +733,9 @@ I wrote this for three reasons:
 1. I was curious what it would be like to have a Python RPN calculator that
    offered both the minimalist syntax of `dc` but that also offered a much
    wider range of operations and made it possible to put Python objects
-   (lists, dicts, functions, etc.) onto the stack and operate on them. I'm
-   curious what use I'll make of it, and what others might do with it too.
+   (lists, dicts, functions, etc.) onto the stack and operate on them. I was
+   curious to see what use I might make of that, and what others might do
+   with it, too.
 
 ## Todo
 
