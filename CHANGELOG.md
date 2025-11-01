@@ -1,3 +1,8 @@
+# 3.0.13 November 1, 2025
+
+Added GitHub action to run tests on pushes and pull requests, and publish to
+PyPI on newly tagged releases.
+
 # 3.0.12 November 1, 2025
 
 Updated Python version badge in README.
