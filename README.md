@@ -9,6 +9,9 @@ Hewlett-Packard calculators, but to generalize it by allowing programming in
 Python, providing access to useful Python math functions, and to allow
 anything to be on the stack.
 
+See the <a href="#background">Background</a> section if you're interested to
+read more about why I wrote this.
+
 ## Features
 
 `rpnpy` 
@@ -22,9 +25,6 @@ anything to be on the stack.
   functions onto the stack and operate on them.
 * uses [readline](https://docs.python.org/3.14/library/readline.html) to keep
   a command history within and between sessions.
-
-I put a <a href="#background">Background</a> section at the bottom in case
-you're interested in why I wrote this.
 
 ## Installation
 
