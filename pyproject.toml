@@ -81,7 +81,7 @@ tag_name = "{new_version}"
 tag_message = "Version {new_version}"
 message = "Bump version: {current_version} → {new_version}"
 
-[tool.bumpversion.post_hooks]
+[tool.bumpversion.pre_commit_hooks]
 # Regenerate uv.lock after version bump and add it to the commit
 update_lock = "uv lock && git add uv.lock"
 
