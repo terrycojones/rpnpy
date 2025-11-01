@@ -725,3 +725,8 @@ I wrote this for three reasons:
 
 To [David Pattinson (@davipatti)](https://github.com/davipatti) for various
 nice ideas, including executing the command line arguments.
+
+To Ron R. Hightower for suggesting adding a UI, to [Will
+McGugan](https://github.com/willmcgugan) and the other contributors to the
+[Textual](https://github.com/textualize/textual) project, and to the
+[claude.ai](https://claude.ai/) CLI that wrote 100% of the TUI code.
