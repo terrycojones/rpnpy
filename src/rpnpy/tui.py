@@ -380,27 +380,14 @@ class CalculatorTUI(App):
         variables_display = self.query_one("#variables-display", VariablesDisplay)
 
         try:
-            if command == "clear":
-                # Clear the stack
-                if self.calc.stack:
-                    self.calc.stack.clear()
-                    self.notify("Stack cleared", severity="information")
-                else:
-                    self.calc.stack.clear()
-            else:
-                # Execute the command through the calculator
-                success = self.calc.execute(command)
+            success = self.calc.execute(command)
+            error_output = self.errorBuffer.getvalue().strip()
 
-                # Check if any errors were written to the error buffer
-                error_output = self.errorBuffer.getvalue().strip()
+            if error_output:
+                self.notify(error_output, severity="error", timeout=5)
+            elif not success:
+                self.notify("Command failed", severity="error")
 
-                if error_output:
-                    # Display the error message from the calculator
-                    self.notify(error_output, severity="error", timeout=5)
-                elif not success:
-                    self.notify("Command failed", severity="error")
-
-            # Update displays
             stack_display.update_display()
             variables_display.update_display()
 
@@ -409,24 +396,22 @@ class CalculatorTUI(App):
         except Exception as e:
             self.notify(f"Unexpected error: {e}", severity="error", timeout=5)
         finally:
-            # Clear the error buffer for the next command
             self.errorBuffer.truncate(0)
             self.errorBuffer.seek(0)
 
     def on_mount(self) -> None:
         """Called when the app is mounted."""
-        # Set the theme
         self.theme = self.theme_name
 
-        # Initialize the stack display
+        # Initialize the stack display.
         stack_display = self.query_one("#stack-display", StackDisplay)
         stack_display.update_display()
 
-        # Initialize the variables display
+        # Initialize the variables display.
         variables_display = self.query_one("#variables-display", VariablesDisplay)
         variables_display.update_display()
 
-        # Focus the input field so user can start typing immediately
+        # Focus the input field so user can start typing immediately.
         input_field = self.query_one("#input-field", Input)
         input_field.focus()
 

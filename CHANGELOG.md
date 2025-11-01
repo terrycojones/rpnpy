@@ -1,3 +1,7 @@
+# 3.0.2 November 1, 2025
+
+Minor simplifications of Claude code in tui.py.
+
 # 3.0.1 November 1, 2025
 
 Updated README.
