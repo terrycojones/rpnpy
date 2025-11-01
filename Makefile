@@ -28,6 +28,3 @@ bump-minor:
 
 bump-major:
 	uv run bump-my-version bump major
-
-push:
-	git push --tags
