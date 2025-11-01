@@ -1,4 +1,4 @@
-.PHONY: lint format check clean upload bump-patch bump-minor bump-major
+.PHONY: lint format check clean upload bump-patch bump-minor bump-major push
 
 lint:
 	uv run ruff check .
@@ -20,7 +20,6 @@ upload:
 	uv build
 	uv publish
 
-# Bump version targets - bump-my-version will fail if there are uncommitted changes
 bump-patch:
 	uv run bump-my-version bump patch
 
@@ -29,3 +28,6 @@ bump-minor:
 
 bump-major:
 	uv run bump-my-version bump major
+
+push:
+	git push --tags
