@@ -11,11 +11,8 @@ from pprint import pprint
 from typing import (
     Any,
     Callable,
-    Dict,
-    List,
     Optional,
     TextIO,
-    Tuple,
     Union,
 )
 
@@ -61,7 +58,7 @@ class Function:
 
 
 class Variable:
-    def __init__(self, name: str, variables: Dict[str, Any]) -> None:
+    def __init__(self, name: str, variables: dict[str, Any]) -> None:
         self.name = name
         self._variables = variables
 
@@ -563,7 +560,7 @@ class Calculator:
 
     def _tryFunction(
         self, command: str, modifiers: Modifiers, count: Optional[int]
-    ) -> Tuple[bool, Any]:
+    ) -> tuple[bool, Any]:
         if modifiers.forceCommand:
             return False, self.NO_VALUE
 
@@ -587,7 +584,7 @@ class Calculator:
         modifiers: Modifiers,
         count: Optional[int],
         function: Function,
-    ) -> Tuple[bool, Any]:
+    ) -> tuple[bool, Any]:
         "Run a Python function."
 
         nArgs = (
@@ -625,7 +622,7 @@ class Calculator:
 
     def _tryVariable(
         self, command: str, modifiers: Modifiers, count: Optional[int]
-    ) -> Tuple[bool, Any]:
+    ) -> tuple[bool, Any]:
         if modifiers.forceCommand:
             return False, self.NO_VALUE
 
@@ -655,7 +652,7 @@ class Calculator:
 
     def _trySpecial(
         self, command: str, modifiers: Modifiers, count: Optional[int]
-    ) -> Tuple[bool, Any]:
+    ) -> tuple[bool, Any]:
         if command in self._special:
             try:
                 value = self._special[command](self, modifiers, count)
@@ -674,7 +671,7 @@ class Calculator:
 
     def _tryEvalExec(
         self, command: str, modifiers: Modifiers, count: Optional[int]
-    ) -> Tuple[bool, Any]:
+    ) -> tuple[bool, Any]:
         errors = []
         possibleWhiteSpace = False
         try:
@@ -723,7 +720,7 @@ class Calculator:
             self._finalize(value, modifiers=modifiers, repeat=count)
             return True, value
 
-    def convertStackArgs(self, args: Iterable[Any]) -> List[Any]:
+    def convertStackArgs(self, args: Iterable[Any]) -> list[Any]:
         """Convert stack items to arguments for functions.
 
         @param args: An iterable of stack items.
@@ -788,7 +785,7 @@ class Calculator:
         defaultArgCount: Callable[[Any], int],
         modifiers: Modifiers,
         count: Optional[int],
-    ) -> Tuple[Any, Tuple[Any, ...]]:
+    ) -> tuple[Any, tuple[Any, ...]]:
         """
         Look for something (e.g., a callable function or a string) and its
         arguments on the stack.
@@ -867,7 +864,7 @@ class Calculator:
 
     def findCallableAndArgs(
         self, command: str, modifiers: Modifiers, count: Optional[int]
-    ) -> Tuple[Callable, Tuple[Any, ...]]:
+    ) -> tuple[Callable, tuple[Any, ...]]:
         """Look for a callable function and its arguments on the stack.
 
         @param modifier: A C{Modifiers} instance.
@@ -883,7 +880,7 @@ class Calculator:
 
     def findStringAndArgs(
         self, command: str, modifiers: Modifiers, count: Optional[int]
-    ) -> Tuple[str, Tuple[Any, ...]]:
+    ) -> tuple[str, tuple[Any, ...]]:
         """Look for a string its arguments on the stack.
 
         @param modifier: A C{Modifiers} instance.

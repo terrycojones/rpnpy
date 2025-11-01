@@ -1,6 +1,6 @@
 import functools
 from operator import itemgetter
-from typing import TYPE_CHECKING, Any, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Optional
 
 import rpnpy
 from rpnpy.errors import CalculatorError
@@ -379,7 +379,7 @@ def version(calc: "Calculator", modifiers: "Modifiers", count: Optional[int]) ->
 version.names = ("version",)
 
 
-FUNCTIONS: Tuple = (
+FUNCTIONS: tuple = (
     apply,
     clear,
     dup,

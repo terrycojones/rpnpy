@@ -1,8 +1,7 @@
-from typing import Dict
 
 from rpnpy.errors import IncompatibleModifiersError, UnknownModifiersError
 
-MODIFIERS: Dict[str, str] = {
+MODIFIERS: dict[str, str] = {
     "*": "all",
     "c": "forceCommand",
     "D": "debug",

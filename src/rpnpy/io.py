@@ -1,6 +1,6 @@
 import re
 from collections.abc import Iterable
-from typing import Optional, Tuple
+from typing import Optional
 
 from rpnpy.modifiers import MODIFIERS, Modifiers, strToModifiers
 
@@ -8,7 +8,7 @@ _NUMBER_RE = re.compile(r"(\d+)")
 _MODIFIERS_SEPARATOR = ":"
 
 
-def findModifiers(line: str) -> Tuple[int, Modifiers, Optional[int]]:
+def findModifiers(line: str) -> tuple[int, Modifiers, Optional[int]]:
     """Find the modifiers (if any) in an input line.
 
     @param line: A C{str} input line.
@@ -53,7 +53,7 @@ def findModifiers(line: str) -> Tuple[int, Modifiers, Optional[int]]:
 
 def findCommands(
     line: str, splitLines: bool = True, separator: Optional[str] = None
-) -> Iterable[Tuple[str, Modifiers, Optional[int]]]:
+) -> Iterable[tuple[str, Modifiers, Optional[int]]]:
     """Find all commands (and their modifiers) in an input line.
 
     @param line: A C{str} input line.
