@@ -53,7 +53,7 @@ convenient / shorter shell alias for it).
 You can run `rpnpy` with the `--tui` option to have it present a TUI with
 buttons, and a stack and variables display.
 
-<img src="images/tui.png" width=800></img>
+<img src="https://raw.githubusercontent.com/terrycojones/rpnpy/master/images/tui.png" width=800></img>
 
 You can still use your keyboard when using the TUI. Use ENTER to send your
 inputs to the calculator.

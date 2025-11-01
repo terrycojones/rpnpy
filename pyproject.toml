@@ -39,6 +39,7 @@ rpnpy = "rpnpy.cli:main"
 
 [dependency-groups]
 dev = [
+    "bump-my-version>=0.30.0",
     "nox>=2025.10.16",
     "pytest",
     "ruff",
@@ -71,3 +72,16 @@ ignore = [
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
+
+[tool.bumpversion]
+current_version = "3.0.2"
+commit = true
+tag = true
+tag_name = "{new_version}"
+tag_message = "Version {new_version}"
+message = "Bump version: {current_version} → {new_version}"
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'
