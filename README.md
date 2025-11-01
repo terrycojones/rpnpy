@@ -32,7 +32,8 @@ buttons, and a stack and variables display.
 
 <img src="images/tui.png" width=800></img>
 
-You can still use your keyboard when using the TUI.
+You can still use your keyboard when using the TUI. Use ENTER to send your
+inputs to the calculator.
 
 ## Example rpnpy sessions
 
