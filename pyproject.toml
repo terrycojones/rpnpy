@@ -20,7 +20,7 @@ classifiers = [
     "Operating System :: OS Independent",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-keywords = ["python", "reverse", "polish", "calculator"]
+keywords = ["rpn", "reverse", "polish", "calculator", "TUI"]
 dependencies = [
     "engineering_notation",
     "gnureadline>=8.2.13",

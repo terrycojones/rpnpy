@@ -1,3 +1,7 @@
+# 3.0.11 November 1, 2025
+
+Updated `pyproject.toml` keywords.
+
 # 3.0.10 November 1, 2025
 
 Updated `pyproject.toml`.
