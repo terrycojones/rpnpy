@@ -58,7 +58,10 @@ buttons, and a stack and variables display.
 You can still use your keyboard when using the TUI. Use ENTER to send your
 inputs to the calculator.
 
-Use `--theme` to choose a (Textual) theme. Known theme names 
+Use `--theme` to choose a (Textual) theme. Currently available theme names
+are catppuccin-latte, catppuccin-mocha, dracula, flexoki, gruvbox, monokai,
+nord, solarized-light, textual-ansi, textual-dark, textual-light, and
+tokyo-night. Run `rpnpy --help` to see the definitive list.
 
 ## Example rpnpy sessions
 
