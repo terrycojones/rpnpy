@@ -13,11 +13,11 @@ class TestCountArgs(TestCase):
 
     def testOne(self):
         "A function that takes one argument must be processed correctly"
-        self.assertEqual(1, countArgs(lambda x: 3))
+        self.assertEqual(1, countArgs(lambda _: 3))
 
     def testTwo(self):
         "A function that takes two arguments must be processed correctly"
-        self.assertEqual(2, countArgs(lambda x, y: 3))
+        self.assertEqual(2, countArgs(lambda a, b: 3 + a + b))
 
     def testLog(self):
         "The signature of math.log can't be inspected (at least in Python 3.7)"

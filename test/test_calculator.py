@@ -17,7 +17,7 @@ class TestDebug(TestCase):
 
     def testDebugOffByDefault(self):
         "debugging must be off by default"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         self.assertFalse(c._debug)
 
     def testStartWithDebugOn(self):
@@ -27,19 +27,19 @@ class TestDebug(TestCase):
 
     def testDebugOn(self):
         "It must be possible to turn debugging on"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.toggleDebug(True)
         self.assertTrue(c._debug)
 
     def testDebugOff(self):
         "It must be possible to turn debugging off"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.toggleDebug(False)
         self.assertFalse(c._debug)
 
     def testToggleDebugOn(self):
         "It must be possible to toggle debugging on"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         # Double-check it starts out off (don't rely on above test).
         self.assertFalse(c._debug)
         c.toggleDebug()
@@ -47,7 +47,7 @@ class TestDebug(TestCase):
 
     def testToggleDebugOff(self):
         "It must be possible to toggle debugging on"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         # Double-check it starts out off (don't rely on above test).
         c.toggleDebug()
         self.assertTrue(c._debug)
@@ -56,7 +56,7 @@ class TestDebug(TestCase):
 
     def testDebugOnViaModifier(self):
         "It must be possible to turn debugging on using a modifier"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute(":D")
         self.assertTrue(c._debug)
 
@@ -70,32 +70,32 @@ class TestDebug(TestCase):
 class TestCalculator(TestCase):
     def testEmptyStack(self):
         "A calculator must start life with an empty stack"
-        self.assertEqual([], Calculator().stack)
+        self.assertEqual([], Calculator(noStartup=True, noHistory=True).stack)
 
     def testPushNumber(self):
         "Pushing a number must work as expected"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("4")
         (result,) = c.stack
         self.assertEqual(4, result)
 
     def testPushString(self):
         "Pushing a string must work as expected"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("'4'")
         (result,) = c.stack
         self.assertEqual("4", result)
 
     def testPushAbs(self):
         "Pushing the operator.abs function must work as expected"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("operator.abs :!")
         (result,) = c.stack
         self.assertIs(operator.abs, result)
 
     def testAdd(self):
         "Adding must work"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("3 4 +")
         (result,) = c.stack
         self.assertEqual(7, result)
@@ -112,7 +112,7 @@ class TestCalculator(TestCase):
 
     def testAddVariables(self):
         "Add must work correctly when Variable instances are on the stack"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("a=4 b=5")
         c.execute("a :!")
         c.execute("b :!")
@@ -122,7 +122,7 @@ class TestCalculator(TestCase):
 
     def testSetVariable(self):
         "The setVariable method must have the expected effect."
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.setVariable("a", 5)
         c.execute("a")
         (result,) = c.stack
@@ -135,7 +135,7 @@ class TestCalculator(TestCase):
         def double(n):
             return 2 * n
 
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.register(double, name="double", nArgs=1)
         c.execute("3 double")
         (result,) = c.stack
@@ -148,7 +148,7 @@ class TestCalculator(TestCase):
         def doubleMax(*args):
             return 2 * max(*args)
 
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.register(doubleMax, name="doubleMax", nArgs=3)
         c.execute("3 5 6 7 doubleMax")
         (onStack, result) = c.stack
@@ -162,7 +162,7 @@ class TestCalculator(TestCase):
         def addAndDouble(i, j):
             return 2 * (i + j)
 
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.register(addAndDouble, name="addAndDouble")
         c.execute("3 5 addAndDouble")
         (result,) = c.stack
@@ -175,7 +175,7 @@ class TestCalculator(TestCase):
         def celcius(f):
             return (f - 32) / 1.8
 
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.register(celcius)
         c.execute("212 celcius")
         (result,) = c.stack
@@ -183,7 +183,7 @@ class TestCalculator(TestCase):
 
     def testRegisterLambdaWithExplicitName(self):
         "Register and call a function defined using lambda with a passed name"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.register(lambda: 3, name="xx")
         c.execute("xx")
         (result,) = c.stack
@@ -191,7 +191,7 @@ class TestCalculator(TestCase):
 
     def testRegisterLambdaWithNoName(self):
         "Register and call a function defined using lambda and no passed name"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.register(lambda: 3)
         # The function will be called '<lambda>', which is a bit dangerous
         # (could easily be accidentally be overwritten).
@@ -218,17 +218,17 @@ class TestCalculator(TestCase):
 
     def testSumOneArg(self):
         "sum must take one arg by default"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         self.assertEqual(1, c._functions["sum"].nArgs)
 
     def testPowTwoArgs(self):
         "pow must take two args by default"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         self.assertEqual(2, c._functions["pow"].nArgs)
 
     def testSwap(self):
         "swap must work as expected"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("4 5")
         self.assertEqual([4, 5], c.stack)
         c.execute("swap")
@@ -236,7 +236,7 @@ class TestCalculator(TestCase):
 
     def testDup(self):
         "dup must work as expected"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("4 d")
         self.assertEqual([4, 4], c.stack)
         c.execute("dup")
@@ -244,7 +244,7 @@ class TestCalculator(TestCase):
 
     def testIterateString(self):
         "The :i (iterate) modifier must work as expected on a string"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute('"hello" :i')
         (result,) = c.stack
         self.assertEqual(["h", "e", "l", "l", "o"], result)
@@ -261,14 +261,14 @@ class TestCalculator(TestCase):
 
     def testList(self):
         "Converting the top of the stack to a list must work"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute('"hey" list')
         (result,) = c.stack
         self.assertEqual(["h", "e", "y"], result)
 
     def testList2(self):
         "Converting the top two items of the stack to a list must work"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("4 5 list:2")
         c.printStack()
         (result,) = c.stack
@@ -276,7 +276,7 @@ class TestCalculator(TestCase):
 
     def testListAll(self):
         "Converting all items of the stack to a list must work"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("4 5 6 list:*")
         c.printStack()
         (result,) = c.stack
@@ -284,28 +284,28 @@ class TestCalculator(TestCase):
 
     def testPushList(self):
         "It must be possible to push list onto the stack"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("list :!")
         (result,) = c.stack
         self.assertIs(list, result)
 
     def testPushNone(self):
         "It must be possible to push None onto the stack"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("None")
         (result,) = c.stack
         self.assertIs(None, result)
 
     def testPushTrue(self):
         "It must be possible to push True onto the stack"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("True")
         (result,) = c.stack
         self.assertIs(True, result)
 
     def testPushFalse(self):
         "It must be possible to push False onto the stack"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("False")
         (result,) = c.stack
         self.assertIs(False, result)
@@ -339,7 +339,7 @@ class TestCalculator(TestCase):
 
     def testFloat(self):
         "It must be possible to convert something to a float"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("4 float")
         (result,) = c.stack
         self.assertEqual(4.0, result)
@@ -350,14 +350,14 @@ class TestReverseModifier(TestCase):
 
     def testReverseSubtractionArgs(self):
         "Reverse the args in a subtraction"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("5 4 -:r")
         (result,) = c.stack
         self.assertEqual(-1, result)
 
     def testMap(self):
         "Call map with args reversed from their normal order"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("[1,2,3]")
         c.execute("str :!")
         c.execute("map :ir")
@@ -370,19 +370,19 @@ class TestReverseSpecialCommand(TestCase):
 
     def testReverse1(self):
         "Reversing just the top element of the stack does nothing"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("4 5 reverse:1")
         self.assertEqual([4, 5], c.stack)
 
     def testReverse(self):
         "Reverse (by default) the top two elements of the stack"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("4 5 reverse")
         self.assertEqual([5, 4], c.stack)
 
     def testReverseAll(self):
         "It must be possible to reverse all the stack"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("4 6 5 reverse:*")
         self.assertEqual([5, 6, 4], c.stack)
 
@@ -403,21 +403,21 @@ class TestDecimal(TestCase):
 
     def testPush(self):
         "It must be possible to push Decimal by itself"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("Decimal :!")
         (result,) = c.stack
         self.assertIs(Decimal, result)
 
     def testPushValue(self):
         "It must be possible to push a Decimal value"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("Decimal(4)")
         (result,) = c.stack
         self.assertEqual(Decimal(4), result)
 
     def testArithmetic(self):
         "It must be possible to operate on Decimals"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("Decimal(4) Decimal(6) +")
         (result,) = c.stack
         self.assertEqual(Decimal(10), result)
@@ -431,68 +431,68 @@ class TestJoin(TestCase):
 
     def testEmptyString(self):
         "Joining on an empty string must work"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute('"" ["4","5","6"] join')
         (result,) = c.stack
         self.assertEqual("456", result)
 
     def testNonEmptyString(self):
         "Joining on a non-empty string must work"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute('"-" ["4","5","6"] join')
         (result,) = c.stack
         self.assertEqual("4-5-6", result)
 
     def testNonStrings(self):
         "Joining things that are not string must work"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute('"-" [4,5,6] join')
         (result,) = c.stack
         self.assertEqual("4-5-6", result)
 
     def testWithCount(self):
         "Joining several stack items must work"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute('3 "-" 4 5 6 join:3')
         self.assertEqual([3, "4-5-6"], c.stack)
 
     def testAllStack(self):
         "Joining the whole stack"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute('"-" 3 4 5 6 join:*')
         (result,) = c.stack
         self.assertEqual("3-4-5-6", result)
 
     def testEmptyStringReversed(self):
         "Joining on an empty string must work"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute('["4","5","6"] "" join:r')
         (result,) = c.stack
         self.assertEqual("456", result)
 
     def testNonEmptyStringReversed(self):
         "Joining on a non-empty string must work"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute('["4","5","6"] "-" join:r')
         (result,) = c.stack
         self.assertEqual("4-5-6", result)
 
     def testNonStringsReversed(self):
         "Joining things that are not string must work"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute('[4,5,6] "-" join:r')
         (result,) = c.stack
         self.assertEqual("4-5-6", result)
 
     def testWithCountReversed(self):
         "Joining several stack items must work"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute('3 4 5 6 "-" join:3r')
         self.assertEqual([3, "4-5-6"], c.stack)
 
     def testAllStackReversed(self):
         "Joining the whole stack"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute('3 4 5 6 "-" join:*r')
         (result,) = c.stack
         self.assertEqual("3-4-5-6", result)
@@ -503,17 +503,17 @@ class TestStore(TestCase):
 
     def testEmptyStack(self):
         "Calling store on an empty stack must fail."
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         self.assertFalse(c.execute("store"))
 
     def testStackWithOneItem(self):
         "Calling store on a stack with one item must fail."
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         self.assertFalse(c.execute("4 store"))
 
     def testStackWithTwoItemsClearsStack(self):
         "Calling store on a stack with two items must result in an empty stack"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute('"a" 4 store')
         self.assertEqual([], c.stack)
 
@@ -522,7 +522,7 @@ class TestStore(TestCase):
         Calling store on a stack with two items and asking for the stack to be
         preserved must work as expected.
         """
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute('"a" 4 store:=')
         self.assertEqual(["a", 4], c.stack)
 
@@ -531,7 +531,7 @@ class TestStore(TestCase):
         Calling store on a stack with two items must result in the variable
         being set as expected.
         """
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute('"a" 4 store a')
         (result,) = c.stack
         self.assertEqual(4, result)
@@ -541,7 +541,7 @@ class TestStore(TestCase):
         Calling store on a stack with three items and a numeric modifier must
         result in the variable being set as expected.
         """
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute('"a" 4 5 store:2 a')
         self.assertEqual([[4, 5]], c.stack)
 
@@ -550,7 +550,7 @@ class TestStore(TestCase):
         Calling store on a stack with three items and a numeric modifier and
         the reverse modifier must result in the variable being set as expected.
         """
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute('4 5 "a" store:r2 a')
         self.assertEqual([[4, 5]], c.stack)
 
@@ -559,7 +559,7 @@ class TestStore(TestCase):
         Calling store on a stack with three items and a * modifier must
         result in the variable being set as expected.
         """
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute('"a" 4 5 6 store:* a')
         self.assertEqual([[4, 5, 6]], c.stack)
 
@@ -568,7 +568,7 @@ class TestStore(TestCase):
         Calling store on a stack with three items and a * modifier and the
         reverse modifier must result in the variable being set as expected.
         """
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute('4 5 6 "a" store:r* a')
         self.assertEqual([[4, 5, 6]], c.stack)
 
@@ -578,7 +578,7 @@ class TestFindCallableAndArgs(TestCase):
 
     def testEmptyStack(self):
         "Calling on an empty stack must raise a StackError."
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
 
         error = r"^Cannot run 'cmd' \(stack has only 0 items\)\.$"
         self.assertRaisesRegex(
@@ -599,7 +599,7 @@ class TestFindCallableAndArgs(TestCase):
         """Calling on a stack with two items and no count must return
         correctly. The number of stack items is obtained from the function
         signature"""
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("log10 :!")
         c.execute("4")
         func, args = c.findCallableAndArgs("cmd", Modifiers(), None)
@@ -609,7 +609,7 @@ class TestFindCallableAndArgs(TestCase):
     def testStackLengthTwoWithCount(self):
         """Calling on a stack with two items and a count must return
         correctly."""
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("log10 :!")
         c.execute("4")
         func, args = c.findCallableAndArgs("cmd", Modifiers(), 1)
@@ -634,7 +634,7 @@ class TestFindCallableAndArgs(TestCase):
 
     def testStackLengthThree(self):
         "Calling on a stack with three items (count=2) must return correctly"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("log10 :!")
         c.execute("4")
         c.execute("5")
@@ -644,7 +644,7 @@ class TestFindCallableAndArgs(TestCase):
 
     def testAllStack(self):
         "Calling on all the stack must return correctly"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("log10 :!")
         c.execute("4")
         c.execute("5")
@@ -659,7 +659,7 @@ class TestFindCallableAndArgsReversed(TestCase):
 
     def testEmptyStack(self):
         "Calling on an empty stack must raise a StackError."
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         error = r"Cannot run 'cmd' \(stack has only 0 items\)\.$"
         self.assertRaisesRegex(
             StackError, error, c.findCallableAndArgs, "cmd", strToModifiers("r"), None
@@ -667,7 +667,7 @@ class TestFindCallableAndArgsReversed(TestCase):
 
     def testStackLengthOne(self):
         "Calling on a stack with only one item must raise a StackError."
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("4")
         error = r"Cannot run 'cmd' \(stack has only 1 item\)\.$"
         self.assertRaisesRegex(
@@ -678,7 +678,7 @@ class TestFindCallableAndArgsReversed(TestCase):
         """Calling on a stack with two items and no count must return
         correctly. The number of stack items is obtained from the function
         signature"""
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("4")
         c.execute("log10 :!")
         func, args = c.findCallableAndArgs("cmd", strToModifiers("r"), None)
@@ -688,7 +688,7 @@ class TestFindCallableAndArgsReversed(TestCase):
     def testStackLengthTwoWithCount(self):
         """Calling on a stack with two items and a count must return
         correctly."""
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("4")
         c.execute("log10 :!")
         func, args = c.findCallableAndArgs("cmd", strToModifiers("r"), 1)
@@ -697,7 +697,7 @@ class TestFindCallableAndArgsReversed(TestCase):
 
     def testStackLengthThree(self):
         "Calling on a stack with three items (count=2) must return correctly"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("5")
         c.execute("4")
         c.execute("log10 :!")
@@ -707,7 +707,7 @@ class TestFindCallableAndArgsReversed(TestCase):
 
     def testAllStack(self):
         "Calling on all the stack must return correctly"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("4")
         c.execute("5")
         c.execute("6")
@@ -722,7 +722,7 @@ class TestFindStringAndArgs(TestCase):
 
     def testEmptyStack(self):
         "Calling on an empty stack must raise a StackError."
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         error = r"^Cannot run 'cmd' \(stack has only 0 items\)\.$"
         self.assertRaisesRegex(
             StackError, error, c.findStringAndArgs, "cmd", Modifiers(), None
@@ -730,7 +730,7 @@ class TestFindStringAndArgs(TestCase):
 
     def testStackLengthOne(self):
         "Calling on a stack with only one item must raise a StackError."
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("4")
         error = r"^Cannot run 'cmd' \(stack has only 1 item\)\.$"
         self.assertRaisesRegex(
@@ -741,7 +741,7 @@ class TestFindStringAndArgs(TestCase):
         """Calling on a stack with two items and no count must return
         correctly. The number of stack items is obtained from the function
         signature"""
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("'string'")
         c.execute("4")
         string, args = c.findStringAndArgs("cmd", Modifiers(), None)
@@ -751,7 +751,7 @@ class TestFindStringAndArgs(TestCase):
     def testStackLengthTwoWithCount(self):
         """Calling on a stack with two items and a count must return
         correctly."""
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("'string'")
         c.execute("4")
         string, args = c.findStringAndArgs("cmd", Modifiers(), 1)
@@ -761,7 +761,7 @@ class TestFindStringAndArgs(TestCase):
     def testStackLengthThreeWithCountError(self):
         """Calling on a stack with three items and a count that points to a
         non-string must result in an error"""
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("'string'")
         c.execute("4")
         c.execute("5")
@@ -775,7 +775,7 @@ class TestFindStringAndArgs(TestCase):
 
     def testStackLengthThree(self):
         "Calling on a stack with three items (count=2) must return correctly"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("'string'")
         c.execute("4")
         c.execute("5")
@@ -785,7 +785,7 @@ class TestFindStringAndArgs(TestCase):
 
     def testAllStack(self):
         "Calling on all the stack must return correctly"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("'string'")
         c.execute("4")
         c.execute("5")
@@ -800,7 +800,7 @@ class TestFindStringAndArgsReversed(TestCase):
 
     def testEmptyStack(self):
         "Calling on an empty stack must raise a StackError."
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         error = r"^Cannot run 'cmd' \(stack has only 0 items\)\.$"
         self.assertRaisesRegex(
             StackError, error, c.findStringAndArgs, "cmd", strToModifiers("r"), None
@@ -808,7 +808,7 @@ class TestFindStringAndArgsReversed(TestCase):
 
     def testStackLengthOne(self):
         "Calling on a stack with only one item must result in a StackError"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("4")
         error = r"^Cannot run 'cmd' \(stack has only 1 item\)\.$"
         self.assertRaisesRegex(
@@ -819,7 +819,7 @@ class TestFindStringAndArgsReversed(TestCase):
         """Calling on a stack with two items and no count must return
         correctly. The number of stack items is obtained from the function
         signature"""
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("4")
         c.execute("'string'")
         string, args = c.findStringAndArgs("cmd", strToModifiers("r"), None)
@@ -829,7 +829,7 @@ class TestFindStringAndArgsReversed(TestCase):
     def testStackLengthTwoWithCount(self):
         """Calling on a stack with two items and a count must return
         correctly."""
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("4")
         c.execute("'string'")
         string, args = c.findStringAndArgs("cmd", strToModifiers("r"), 1)
@@ -838,7 +838,7 @@ class TestFindStringAndArgsReversed(TestCase):
 
     def testStackLengthThree(self):
         "Calling on a stack with three items (count=2) must return correctly"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("5")
         c.execute("4")
         c.execute("'string'")
@@ -848,7 +848,7 @@ class TestFindStringAndArgsReversed(TestCase):
 
     def testAllStack(self):
         "Calling on all the stack must return correctly"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("4")
         c.execute("5")
         c.execute("6")
@@ -863,7 +863,7 @@ class TestApply(TestCase):
 
     def testApplyNoCount(self):
         "apply must work correctly when not given a count"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("abs :!")
         c.execute("-1")
         c.execute("apply")
@@ -872,7 +872,7 @@ class TestApply(TestCase):
 
     def testApplyWithCount(self):
         "apply must work correctly when given a count"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("+ :!")
         c.execute("3 5")
         c.execute("apply :2")
@@ -881,7 +881,7 @@ class TestApply(TestCase):
 
     def testApplyVariables(self):
         "apply must work correctly when Variable instances are on the stack"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("a=4 b=5")
         c.execute("+ :!")
         c.execute("a :!")
@@ -896,7 +896,7 @@ class TestReduce(TestCase):
 
     def testReduceAl(self):
         "Reduce must work correctly when told to operate on the whole stack"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("+ :!")
         c.execute("5")
         c.execute("6")
@@ -907,7 +907,7 @@ class TestReduce(TestCase):
 
     def testReduceWithCount(self):
         "Reduce must work correctly when given a count"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("+ :!")
         c.execute("5")
         c.execute("6")
@@ -921,7 +921,7 @@ class TestReduceReversed(TestCase):
 
     def testReduceAl(self):
         "Reduce must work correctly when told to operate on the whole stack"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("5")
         c.execute("6")
         c.execute("7")
@@ -932,7 +932,7 @@ class TestReduceReversed(TestCase):
 
     def testReduceWithCount(self):
         "Reduce must work correctly when given a count"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("4")
         c.execute("5")
         c.execute("6")
@@ -946,28 +946,28 @@ class TestPop(TestCase):
 
     def testPop(self):
         "Calling pop must work as expected"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("4 5 pop")
         (result,) = c.stack
         self.assertEqual(4, result)
 
     def testPop2(self):
         "Calling pop with a count of 2 must work as expected"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("3 4 5 pop:2")
         (result,) = c.stack
         self.assertEqual(3, result)
 
     def testPopAll(self):
         "Calling pop on the whole stack must work as expected"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("3 4 5 pop:*")
         self.assertEqual([], c.stack)
 
     def testPopWhenAVariableCalledPopExists(self):
         """pop must put a value on the stack when there is a varible of that
         name"""
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("pop=4")
         c.execute("6")
         c.execute("5")
@@ -977,7 +977,7 @@ class TestPop(TestCase):
     def testPopForcedCommandWhenAVariableCalledPopExists(self):
         """pop must work as expected when there is a varible of that name if
         we force the command to be run using :c"""
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("pop=4")
         c.execute("6")
         c.execute("5")
@@ -992,7 +992,7 @@ class TestMap(TestCase):
 
     def testWithCount(self):
         "map must work as expected when given a count"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("str :!")
         c.execute("1 2 3")
         c.execute("map :3i")
@@ -1000,7 +1000,7 @@ class TestMap(TestCase):
 
     def testIterateGenerator(self):
         "The :i (iterate) modifier must work as expected on a map generator"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("str :!")
         c.execute("[1,2,3]")
         c.execute("map :i")
@@ -1014,14 +1014,14 @@ class TestEngineeringNotation(TestCase):
     def testInput(self):
         """A value suffixed by a unit should be recognized as engineering
         notation."""
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("2k")
         (result,) = c.stack
         self.assertEqual(EngNumber("2k"), result)
 
     def testArithmetic(self):
         "Arithmetic should work using EngNumbers"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("2k")
         c.execute("2k")
         c.execute("+")
@@ -1031,7 +1031,7 @@ class TestEngineeringNotation(TestCase):
     def testImplicitConversion(self):
         """Arithmetic involving an EngNumber and an int should return an
         EngNumber"""
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("2k")
         c.execute("2000")
         c.execute("+")
@@ -1041,14 +1041,14 @@ class TestEngineeringNotation(TestCase):
     def testNoImplicitConversion(self):
         """An int without suffixes should not be implicitly converted to
         EngNumber"""
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("2000")
         (result,) = c.stack
         self.assertNotIsInstance(result, EngNumber)
 
     def testAutomaticUnitScaling(self):
         "EngNumbers should automatically scale to the closest unit"
-        c = Calculator()
+        c = Calculator(noStartup=True, noHistory=True)
         c.execute("3m")
         c.execute("3m")
         c.execute("*")
