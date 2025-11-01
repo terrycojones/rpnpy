@@ -22,7 +22,7 @@ class TestDebug(TestCase):
 
     def testStartWithDebugOn(self):
         "debugging must be settable via __init__"
-        c = Calculator(debug=True)
+        c = Calculator(debug=True, noStartup=True, noHistory=True)
         self.assertTrue(c._debug)
 
     def testDebugOn(self):
@@ -62,7 +62,7 @@ class TestDebug(TestCase):
 
     def testDebugOffViaModifier(self):
         "It must be possible to turn debugging off using a modifier"
-        c = Calculator(debug=True)
+        c = Calculator(debug=True, noStartup=True, noHistory=True)
         c.execute(":D")
         self.assertFalse(c._debug)
 
@@ -103,7 +103,7 @@ class TestCalculator(TestCase):
     def testAddOneArg(self):
         "Adding must give an error if there is only one thing on the stack"
         err = StringIO()
-        c = Calculator(errfp=err)
+        c = Calculator(errfp=err, noStartup=True, noHistory=True)
         c.execute("3 +")
         self.assertEqual(
             "Not enough args on stack! (+ needs 2 args, stack has 1 item)\n",
@@ -201,7 +201,7 @@ class TestCalculator(TestCase):
 
     def testDef(self):
         "Use def to make a new function."
-        c = Calculator(splitLines=False)
+        c = Calculator(splitLines=False, noStartup=True, noHistory=True)
         c.execute("def celcius(f): return (f - 32) / 1.8")
         c.execute("212")
         c.execute("celcius")
@@ -210,7 +210,7 @@ class TestCalculator(TestCase):
 
     def testDefThenPush(self):
         "Use def to make a new function and push it onto the stack."
-        c = Calculator(splitLines=False)
+        c = Calculator(splitLines=False, noStartup=True, noHistory=True)
         c.execute("def celcius(f): return (f - 32) / 1.8")
         c.execute("celcius :!")
         (result,) = c.stack
@@ -251,7 +251,7 @@ class TestCalculator(TestCase):
 
     def testItemgetter(self):
         "itemgetter must work correctly"
-        c = Calculator(splitLines=False)
+        c = Calculator(splitLines=False, noStartup=True, noHistory=True)
         c.execute("1")
         c.execute("itemgetter")
         c.execute("[[1, 2, 3], [4, 5, 6]]")
@@ -314,7 +314,7 @@ class TestCalculator(TestCase):
         "It must be possible to read from a file using the batch method"
         infp = StringIO("3\n4\n+\np\n")
         outfp = StringIO()
-        c = Calculator(outfp=outfp)
+        c = Calculator(outfp=outfp, noStartup=True, noHistory=True)
         c.batch(infp)
         self.assertEqual("7\n", outfp.getvalue())
 
@@ -322,7 +322,7 @@ class TestCalculator(TestCase):
         "It must be possible to read input in REPL form"
         infp = StringIO("3\n4\n+\np\n")
         outfp = StringIO()
-        c = Calculator(outfp=outfp)
+        c = Calculator(outfp=outfp, noStartup=True, noHistory=True)
         stdin = sys.stdin
         sys.stdin = infp
         c.repl("prompt")
@@ -332,7 +332,7 @@ class TestCalculator(TestCase):
     def testCountConflictsWithAllModifier(self):
         "If :* and a count is given, it's an error if they don't agree"
         errfp = StringIO()
-        c = Calculator(errfp=errfp)
+        c = Calculator(errfp=errfp, noStartup=True, noHistory=True)
         self.assertFalse(c.execute("4 5 6 list:*5"))
         error = "* modifier conflicts with explicit count 5 (stack has 3 items)\n"
         self.assertEqual(error, errfp.getvalue())
@@ -389,7 +389,7 @@ class TestReverseSpecialCommand(TestCase):
     def testReverseWithStackTooSmall(self):
         "It's an error if an attempt is made to reverse too many things"
         errfp = StringIO()
-        c = Calculator(errfp=errfp)
+        c = Calculator(errfp=errfp, noStartup=True, noHistory=True)
         self.assertFalse(c.execute("4 5 6 reverse:10"))
         error = (
             "Could not run special command 'reverse': Cannot reverse 10 "
@@ -588,7 +588,7 @@ class TestFindCallableAndArgs(TestCase):
     def testStackLengthOne(self):
         "Calling on a stack with only one item must raise a StackError."
         errfp = StringIO()
-        c = Calculator(errfp=errfp)
+        c = Calculator(errfp=errfp, noStartup=True, noHistory=True)
         c.execute("4")
         error = r"^Cannot run 'cmd' \(stack has only 1 item\)\.$"
         self.assertRaisesRegex(
@@ -620,7 +620,7 @@ class TestFindCallableAndArgs(TestCase):
         """Calling on a stack with three items and a count that points to a
         non-callable must result in an error"""
         errfp = StringIO()
-        c = Calculator(errfp=errfp)
+        c = Calculator(errfp=errfp, noStartup=True, noHistory=True)
         c.execute("log10 :!")
         c.execute("4")
         c.execute("5")
