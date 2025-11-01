@@ -18,8 +18,12 @@ read more about why I wrote this.
 
 * provides typical numeric calculator operations.
 * can read commands from the command line, from standard input, or from files.
-* has a simple terminal REPL interface and a terminal user interface (TUI) with
-  buttons and a display of the stack and variables.
+* has a simple terminal
+  [REPL](https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop)
+  interface and a [text-based user
+  interface](https://en.wikipedia.org/wiki/Text-based_user_interface) (TUI)
+  with clickable buttons for digits and common operations and a display of
+  the stack and variables.
 * provides for input/output using [engineering notation](https://pypi.org/project/engineering-notation/),
   e.g., 12K.
 * provides direct access to over 400 Python functions, pre-imported from the
