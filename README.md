@@ -11,13 +11,17 @@ anything to be on the stack.
 
 ## Features
 
-* `rpnpy` provides typical numeric calculator operations.
-* `rpnpy` provides direct access to over 400 Python functions, pre-imported from the
+`rpnpy` 
+
+* provides typical numeric calculator operations.
+* provides direct access to over 400 Python functions, pre-imported from the
   `builtins`, `math`, `operator`, `functools`, and `decimal` modules.
-* `rpnpy` is programmable. You can write your own Python functions, which can
+* is programmable. You can write your own Python functions, which can
   be loaded from a start-up file.
-* `rpnpy` allows you to put Python data structures, and other objects and
+* allows you to put Python data structures, and other objects and
   functions onto the stack and operate on them.
+* uses [readline](https://docs.python.org/3.14/library/readline.html) to keep
+  a command history within and between sessions.
 
 I put a <a href="#background">Background</a> section at the bottom in case
 you're interested in why I wrote this.
@@ -683,7 +687,7 @@ The effect of commands on the stack and variables can be undone with the
 ## History
 
 `rpnpy` makes use of Python's
-[readline](https://docs.python.org/3.7/library/readline.html) library to
+[readline](https://docs.python.org/3.14/library/readline.html) library to
 allow familiar/comfortable command line editing. Your input history will be
 saved to `~/.pycalc_history`.
 
