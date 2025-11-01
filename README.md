@@ -1,12 +1,23 @@
 # rpnpy - a reverse-Polish notation calculator for Python
 
-Here is `rpnpy`, a script implementing a
-[reverse-Polish notation](https://en.wikipedia.org/wiki/Reverse_Polish_notation)
-(RPN) calculator for Python.
+Here is `rpnpy`, a [reverse-Polish
+notation](https://en.wikipedia.org/wiki/Reverse_Polish_notation) (RPN)
+calculator for Python.
 
-As well as providing for traditional numeric calculator operations, it
-provides easy access to many Python functions, and you can put Python
-objects and functions onto the stack and operate on them.
+The aim was to emulate the wonderful RPN approach taken by early
+Hewlett-Packard calculators, but to generalize it by allowing programming in
+Python, providing access to useful Python math functions, and to allow
+anything to be on the stack.
+
+## Features
+
+* `rpnpy` provides typical numeric calculator operations.
+* `rpnpy` provides direct access to over 400 Python functions, pre-imported from the
+  `builtins`, `math`, `operator`, `functools`, and `decimal` modules.
+* `rpnpy` is programmable. You can write your own Python functions, which can
+  be loaded from a start-up file.
+* `rpnpy` allows you to put Python data structures, and other objects and
+  functions onto the stack and operate on them.
 
 I put a <a href="#background">Background</a> section at the bottom in case
 you're interested in why I wrote this.
