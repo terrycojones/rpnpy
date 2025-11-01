@@ -24,11 +24,17 @@ convenient / shorter shell alias for it).
 * As of version 2.0.0, the `rpn.py` script has been moved into
   `src/rpnpy/cli/rpn.py`. You can call it using the `rpnpy` command that the
   package now installs.
+  
+## Terminal User Interface
+
+You can run `rpnpy` with the `--tui` option to have it present a TUI with
+buttons, and a stack and variables display. You can still use your keyboard
+when using the TUI.
 
 ## Example rpnpy sessions
 
-Before getting a bit more formal (and boring) in describing how you use
-`rpnpy`, here are some example sessions to give you a flavor.
+Before getting more formal in describing how to use `rpnpy`, here are some
+example command line computations to give you the flavor.
 
 (BTW, I set my shell up to alias `pc` (Python calculator) for `rpnpy` to
 minimize typing and be a bit more like `dc`. But I'll use `rpnpy` in the

@@ -1,3 +1,7 @@
+# 2.4.1 November 31, 2025
+
+Improved speed at which button click events can be handled.
+
 # 2.4.0 November 31, 2025
 
 Added a TUI (terminal UI). Invoke it with `--tui` and set your theme via

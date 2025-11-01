@@ -306,8 +306,11 @@ class CalculatorTUI(App):
                 yield CalculatorButton("Clear", "clear", variant="error")
 
     @on(Button.Pressed, "CalculatorButton")
-    def handle_calculator_button(self, event: Button.Pressed) -> None:
+    async def handle_calculator_button(self, event: Button.Pressed) -> None:
         """Handle calculator button presses."""
+        # Prevent default button behavior to avoid focus issues
+        event.prevent_default()
+
         # Clear any error notifications when user clicks a button
         self.clear_notifications()
 
@@ -321,13 +324,11 @@ class CalculatorTUI(App):
         if command in "0123456789.":
             input_field.value += command
             input_field.cursor_position = len(input_field.value)
-            input_field.focus()
         elif command == "enter":
             # Enter button - submit current input
             if input_field.value.strip():
                 self._execute_command(input_field.value.strip())
                 input_field.value = ""
-            input_field.focus()
         else:
             # For operation buttons, first execute any pending input
             if input_field.value.strip():
@@ -342,7 +343,6 @@ class CalculatorTUI(App):
                     self._execute_command(cmd)
             else:
                 self._execute_command(command)
-            input_field.focus()
 
     @on(Input.Changed, "#input-field")
     def handle_input_changed(self, event: Input.Changed) -> None:
