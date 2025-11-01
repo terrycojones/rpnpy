@@ -81,6 +81,10 @@ tag_name = "{new_version}"
 tag_message = "Version {new_version}"
 message = "Bump version: {current_version} → {new_version}"
 
+[tool.bumpversion.post_hooks]
+# Regenerate uv.lock after version bump and before commit
+update_lock = "uv lock"
+
 [[tool.bumpversion.files]]
 filename = "pyproject.toml"
 search = 'version = "{current_version}"'
