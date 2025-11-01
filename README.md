@@ -28,8 +28,11 @@ convenient / shorter shell alias for it).
 ## Terminal User Interface
 
 You can run `rpnpy` with the `--tui` option to have it present a TUI with
-buttons, and a stack and variables display. You can still use your keyboard
-when using the TUI.
+buttons, and a stack and variables display.
+
+<img src="images/tui.png" width=800></img>
+
+You can still use your keyboard when using the TUI.
 
 ## Example rpnpy sessions
 
