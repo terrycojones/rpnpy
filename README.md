@@ -699,13 +699,33 @@ The effect of commands on the stack and variables can be undone with the
 
 ## Start-up file
 
-`rpnpy` will look for a startup Python file to `exec` in
+`rpnpy` will look for a start-up Python file to `exec` in
 `~/.rpnpy/startup.py`. To specify an alternate location for the file, use
 `--startupFile` and to disable reading of the start-up file, use
 `--noStartup`.
 
 Functions defined in the start-up file can be used without arguments and will
 be applied to their correct number of arguments pulled from the stack.
+
+You can give your functions additional names:
+
+
+```python
+def fact(n: int) -> int:
+    return factorial(n)
+
+fact.names = ("!",)
+```
+
+Then, use either name:
+
+```sh
+$ rpnpy
+--> 10 fact
+--> 15 !
+--> f
+[3628800, 1307674368000]
+```
 
 ## History
 

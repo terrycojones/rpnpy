@@ -41,11 +41,16 @@ def functions(calc: "Calculator", modifiers: "Modifiers", count: Optional[int]) 
     @param modifiers: A C{Modifiers} instance.
     @param count: An C{int} count of the number of arguments to pass.
     """
-    for name, func in sorted(
+    data = sorted(
         list(calc._functions.items()) + list(calc._special.items()),
         key=itemgetter(0),
-    ):
-        calc.report(name, func)
+    )
+
+    width = max(len(name) for name, _ in data)
+
+    for name, func in data:
+        calc.report(f"{name:{width}s}", func)
+
     return calc.NO_VALUE
 
 

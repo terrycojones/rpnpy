@@ -1,3 +1,8 @@
+# 3.0.16 November 3, 2025
+
+Added `!` as an alias for `math.factorial`. Improved printing of functions.
+Made it so user-defined functions can have multiple (arbitrary) names.
+
 # 3.0.15 November 1, 2025
 
 Updated README.

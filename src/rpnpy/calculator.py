@@ -8,13 +8,7 @@ import sys
 from collections.abc import Iterable
 from pathlib import Path
 from pprint import pprint
-from typing import (
-    Any,
-    Callable,
-    Optional,
-    TextIO,
-    Union,
-)
+from typing import Any, Callable, Optional, TextIO, Union
 
 from engineering_notation import EngNumber
 from rich.console import Console
@@ -217,6 +211,7 @@ class Calculator:
 
     def addAbbrevs(self) -> None:
         for longName, shortNames in (
+            ("math.factorial", ("!",)),
             ("math.log", ("log",)),
             ("math.sqrt", ("v",)),
             ("operator.attrgetter", ("attrgetter",)),
@@ -328,6 +323,17 @@ class Calculator:
                             # Note that this will redefine pre-existing functions with
                             # the same name.
                             self.register(value, name, moduleName="user-function")
+
+                            # See if the function has any additional names.
+                            try:
+                                names = value.names
+                            except AttributeError:
+                                pass
+                            else:
+                                for alias in names:
+                                    self.register(
+                                        value, alias, moduleName="user-function"
+                                    )
         except FileNotFoundError:
             # A start-up file isn't mandatory.
             pass
