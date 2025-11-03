@@ -6,7 +6,7 @@ from typing import Any
 from textual import on
 from textual.app import App, ComposeResult
 from textual.containers import Container, Horizontal, Vertical
-from textual.widgets import Button, Footer, Header, Input, Label, Static
+from textual.widgets import Button, Header, Input, Label, Static
 
 from rpnpy.calculator import Calculator
 from rpnpy.errors import CalculatorError, StackError
@@ -45,6 +45,36 @@ class StackDisplay(Static):
                 lines.append(f"[bold cyan]{i}:[/bold cyan] {formatted}")
             content = "\n".join(lines)
         self.update(content)
+
+
+class CustomFooter(Horizontal):
+    """Custom footer that shows key bindings and line splitting status."""
+
+    def __init__(self, calc: Calculator, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.calc = calc
+
+    def compose(self) -> ComposeResult:
+        """Compose the footer layout."""
+        yield Label("", id="footer-left")
+        status_btn = Button("on", id="line-split-status-btn", variant="success")
+        status_btn.can_focus = False
+        yield status_btn
+
+    def update_display(self) -> None:
+        """Update the footer display with current line splitting state."""
+        left_label = self.query_one("#footer-left", Label)
+        left_label.update(
+            "[bold]^q[/bold] Quit  [bold]esc[/bold] Clear Input  │  Line splitting: "
+        )
+
+        status_btn = self.query_one("#line-split-status-btn", Button)
+        if self.calc._splitLines:
+            status_btn.label = "on"
+            status_btn.variant = "success"
+        else:
+            status_btn.label = "off"
+            status_btn.variant = "error"
 
 
 class VariablesDisplay(Static):
@@ -218,6 +248,31 @@ class CalculatorTUI(App):
         margin: 0 0 1 0;
         color: $text-muted;
     }
+
+    #custom-footer {
+        dock: bottom;
+        height: 1;
+        background: $panel;
+        color: $text;
+        padding: 0 1;
+        align: left middle;
+    }
+
+    #footer-left {
+        width: auto;
+        height: 1;
+        padding: 0;
+        margin: 0;
+    }
+
+    #line-split-status-btn {
+        width: auto;
+        min-width: 3;
+        height: 1;
+        padding: 0 1;
+        margin: 0;
+        border: none;
+    }
     """
 
     BINDINGS = [
@@ -257,7 +312,8 @@ class CalculatorTUI(App):
                     yield Label("Variables", id="variables-title")
                     yield VariablesDisplay(self.calc, id="variables-display")
 
-        yield Footer()
+        # Custom footer with key bindings and line splitting status
+        yield CustomFooter(self.calc, id="custom-footer")
 
     def _create_button_grid(self) -> ComposeResult:
         """Create the calculator button grid."""
@@ -310,6 +366,19 @@ class CalculatorTUI(App):
                 yield CalculatorButton("Dup", "dup", variant="success")
                 yield CalculatorButton("Swap", "swap", variant="success")
                 yield CalculatorButton("Enter", "enter", variant="success")
+
+    @on(Button.Pressed, "#line-split-status-btn")
+    async def handle_line_split_toggle(self, event: Button.Pressed) -> None:
+        """Handle line split status button press."""
+        event.prevent_default()
+        # Toggle the state by executing the appropriate command
+        if self.calc._splitLines:
+            self._execute_command(":n")  # Turn off line splitting
+        else:
+            self._execute_command(":s")  # Turn on line splitting
+        # Keep focus on input field
+        input_field = self.query_one("#input-field", Input)
+        input_field.focus()
 
     @on(Button.Pressed, "CalculatorButton")
     async def handle_calculator_button(self, event: Button.Pressed) -> None:
@@ -374,6 +443,11 @@ class CalculatorTUI(App):
             self.clear_notifications()
         event.input.focus()
 
+    def _update_line_split_toggle(self) -> None:
+        """Update the footer to reflect current line splitting state."""
+        footer = self.query_one("#custom-footer", CustomFooter)
+        footer.update_display()
+
     def _execute_command(self, command: str) -> None:
         """Execute a calculator command and update displays."""
         stack_display = self.query_one("#stack-display", StackDisplay)
@@ -390,6 +464,7 @@ class CalculatorTUI(App):
 
             stack_display.update_display()
             variables_display.update_display()
+            self._update_line_split_toggle()
 
         except (CalculatorError, StackError) as e:
             self.notify(str(e), severity="error", timeout=5)
@@ -411,9 +486,17 @@ class CalculatorTUI(App):
         variables_display = self.query_one("#variables-display", VariablesDisplay)
         variables_display.update_display()
 
+        # Initialize the line split toggle.
+        self._update_line_split_toggle()
+
         # Focus the input field so user can start typing immediately.
         input_field = self.query_one("#input-field", Input)
         input_field.focus()
+
+    def on_resize(self) -> None:
+        """Called when the terminal is resized."""
+        # Update the line split toggle to ensure it displays correctly
+        self._update_line_split_toggle()
 
     def action_clear_input(self) -> None:
         """Clear the input field (bound to 'Escape' key)."""
