@@ -1,4 +1,8 @@
-# 3.0.16 November 3, 2025
+# 3.1.1 November 3, 2025
+
+Used Claude to make the stack and variable sections scrollable. Added a button to toggle line splitting.
+
+# 3.1.0 November 3, 2025
 
 Added `!` as an alias for `math.factorial`. Improved printing of functions.
 Made it so user-defined functions can have multiple (arbitrary) names.

@@ -5,7 +5,7 @@ from typing import Any
 
 from textual import on
 from textual.app import App, ComposeResult
-from textual.containers import Container, Horizontal, Vertical
+from textual.containers import Container, Horizontal, Vertical, VerticalScroll
 from textual.widgets import Button, Header, Input, Label, Static
 
 from rpnpy.calculator import Calculator
@@ -45,6 +45,10 @@ class StackDisplay(Static):
                 lines.append(f"[bold cyan]{i}:[/bold cyan] {formatted}")
             content = "\n".join(lines)
         self.update(content)
+        # Scroll the parent VerticalScroll to the end to show the most recent items
+        scroll_container = self.parent
+        if scroll_container:
+            scroll_container.scroll_end(animate=False)
 
 
 class CustomFooter(Horizontal):
@@ -119,6 +123,10 @@ class VariablesDisplay(Static):
                 lines.append(f"[bold green]{name}:[/bold green] {formatted}")
             content = "\n".join(lines)
         self.update(content)
+        # Scroll the parent VerticalScroll to show content if needed
+        scroll_container = self.parent
+        if scroll_container:
+            scroll_container.scroll_end(animate=False)
 
 
 class CalculatorButton(Button):
@@ -215,20 +223,24 @@ class CalculatorTUI(App):
         text-align: center;
     }
 
-    #stack-display {
-        border: solid $primary-lighten-1;
-        padding: 1;
+    #stack-scroll {
         height: 1fr;
         background: $panel;
-        overflow-y: auto;
+    }
+
+    #stack-display {
+        padding: 0 1;
+        width: 100%;
+    }
+
+    #variables-scroll {
+        height: 1fr;
+        background: $panel;
     }
 
     #variables-display {
-        border: solid $success-lighten-1;
-        padding: 1;
-        height: 1fr;
-        background: $panel;
-        overflow-y: auto;
+        padding: 0 1;
+        width: 100%;
     }
 
 
@@ -305,12 +317,14 @@ class CalculatorTUI(App):
                 # Stack section
                 with Vertical(id="stack-container"):
                     yield Label("Stack", id="stack-title")
-                    yield StackDisplay(self.calc, id="stack-display")
+                    with VerticalScroll(id="stack-scroll"):
+                        yield StackDisplay(self.calc, id="stack-display")
 
                 # Variables section
                 with Vertical(id="variables-container"):
                     yield Label("Variables", id="variables-title")
-                    yield VariablesDisplay(self.calc, id="variables-display")
+                    with VerticalScroll(id="variables-scroll"):
+                        yield VariablesDisplay(self.calc, id="variables-display")
 
         # Custom footer with key bindings and line splitting status
         yield CustomFooter(self.calc, id="custom-footer")
