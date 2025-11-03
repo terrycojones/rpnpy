@@ -63,6 +63,9 @@ are catppuccin-latte, catppuccin-mocha, dracula, flexoki, gruvbox, monokai,
 nord, solarized-light, textual-ansi, textual-dark, textual-light, and
 tokyo-night. Run `rpnpy --help` to see the definitive list.
 
+Click the line splitting "off" button at the bottom to toggle line splitting
+(<a href="#splitting">see below</a> for details).
+
 ## Example rpnpy sessions
 
 Before getting more formal in describing how to use `rpnpy`, here are some
@@ -354,6 +357,7 @@ full list of commands and modifiers is given below.
 
 If modifiers are given, they apply to all commands on an input line.
 
+<a id="splitting"></a>
 #### Input line splitting
 
 By default, `rpnpy` will split lines on whitespace and each field will be
