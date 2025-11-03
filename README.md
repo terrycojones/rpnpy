@@ -715,6 +715,17 @@ You can give your functions additional names:
 
 
 ```python
+def heron(a: float, b: float, c: float) -> float:
+    """
+    Calculate the area of a triangle given its three sides
+    See https://en.wikipedia.org/wiki/Heron's_formula
+    """
+    s = (a + b + c) / 2.0
+    return sqrt(s * (s - a) * (s - b) * (s - c))
+
+heron.names = ("area",)
+
+
 def fact(n: int) -> int:
     return factorial(n)
 
@@ -725,10 +736,10 @@ Then, use either name:
 
 ```sh
 $ rpnpy
---> 10 fact
---> 15 !
---> f
-[3628800, 1307674368000]
+--> 3 4 5 heron p
+6.0
+--> 15 ! p
+1307674368000
 ```
 
 ## History
