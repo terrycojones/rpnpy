@@ -1,3 +1,8 @@
+# 3.1.2 November 3, 2025
+
+Make it so functions that take *args will consume everything from the stack
+unless told not to.
+
 # 3.1.1 November 3, 2025
 
 Used Claude to make the stack and variable sections scrollable. Added a button to toggle line splitting.

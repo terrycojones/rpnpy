@@ -24,6 +24,17 @@ class TestCountArgs(TestCase):
         self.assertEqual(None, countArgs(log))
 
     def testLogWithDefault(self):
-        """The signature of math.log can't be inspected (at least in Python
-        3.7). Pass a default value."""
+        """
+        The signature of math.log can't be inspected (at least in Python
+        3.7).
+
+        Pass a default value.
+        """
         self.assertEqual(3, countArgs(log, 3))
+
+    def testVariable(self):
+        """A function that takes a variable number of args should get a -1"""
+        def f(*args):
+            return args
+
+        self.assertEqual(-1, countArgs(f))

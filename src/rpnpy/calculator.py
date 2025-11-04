@@ -593,9 +593,12 @@ class Calculator:
     ) -> tuple[bool, Any]:
         "Run a Python function."
 
-        nArgs = (
-            (len(self) if modifiers.all else function.nArgs) if count is None else count
-        )
+        if count is None:
+            nArgs = (
+                len(self) if function.nArgs == -1 or modifiers.all else function.nArgs
+            )
+        else:
+            nArgs = count
 
         assert nArgs is not None
 
