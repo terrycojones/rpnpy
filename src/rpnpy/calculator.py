@@ -345,7 +345,6 @@ class Calculator:
             historyFile
             or Path().home() / self.DEFAULT_CONFIG_DIR / self.DEFAULT_HISTORY_FILE
         )
-        historyFile.parent.mkdir(parents=True, exist_ok=True)
         setupReadline(historyFile)
 
     def importCallables(self, module: Any) -> None:
