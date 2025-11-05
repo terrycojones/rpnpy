@@ -1,4 +1,5 @@
 import functools
+import math
 from operator import itemgetter
 from typing import TYPE_CHECKING, Any, Optional
 
@@ -384,10 +385,84 @@ def version(calc: "Calculator", modifiers: "Modifiers", count: Optional[int]) ->
 version.names = ("version",)
 
 
+def sin(calc: "Calculator", modifiers: "Modifiers", count: Optional[int]) -> Any:
+    """Calculates the sine of the top of the stack.
+
+    @param calc: A C{Calculator} instance.
+    @param modifiers: A C{Modifiers} instance.
+    @param count: An C{int} count of the number of arguments to pass.
+    """
+    if calc.stack:
+        value = calc.stack[-1]
+        result = math.sin(value)
+        calc._finalize(result, modifiers, nPop=1)
+        return result
+    raise CalculatorError("Cannot calculate sin (stack is empty)")
+
+
+sin.names = ("sin",)
+
+
+def cos(calc: "Calculator", modifiers: "Modifiers", count: Optional[int]) -> Any:
+    """Calculates the cosine of the top of the stack.
+
+    @param calc: A C{Calculator} instance.
+    @param modifiers: A C{Modifiers} instance.
+    @param count: An C{int} count of the number of arguments to pass.
+    """
+    if calc.stack:
+        value = calc.stack[-1]
+        result = math.cos(value)
+        calc._finalize(result, modifiers, nPop=1)
+        return result
+    raise CalculatorError("Cannot calculate cos (stack is empty)")
+
+
+cos.names = ("cos",)
+
+
+def tan(calc: "Calculator", modifiers: "Modifiers", count: Optional[int]) -> Any:
+    """Calculates the tangent of the top of the stack.
+
+    @param calc: A C{Calculator} instance.
+    @param modifiers: A C{Modifiers} instance.
+    @param count: An C{int} count of the number of arguments to pass.
+    """
+    if calc.stack:
+        value = calc.stack[-1]
+        result = math.tan(value)
+        calc._finalize(result, modifiers, nPop=1)
+        return result
+    raise CalculatorError("Cannot calculate tan (stack is empty)")
+
+
+tan.names = ("tan",)
+
+
+def factorial(calc: "Calculator", modifiers: "Modifiers", count: Optional[int]) -> Any:
+    """Calculates the factorial of the top of the stack.
+
+    @param calc: A C{Calculator} instance.
+    @param modifiers: A C{Modifiers} instance.
+    @param count: An C{int} count of the number of arguments to pass.
+    """
+    if calc.stack:
+        value = calc.stack[-1]
+        result = math.factorial(value)
+        calc._finalize(result, modifiers, nPop=1)
+        return result
+    raise CalculatorError("Cannot calculate factorial (stack is empty)")
+
+
+factorial.names = ("factorial", "fact", "!")
+
+
 FUNCTIONS: tuple = (
     apply,
     clear,
+    cos,
     dup,
+    factorial,
     functions,
     join,
     list_,
@@ -397,9 +472,11 @@ FUNCTIONS: tuple = (
     quit,
     reduce,
     reverse,
+    sin,
     stack,
     store,
     swap,
+    tan,
     undo,
     variables,
     version,
