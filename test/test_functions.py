@@ -15,7 +15,7 @@ class TestFactorial(TestCase):
 
     def test_integer_float(self):
         """
-        Should be able to calculate the factorial of float the value of which doesn't change when
+        Should be able to calculate the factorial of a float the value of which doesn't change when
         rounded.
         """
         calc = Calculator()
