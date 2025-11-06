@@ -28,10 +28,7 @@ class StackDisplay(Static):
             for i, item in enumerate(self.calc.stack):
                 # Format the item nicely using repr() to show strings with quotes
                 # and handle complex objects properly
-                if isinstance(item, float):
-                    # Format floats without excessive precision
-                    formatted = f"{item:.10g}"
-                elif isinstance(item, str):
+                if isinstance(item, str):
                     # Show strings with quotes
                     formatted = repr(item)
                 elif isinstance(item, (list, dict, tuple, set)):
