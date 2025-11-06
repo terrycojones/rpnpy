@@ -1,5 +1,4 @@
 import functools
-import math
 from operator import itemgetter
 from typing import TYPE_CHECKING, Any, Optional
 
@@ -385,33 +384,10 @@ def version(calc: "Calculator", modifiers: "Modifiers", count: Optional[int]) ->
 version.names = ("version",)
 
 
-def factorial(calc: "Calculator", modifiers: "Modifiers", count: Optional[int]) -> Any:
-    """Calculates the factorial of the top of the stack.
-
-    @param calc: A C{Calculator} instance.
-    @param modifiers: A C{Modifiers} instance.
-    @param count: An C{int} count of the number of arguments to pass.
-    """
-    if calc.stack:
-        value = calc.stack[-1]
-        rounded_value = round(value)
-        if rounded_value == value:
-            result = math.factorial(rounded_value)
-            calc._finalize(result, modifiers, nPop=1)
-            return result
-        else:
-            raise CalculatorError("Cannot calculate the factorial of a float")
-    raise CalculatorError("Cannot calculate factorial (stack is empty)")
-
-
-factorial.names = ("factorial", "fact", "!")
-
-
 FUNCTIONS: tuple = (
     apply,
     clear,
     dup,
-    factorial,
     functions,
     join,
     list_,
