@@ -1,3 +1,7 @@
+# 3.2.0 November 6, 2025
+
+Added fix to make parent of `~/.rpnpy` (or whatever history file location is passed).
+
 # 3.1.2 November 3, 2025
 
 Make it so functions that take *args will consume everything from the stack
