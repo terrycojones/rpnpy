@@ -65,7 +65,13 @@ class Variable:
 class Calculator:
     # Functions we don't want to get from the given modules because they are already
     # defined elsewhere.
-    OVERRIDES = {"builtins.list", "builtins.map", "builtins.quit", "functools.reduce"}
+    OVERRIDES = {
+        "builtins.list",
+        "builtins.map",
+        "builtins.quit",
+        "functools.reduce",
+        "math.factorial",
+    }
 
     # Sentinel value for calculator functions to return to indicate that they did not
     # result in a value that can/should be printed.
@@ -211,7 +217,6 @@ class Calculator:
 
     def addAbbrevs(self) -> None:
         for longName, shortNames in (
-            ("math.factorial", ("!",)),
             ("math.log", ("log",)),
             ("math.sqrt", ("v",)),
             ("operator.attrgetter", ("attrgetter",)),
