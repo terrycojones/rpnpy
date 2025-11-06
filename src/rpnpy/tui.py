@@ -374,6 +374,13 @@ class CalculatorTUI(App):
                 yield CalculatorButton("eˣ", "math.exp", variant="default")
                 yield CalculatorButton("+/-", "-1 *", variant="default")
 
+            # Mathematical functions row 3
+            with Horizontal(classes="button-row"):
+                yield CalculatorButton("x!", "factorial", variant="default")
+                yield CalculatorButton("sin", "sin", variant="default")
+                yield CalculatorButton("cos", "cos", variant="default")
+                yield CalculatorButton("tan", "tan", variant="default")
+
             # Stack operations
             with Horizontal(classes="button-row"):
                 yield CalculatorButton("Pop", "pop", variant="success")
