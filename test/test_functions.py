@@ -1,6 +1,5 @@
 from unittest import TestCase
 
-from rpnpy.errors import CalculatorError
 from rpnpy.calculator import Calculator
 
 
