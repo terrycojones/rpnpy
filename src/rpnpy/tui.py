@@ -26,22 +26,10 @@ class StackDisplay(Static):
         else:
             lines = []
             for i, item in enumerate(self.calc.stack):
-                # Format the item nicely using repr() to show strings with quotes
-                # and handle complex objects properly
-                if isinstance(item, float):
-                    # Format floats without excessive precision
-                    formatted = f"{item:.10g}"
-                elif isinstance(item, str):
-                    # Show strings with quotes
-                    formatted = repr(item)
-                elif isinstance(item, (list, dict, tuple, set)):
-                    # For complex objects, use repr but limit length for display
-                    formatted = repr(item)
-                    if len(formatted) > 80:
-                        formatted = formatted[:77] + "..."
-                else:
-                    # For everything else, use repr
-                    formatted = repr(item)
+                formatted = repr(item)
+                if isinstance(item, (list, dict, tuple, set)) and len(formatted) > 80:
+                    # Truncate complex objects
+                    formatted = formatted[:77] + "..."
                 lines.append(f"[bold cyan]{i}:[/bold cyan] {formatted}")
             content = "\n".join(lines)
         self.update(content)
@@ -110,16 +98,9 @@ class VariablesDisplay(Static):
             for name in sorted(variables):
                 value = variables[name]
                 # Format the value
-                if isinstance(value, float):
-                    formatted = f"{value:.10g}"
-                elif isinstance(value, str):
-                    formatted = repr(value)
-                elif isinstance(value, (list, dict, tuple, set)):
-                    formatted = repr(value)
-                    if len(formatted) > 60:
-                        formatted = formatted[:57] + "..."
-                else:
-                    formatted = repr(value)
+                formatted = repr(value)
+                if isinstance(value, (list, dict, tuple, set)) and len(formatted) > 60:
+                    formatted = formatted[:57] + "..."
                 lines.append(f"[bold green]{name}:[/bold green] {formatted}")
             content = "\n".join(lines)
         self.update(content)
