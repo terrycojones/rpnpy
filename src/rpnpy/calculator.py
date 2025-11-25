@@ -213,6 +213,7 @@ class Calculator:
         for longName, shortNames in (
             ("math.factorial", ("!",)),
             ("math.log", ("log",)),
+            ("math.pow", ("^", "**")),
             ("math.sqrt", ("v",)),
             ("operator.attrgetter", ("attrgetter",)),
             ("operator.itemgetter", ("itemgetter",)),

@@ -1,3 +1,7 @@
+# 3.3.0 November 25, 2025
+
+Added `**` and `^` as aliases for `math.pow`.
+
 # 3.2.0 November 6, 2025
 
 Added fix to make parent of `~/.rpnpy` (or whatever history file location is passed).
