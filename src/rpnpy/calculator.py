@@ -359,7 +359,7 @@ class Calculator:
                 continue
 
             try:
-                if issubclass(func, BaseException):
+                if issubclass(func, Exception):
                     continue
             except TypeError:
                 pass
@@ -622,7 +622,7 @@ class Calculator:
         self.debug(f"Calling {function.name!r} with {tuple(args)!r}")
         try:
             result = function.func(*args)
-        except BaseException as e:
+        except Exception as e:
             raise CalculatorError(
                 "Exception running %s(%s): %s"
                 % (function.name, ", ".join(map(str, args)), e)
@@ -669,7 +669,7 @@ class Calculator:
                 value = self._special[command](self, modifiers, count)
             except EOFError:
                 raise
-            except BaseException as e:
+            except Exception as e:
                 raise CalculatorError(
                     f"Could not run special command {command!r}: {e}"
                 ) from e
@@ -687,7 +687,7 @@ class Calculator:
         possibleWhiteSpace = False
         try:
             value = eval(command, globals(), self._variables)
-        except BaseException as e:
+        except Exception as e:
             err = str(e)
             errors.append(f"Could not eval({command!r}): {err}")
             if self._splitLines and err.startswith(
@@ -697,10 +697,10 @@ class Calculator:
 
             try:
                 value = EngNumber(command)
-            except decimal.InvalidOperation:
+            except (IndexError, decimal.InvalidOperation):
                 try:
                     exec(command, globals(), self._variables)
-                except BaseException as e:
+                except Exception as e:
                     err = str(e)
                     errors.append(f"Could not exec({command!r}): {err}")
                     if (

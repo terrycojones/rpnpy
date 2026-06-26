@@ -1,3 +1,9 @@
+# 3.3.1 June 26, 2026
+
+Catch `IndexError` when calling engineering notation, to fix
+https://github.com/terrycojones/rpnpy/issues/18. Use `Exception` not
+`BaseException` in a few places.
+
 # 3.3.0 November 25, 2025
 
 Added `**` and `^` as aliases for `math.pow`.
