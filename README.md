@@ -715,6 +715,8 @@ You can give your functions additional names:
 
 
 ```python
+from math import sqrt
+
 def heron(a: float, b: float, c: float) -> float:
     """
     Calculate the area of a triangle given its three sides
