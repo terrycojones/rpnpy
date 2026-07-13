@@ -4,18 +4,16 @@ build-backend = "hatchling.build"
 
 [project]
 name = "rpnpy"
-version = "3.3.1"
+version = "3.4"
 description = "Control an RPN calculator from Python."
 authors = [
     { name = "Terry C. Jones", email = "terence.jones@charite.de" },
 ]
 readme = "README.md"
 license = { text = "MIT" }
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -28,7 +26,7 @@ classifiers = [
 ]
 keywords = ["rpn", "reverse", "polish", "calculator", "TUI"]
 dependencies = [
-    "engineering_notation",
+    "engineering_notation>=0.13.3",
     "gnureadline>=8.2.13",
     "rich>=14.2.0",
     "textual>=0.82.0",

@@ -38,7 +38,7 @@ read more about why I wrote this.
   functions onto the stack and operate on them.
 * uses [readline](https://docs.python.org/3.14/library/readline.html) to keep
   a command history within and between sessions.
-* is compatible with Python 3.9 through 3.14.
+* is compatible with Python 3.11 through 3.14.
 
 ## Installation
 

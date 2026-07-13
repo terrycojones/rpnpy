@@ -697,7 +697,7 @@ class Calculator:
 
             try:
                 value = EngNumber(command)
-            except (IndexError, decimal.InvalidOperation):
+            except (ValueError, decimal.InvalidOperation):
                 try:
                     exec(command, globals(), self._variables)
                 except Exception as e:
